@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CanaRoute - Otimização de Rotas para Transporte de Cana</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --primary: #1a5f2a;
+  --primary-light: #2d8a3e;
+  --danger: #dc2626;
+  --warning: #f59e0b;
+  --success: #16a34a;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
+
+/* Header */
+.header { background: var(--primary); color: white; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.header h1 { font-size: 1.3rem; font-weight: 700; }
+.header .subtitle { font-size: 0.8rem; opacity: 0.8; }
+.header .status { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+.header .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
+
+/* Layout */
+.layout { display: grid; grid-template-columns: 320px 1fr 380px; height: calc(100vh - 52px); }
+
+/* Sidebar Left */
+.sidebar-left { background: var(--card); border-right: 1px solid var(--border); overflow-y: auto; padding: 16px; }
+.sidebar-left h3 { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Filters */
+.filter-group { margin-bottom: 16px; }
+.filter-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--text-muted); }
+.filter-group select, .filter-group input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; }
+
+/* Field list */
+.field-list { margin-top: 12px; }
+.field-item { padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
+.field-item:hover { border-color: var(--primary); background: #f0fdf4; }
+.field-item.active { border-color: var(--primary); background: #dcfce7; }
+.field-item .farm { font-size: 0.75rem; color: var(--text-muted); }
+.field-item .name { font-size: 0.85rem; font-weight: 600; }
+.field-item .meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+.field-item .economy { font-size: 0.8rem; font-weight: 700; color: var(--success); }
+.field-item .economy.negative { color: var(--danger); }
+
+/* Map */
+.map-container { position: relative; }
+#map { width: 100%; height: 100%; }
+
+/* Sidebar Right */
+.sidebar-right { background: var(--card); border-left: 1px solid var(--border); overflow-y: auto; padding: 16px; }
+.sidebar-right h3 { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Cards */
+.route-card { border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+.route-card.gps { border-left: 4px solid #374151; }
+.route-card.alt { border-left: 4px solid var(--success); }
+.route-card .title { font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.route-card .badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; color: white; }
+.route-card .badge.gps { background: #374151; }
+.route-card .badge.alt { background: var(--success); }
+.route-card .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.metric { text-align: center; padding: 6px; background: var(--bg); border-radius: 4px; }
+.metric .value { font-size: 0.9rem; font-weight: 700; }
+.metric .label { font-size: 0.65rem; color: var(--text-muted); }
+
+/* Economy highlight */
+.economy-box { background: #f0fdf4; border: 2px solid var(--success); border-radius: 8px; padding: 12px; margin-bottom: 12px; text-align: center; }
+.economy-box.negative { background: #fef2f2; border-color: var(--danger); }
+.economy-box .amount { font-size: 1.4rem; font-weight: 800; color: var(--success); }
+.economy-box.negative .amount { color: var(--danger); }
+.economy-box .desc { font-size: 0.75rem; color: var(--text-muted); }
+
+/* Chart */
+.chart-container { margin: 12px 0; height: 150px; }
+
+/* Trafficability */
+.traff-bar { display: flex; height: 20px; border-radius: 4px; overflow: hidden; margin: 8px 0; }
+.traff-bar div { display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: white; font-weight: 600; }
+
+/* Vehicle tabs */
+.vehicle-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+.vehicle-tab { flex: 1; padding: 8px 4px; text-align: center; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.7rem; font-weight: 600; transition: all 0.2s; }
+.vehicle-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+.vehicle-tab .tons { font-size: 0.6rem; color: var(--text-muted); }
+.vehicle-tab.active .tons { color: rgba(255,255,255,0.8); }
+
+/* Season projection */
+.season-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; margin-top: 12px; }
+.season-box h4 { font-size: 0.8rem; color: #1e40af; margin-bottom: 6px; }
+.season-box .big { font-size: 1.2rem; font-weight: 800; color: #1e40af; }
+
+/* Climate selector */
+.climate-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+.climate-pill { padding: 4px 8px; border: 1px solid var(--border); border-radius: 12px; font-size: 0.7rem; cursor: pointer; }
+.climate-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* Occupancy slider */
+.slider-group { margin-bottom: 12px; }
+.slider-group input[type=range] { width: 100%; }
+.slider-group .value { text-align: right; font-size: 0.8rem; font-weight: 600; }
+
+/* Legend */
+.legend { position: absolute; bottom: 20px; left: 20px; background: white; padding: 10px 14px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; font-size: 0.75rem; }
+.legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.legend-line { width: 30px; height: 4px; border-radius: 2px; }
+
+/* Responsive */
+@media (max-width: 1200px) { .layout { grid-template-columns: 280px 1fr 320px; } }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; grid-template-rows: auto 400px auto; } }
+
+/* Loading */
+.loading { display: flex; align-items: center; justify-content: center; height: 200px; color: var(--text-muted); }
+.spinner { width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Alerts */
+.alert { padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; margin-bottom: 8px; }
+.alert.warning { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.alert.danger { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+.alert.success { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>CanaRoute</h1>
+    <div class="subtitle">Otimização de Rotas — Transporte de Cana-de-Açúcar</div>
+  </div>
+  <div class="status">
+    <div class="dot"></div>
+    <span id="statusText">Conectado</span>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- Sidebar Left: Filters & Field List -->
+  <div class="sidebar-left">
+    <h3>Filtros</h3>
+
+    <div class="filter-group">
+      <label>Região/Cliente</label>
+      <select id="clientSelect">
+        <option value="">Carregando...</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Buscar Talhão</label>
+      <input type="text" id="searchField" placeholder="Nome da fazenda ou talhão...">
+    </div>
+
+    <h3>Talhões (<span id="fieldCount">0</span>)</h3>
+    <div class="field-list" id="fieldList">
+      <div class="loading"><div class="spinner"></div> Carregando...</div>
+    </div>
+  </div>
+
+  <!-- Map -->
+  <div class="map-container">
+    <div id="map"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-line" style="background:#1f2937;border:1px dashed #000;"></div> Rota GPS Real</div>
+      <div class="legend-item"><div class="legend-line" style="background:#16a34a;"></div> Alternativa (Treminhão)</div>
+      <div class="legend-item"><div class="legend-line" style="background:#2563eb;"></div> Alternativa (Rodotrem)</div>
+      <div class="legend-item"><div class="legend-line" style="background:#dc2626;"></div> Alternativa (Pentaminhão)</div>
+      <div class="legend-item"><div class="legend-line" style="background:#ef4444;opacity:0.3;border-radius:50%;width:14px;height:14px;"></div> Zona Urbana</div>
+      <div class="legend-item"><div class="legend-line" style="background:#f59e0b;border-radius:50%;width:10px;height:10px;"></div> Pedágio</div>
+    </div>
+  </div>
+
+  <!-- Sidebar Right: Route Details -->
+  <div class="sidebar-right">
+    <h3>Detalhes da Rota</h3>
+
+    <!-- Vehicle tabs -->
+    <div class="vehicle-tabs">
+      <div class="vehicle-tab active" data-vehicle="treminhao" onclick="selectVehicle('treminhao')">
+        Treminhão<br><span class="tons">55t / 7 eixos</span>
+      </div>
+      <div class="vehicle-tab" data-vehicle="rodotrem" onclick="selectVehicle('rodotrem')">
+        Rodotrem<br><span class="tons">70t / 9 eixos</span>
+      </div>
+      <div class="vehicle-tab" data-vehicle="pentaminhao" onclick="selectVehicle('pentaminhao')">
+        Pentaminhão<br><span class="tons">90t / 11 eixos</span>
+      </div>
+    </div>
+
+    <!-- Climate -->
+    <div class="filter-group">
+      <label>Cenário Climático</label>
+      <div class="climate-pills">
+        <div class="climate-pill" data-climate="seco" onclick="selectClimate('seco')">Seco</div>
+        <div class="climate-pill active" data-climate="safra_mix" onclick="selectClimate('safra_mix')">Safra-Mix</div>
+        <div class="climate-pill" data-climate="umido" onclick="selectClimate('umido')">Úmido</div>
+        <div class="climate-pill" data-climate="molhado" onclick="selectClimate('molhado')">Molhado</div>
+        <div class="climate-pill" data-climate="enlameado" onclick="selectClimate('enlameado')">Enlameado</div>
+      </div>
+    </div>
+
+    <!-- Occupancy -->
+    <div class="slider-group">
+      <label>Ocupação: <span id="occValue">100%</span></label>
+      <input type="range" id="occSlider" min="0" max="100" value="100" oninput="updateOccupancy(this.value)">
+    </div>
+
+    <!-- Content area -->
+    <div id="routeDetails">
+      <div class="alert success">Selecione um talhão no painel esquerdo ou clique no mapa para ver detalhes da rota.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== CONFIGURATION ==========
+const API_BASE = window.location.port === '3000'
+  ? 'http://localhost:8000'
+  : window.location.origin;
+
+// State
+let map, currentField = null, currentVehicle = 'treminhao', currentClimate = 'safra_mix', currentOccupancy = 100;
+let routeLayers = [], markerLayers = [], elevChart = null;
+let allFields = [], allRoutes = {};
+
+// ========== MAP INIT ==========
+function initMap() {
+  map = L.map('map').setView([-21.34, -48.30], 10);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+}
+
+// ========== API CALLS ==========
+async function fetchAPI(endpoint) {
+  try {
+    const resp = await fetch(`${API_BASE}/api/v1${endpoint}`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    return await resp.json();
+  } catch (e) {
+    console.warn(`API call failed: ${endpoint}`, e);
+    return null;
+  }
+}
+
+async function loadClients() {
+  const data = await fetchAPI('/clients/');
+  const select = document.getElementById('clientSelect');
+  if (data && data.clients) {
+    select.innerHTML = data.clients.map(c =>
+      `<option value="${c.id}">${c.name} (${c.field_count} talhões)</option>`
+    ).join('');
+    if (data.clients.length > 0) loadFields(data.clients[0].id);
+  } else {
+    select.innerHTML = '<option value="">Demo Mode (offline)</option>';
+    loadDemoData();
+  }
+}
+
+async function loadFields(clientId) {
+  const data = await fetchAPI(`/fields/?client_id=${clientId}&limit=500`);
+  if (data) {
+    allFields = data;
+    renderFieldList(data);
+  }
+}
+
+function loadDemoData() {
+  // Fallback demo data when API is not available
+  allFields = [
+    {id:1, farm_name:"SITIO STEFANI", code:"T4", name:"Talhão 4", latitude:-21.3200, longitude:-48.2800, area_ha:25, distance_to_plant_km:16.5},
+    {id:2, farm_name:"SITIO NOSSA SRA APARECIDA", code:"T1", name:"Talhão 1", latitude:-21.3563, longitude:-48.2655, area_ha:40.69, distance_to_plant_km:22},
+    {id:3, farm_name:"FAZENDA SAO DOMINGOS", code:"T24", name:"Talhão 24", latitude:-21.3100, longitude:-48.2500, area_ha:18, distance_to_plant_km:16},
+    {id:4, farm_name:"SITIO STEFANI", code:"T3", name:"Talhão 3", latitude:-21.3150, longitude:-48.2750, area_ha:12, distance_to_plant_km:17},
+    {id:5, farm_name:"SITIO SANTA RITA", code:"T2", name:"Talhão 2", latitude:-21.3300, longitude:-48.2900, area_ha:8, distance_to_plant_km:33},
+    {id:6, farm_name:"FAZENDA CAMBUHY", code:"T1", name:"Talhão 1", latitude:-21.6234, longitude:-48.4998, area_ha:15.26, distance_to_plant_km:40.7},
+    {id:7, farm_name:"FAZENDA SAO ROSARIO", code:"T6799", name:"Talhão 6799", latitude:-21.2331, longitude:-48.3530, area_ha:9.86, distance_to_plant_km:12.5},
+    {id:8, farm_name:"FAZENDA SAO JOSE", code:"T33", name:"Talhão 33", latitude:-21.2800, longitude:-48.3200, area_ha:22, distance_to_plant_km:47},
+  ];
+  renderFieldList(allFields);
+  document.getElementById('statusText').textContent = 'Demo Mode';
+}
+
+// ========== FIELD LIST ==========
+function renderFieldList(fields) {
+  const container = document.getElementById('fieldList');
+  document.getElementById('fieldCount').textContent = fields.length;
+
+  container.innerHTML = fields.map(f => `
+    <div class="field-item" data-id="${f.id}" onclick="selectField(${f.id})">
+      <div class="farm">${f.farm_name || 'Sem fazenda'}</div>
+      <div class="name">${f.name || f.code}</div>
+      <div class="meta">${f.area_ha ? f.area_ha.toFixed(1) + ' ha' : ''} • ${f.distance_to_plant_km ? f.distance_to_plant_km.toFixed(1) + ' km' : ''}</div>
+    </div>
+  `).join('');
+
+  // Add markers to map
+  markerLayers.forEach(m => map.removeLayer(m));
+  markerLayers = [];
+  fields.forEach(f => {
+    const marker = L.circleMarker([f.latitude, f.longitude], {
+      radius: 6, fillColor: '#16a34a', fillOpacity: 0.8, color: '#fff', weight: 1
+    }).addTo(map).bindTooltip(`${f.farm_name}: ${f.name}`);
+    marker.on('click', () => selectField(f.id));
+    markerLayers.push(marker);
+  });
+
+  // Add usina marker
+  const usina = L.marker([-21.3437, -48.3051], {
+    icon: L.divIcon({className:'', html:'<div style="background:#dc2626;color:white;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;">COA (Usina)</div>'})
+  }).addTo(map);
+  markerLayers.push(usina);
+
+  if (fields.length > 0) {
+    const bounds = L.latLngBounds(fields.map(f => [f.latitude, f.longitude]));
+    bounds.extend([-21.3437, -48.3051]);
+    map.fitBounds(bounds, {padding: [30, 30]});
+  }
+}
+
+// ========== FIELD SELECTION ==========
+async function selectField(fieldId) {
+  currentField = allFields.find(f => f.id === fieldId);
+  if (!currentField) return;
+
+  // Highlight in list
+  document.querySelectorAll('.field-item').forEach(el => el.classList.remove('active'));
+  const el = document.querySelector(`.field-item[data-id="${fieldId}"]`);
+  if (el) el.classList.add('active');
+
+  // Center map
+  map.setView([currentField.latitude, currentField.longitude], 12);
+
+  // Load routes
+  await loadRoutes(fieldId);
+}
+
+async function loadRoutes(fieldId) {
+  // Try API first
+  const data = await fetchAPI(`/routes/field/${fieldId}`);
+  if (data && data.length > 0) {
+    allRoutes[fieldId] = data;
+  } else {
+    // Generate demo route via OSRM
+    await generateDemoRoute(fieldId);
+  }
+  renderRouteDetails();
+  drawRoutes();
+}
+
+async function generateDemoRoute(fieldId) {
+  const field = allFields.find(f => f.id === fieldId);
+  if (!field) return;
+
+  const usina = {lat: -21.3437, lon: -48.3051};
+
+  try {
+    const resp = await fetch(
+      `http://router.project-osrm.org/route/v1/driving/${field.longitude},${field.latitude};${usina.lon},${usina.lat}?overview=full&geometries=geojson`
+    );
+    const data = await resp.json();
+    if (data.code === 'Ok' && data.routes.length > 0) {
+      const route = data.routes[0];
+      const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+      const dist = route.distance / 1000;
+
+      allRoutes[fieldId] = {
+        coordinates: coords,
+        distance_km: dist,
+        duration_s: route.duration
+      };
+    }
+  } catch (e) {
+    console.warn('OSRM fallback failed:', e);
+    // Straight line fallback
+    allRoutes[fieldId] = {
+      coordinates: [[field.latitude, field.longitude], [usina.lat, usina.lon]],
+      distance_km: field.distance_to_plant_km || 20,
+      duration_s: 1800
+    };
+  }
+}
+
+// ========== DRAW ROUTES ==========
+function drawRoutes() {
+  routeLayers.forEach(l => map.removeLayer(l));
+  routeLayers = [];
+
+  if (!currentField) return;
+  const routeData = allRoutes[currentField.id];
+  if (!routeData) return;
+
+  const coords = Array.isArray(routeData) ? routeData[0]?.coordinates : routeData.coordinates;
+  if (!coords || coords.length < 2) return;
+
+  // Draw alternative route (green)
+  const altColor = currentVehicle === 'treminhao' ? '#16a34a' :
+                   currentVehicle === 'rodotrem' ? '#2563eb' : '#dc2626';
+  const altLine = L.polyline(coords, {
+    color: altColor, weight: 4, opacity: 0.9
+  }).addTo(map);
+  altLine.bindTooltip(`Alternativa (${currentVehicle}): ${(routeData.distance_km || 0).toFixed(1)} km`);
+  routeLayers.push(altLine);
+
+  // Simulated GPS route (slightly different - add noise)
+  const gpsCoords = simulateGPSRoute(coords);
+  const gpsLine = L.polyline(gpsCoords, {
+    color: '#1f2937', weight: 7, opacity: 0.8, dashArray: '15 10'
+  }).addTo(map);
+  gpsLine.bindTooltip('ROTA ATUAL (GPS) — Praticada hoje');
+  routeLayers.push(gpsLine);
+
+  // Fit bounds
+  map.fitBounds(L.latLngBounds(coords), {padding: [50, 50]});
+}
+
+function simulateGPSRoute(coords) {
+  // Simulate a longer GPS route (add detour)
+  if (coords.length < 4) return coords;
+  const mid = Math.floor(coords.length / 2);
+  const detour = coords.slice(0, mid).concat(
+    coords.slice(mid).map(c => [c[0] + 0.005, c[1] - 0.003])
+  );
+  return detour;
+}
+
+// ========== RENDER DETAILS ==========
+function renderRouteDetails() {
+  if (!currentField) return;
+  const container = document.getElementById('routeDetails');
+  const routeData = allRoutes[currentField.id];
+
+  const vehicles = {
+    treminhao: {name:'Treminhão', pbt:55, axles:7, r0:0.003, alpha:0.004},
+    rodotrem: {name:'Rodotrem', pbt:70, axles:9, r0:0.003, alpha:0.004},
+    pentaminhao: {name:'Pentaminhão', pbt:90, axles:11, r0:0.003, alpha:0.004}
+  };
+  const v = vehicles[currentVehicle];
+  const climateFactors = {seco:1.0, umido:1.08, molhado:1.15, enlameado:1.30, severo:1.50, safra_mix:1.069};
+  const fClima = climateFactors[currentClimate] || 1.069;
+
+  const dist = routeData?.distance_km || currentField.distance_to_plant_km || 20;
+  const slope = 1.5; // avg slope estimate
+  const occ = currentOccupancy / 100;
+
+  // Consumption calculation
+  const fuelIda = (v.r0 + v.alpha * slope) * dist * v.pbt * occ * fClima;
+  const fuelVolta = (v.r0 + v.alpha * slope) * dist * v.pbt * 0.4 * fClima;
+  const fuelTotal = fuelIda + fuelVolta;
+  const fuelCost = fuelTotal * 6.0;
+
+  // GPS (simulated as 30% longer)
+  const gpsDist = dist * 1.3;
+  const gpsFuelIda = (v.r0 + v.alpha * slope) * gpsDist * v.pbt * occ * fClima;
+  const gpsFuelVolta = (v.r0 + v.alpha * slope) * gpsDist * v.pbt * 0.4 * fClima;
+  const gpsFuelTotal = gpsFuelIda + gpsFuelVolta;
+  const gpsFuelCost = gpsFuelTotal * 6.0;
+
+  // Tolls
+  const tollPerAxle = 7.80;
+  const tollCount = dist > 30 ? 1 : 0;
+  const tollCost = tollCount * tollPerAxle * v.axles * 2;
+  const gpsTollCost = tollCost; // same tolls
+
+  // Total
+  const totalCost = fuelCost + tollCost;
+  const gpsTotalCost = gpsFuelCost + gpsTollCost;
+  const economy = gpsTotalCost - totalCost;
+  const economyPct = (economy / gpsTotalCost * 100);
+
+  // Duration
+  const avgSpeed = dist > 30 ? 50 : 35;
+  const duration = (dist / avgSpeed) * 60 * 2; // ida+volta
+  const gpsDuration = (gpsDist / avgSpeed) * 60 * 2;
+
+  // Season
+  const seasonTrips = 187 * 5;
+  const seasonEconomy = economy * seasonTrips;
+
+  container.innerHTML = `
+    ${economy > 0 ? `
+    <div class="economy-box">
+      <div class="amount">R$ ${economy.toFixed(2)}/viagem</div>
+      <div class="desc">Economia vs rota GPS atual (${economyPct.toFixed(1)}%)</div>
+    </div>` : `
+    <div class="economy-box negative">
+      <div class="amount">R$ ${Math.abs(economy).toFixed(2)}/viagem</div>
+      <div class="desc">Custo adicional vs rota GPS atual</div>
+    </div>`}
+
+    ${tollCount > 0 ? `<div class="alert warning">⚠️ Rota passa por ${tollCount} pedágio(s): R$ ${tollCost.toFixed(2)} (${v.axles} eixos × R$ ${tollPerAxle}/eixo × 2)</div>` : ''}
+
+    <div class="route-card gps">
+      <div class="title"><span class="badge gps">GPS REAL</span> Rota Atual</div>
+      <div class="metrics">
+        <div class="metric"><div class="value">${gpsDist.toFixed(1)} km</div><div class="label">Distância</div></div>
+        <div class="metric"><div class="value">${Math.floor(gpsDuration/60)}h${Math.round(gpsDuration%60).toString().padStart(2,'0')}</div><div class="label">Tempo ida+volta</div></div>
+        <div class="metric"><div class="value">${gpsFuelTotal.toFixed(1)} L</div><div class="label">Consumo</div></div>
+        <div class="metric"><div class="value">R$ ${gpsTotalCost.toFixed(2)}</div><div class="label">Custo Total</div></div>
+      </div>
+    </div>
+
+    <div class="route-card alt">
+      <div class="title"><span class="badge alt">ALTERNATIVA</span> ${v.name}</div>
+      <div class="metrics">
+        <div class="metric"><div class="value">${dist.toFixed(1)} km</div><div class="label">Distância</div></div>
+        <div class="metric"><div class="value">${Math.floor(duration/60)}h${Math.round(duration%60).toString().padStart(2,'0')}</div><div class="label">Tempo ida+volta</div></div>
+        <div class="metric"><div class="value">${fuelTotal.toFixed(1)} L</div><div class="label">Consumo</div></div>
+        <div class="metric"><div class="value">R$ ${totalCost.toFixed(2)}</div><div class="label">Custo Total</div></div>
+      </div>
+    </div>
+
+    <div class="chart-container"><canvas id="elevChart"></canvas></div>
+
+    <div class="filter-group">
+      <label>Trafegabilidade (Score)</label>
+      <div class="traff-bar">
+        <div style="width:50%;background:#16a34a;">Primary 50%</div>
+        <div style="width:30%;background:#2563eb;">Secondary 30%</div>
+        <div style="width:15%;background:#f59e0b;">Tertiary 15%</div>
+        <div style="width:5%;background:#dc2626;">Track 5%</div>
+      </div>
+    </div>
+
+    <div class="season-box">
+      <h4>Projeção Safra (187d × 5 viagens = ${seasonTrips} viagens)</h4>
+      <div class="big">${seasonEconomy > 0 ? 'Economia: ' : 'Custo adicional: '}R$ ${Math.abs(seasonEconomy).toFixed(0)}</div>
+    </div>
+  `;
+
+  // Render elevation chart
+  renderElevationChart();
+}
+
+function renderElevationChart() {
+  const canvas = document.getElementById('elevChart');
+  if (!canvas) return;
+  if (elevChart) elevChart.destroy();
+
+  // Simulated elevation profile
+  const points = 50;
+  const data = Array.from({length: points}, (_, i) => ({
+    x: i * 0.5,
+    y: 500 + Math.sin(i * 0.3) * 30 + Math.random() * 10
+  }));
+
+  elevChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: data.map(d => d.x.toFixed(1)),
+      datasets: [{
+        label: 'Elevação (m)',
+        data: data.map(d => d.y),
+        borderColor: '#16a34a',
+        backgroundColor: 'rgba(22,163,74,0.1)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: 'km' }, ticks: { maxTicksLimit: 6 } },
+        y: { title: { display: true, text: 'm' } }
+      }
+    }
+  });
+}
+
+// ========== CONTROLS ==========
+function selectVehicle(slug) {
+  currentVehicle = slug;
+  document.querySelectorAll('.vehicle-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.vehicle-tab[data-vehicle="${slug}"]`).classList.add('active');
+  renderRouteDetails();
+  drawRoutes();
+}
+
+function selectClimate(climate) {
+  currentClimate = climate;
+  document.querySelectorAll('.climate-pill').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.climate-pill[data-climate="${climate}"]`).classList.add('active');
+  renderRouteDetails();
+}
+
+function updateOccupancy(val) {
+  currentOccupancy = parseInt(val);
+  document.getElementById('occValue').textContent = val + '%';
+  renderRouteDetails();
+}
+
+// Search filter
+document.getElementById('searchField').addEventListener('input', function(e) {
+  const query = e.target.value.toLowerCase();
+  const filtered = allFields.filter(f =>
+    (f.farm_name || '').toLowerCase().includes(query) ||
+    (f.name || '').toLowerCase().includes(query) ||
+    (f.code || '').toLowerCase().includes(query)
+  );
+  renderFieldList(filtered);
+});
+
+// Client change
+document.getElementById('clientSelect').addEventListener('change', function(e) {
+  if (e.target.value) loadFields(e.target.value);
+});
+
+// ========== INIT ==========
+initMap();
+loadClients();
+</script>
+</body>
+</html>
