@@ -119,7 +119,8 @@ O custo ao cliente é dimensionado por **veículos, rotas, origens e destinos** 
 Fonte de verdade em SQLAlchemy ([db.py](agroroute/db.py)) — tabelas `tenants`, `subscriptions`, `leads`.
 Padrão: **SQLite** em `data/nokahi.db` (zero infraestrutura). Na 1ª execução, `data/tenants.json` é
 carregado para o banco (idempotente). Produção: aponte `DATABASE_URL` para PostgreSQL
-(`postgresql+psycopg://user:pass@host/nokahi`) — mesmo schema.
+(`postgresql://user:pass@host/nokahi`) — mesmo schema, criado no boot. Aceita
+também `postgres://` (Railway/Heroku) — normalizado automaticamente.
 
 ## Assinatura mensal (billing) — ativar cobrança real
 

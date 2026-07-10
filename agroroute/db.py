@@ -283,19 +283,31 @@ class LeadRow(Base):
 # Engine / sessão
 # ---------------------------------------------------------------------------
 
+def normalize_db_url(url: str) -> str:
+    """Ajusta a URL para o SQLAlchemy. Railway/Heroku entregam `postgres://`,
+    que o SQLAlchemy não aceita — vira `postgresql://` (dialeto psycopg2)."""
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url[len("postgres://"):]
+    return url
+
+
 def database_url() -> str:
     url = os.environ.get("DATABASE_URL")
     if url:
-        return url
+        return normalize_db_url(url.strip())
     DEFAULT_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     return f"sqlite:///{DEFAULT_DB_PATH.as_posix()}"
 
 
 def make_engine(url: Optional[str] = None):
-    url = url or database_url()
+    url = normalize_db_url((url or database_url()).strip())
     kwargs: dict = {"future": True}
     if url.startswith("sqlite"):
         kwargs["connect_args"] = {"check_same_thread": False}
+    else:
+        # Postgres em produção: conexões resilientes a quedas do pool (Railway)
+        kwargs["pool_pre_ping"] = True
+        kwargs["pool_recycle"] = 300
     return create_engine(url, **kwargs)
 
 

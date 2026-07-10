@@ -6,6 +6,7 @@ wear% = uso_atual / limite; severidade em faixas 50/75/90.
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
+from sqlalchemy.exc import IntegrityError
 
 from .db import RouteLogRow, VehicleRow, session_factory, write_lock
 
@@ -94,7 +95,11 @@ class VehicleStore:
                 return 0
             for v in vehicles:
                 s.add(VehicleRow(tenant_id=tenant_id, **v))
-            s.commit()
+            try:
+                s.commit()
+            except IntegrityError:
+                s.rollback()
+                return 0
             return len(vehicles)
 
 

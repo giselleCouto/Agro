@@ -157,7 +157,10 @@ class BillingStore:
                 row = SubscriptionRow(tenant_id=sub.tenant_id)
                 self._apply(row, sub)
                 s.add(row)
-                s.commit()
+                try:
+                    s.commit()
+                except IntegrityError:
+                    s.rollback()  # outro worker semeou (Postgres multi-worker)
 
     def activate(self, tenant_id: str, plan_id: str, provider: str = "sandbox",
                  provider_sub_id: str | None = None,

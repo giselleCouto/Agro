@@ -12,6 +12,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from sqlalchemy.exc import IntegrityError
+
 from .db import TenantRow, session_factory, write_lock
 from .models import TenantConfig
 
@@ -48,7 +50,12 @@ class TenantStore:
                     is_demo=1 if t.get("is_demo") else 0,
                 ))
                 inserted += 1
-            s.commit()
+            try:
+                s.commit()
+            except IntegrityError:
+                # outro worker semeou ao mesmo tempo (Postgres multi-worker)
+                s.rollback()
+                return 0
         return inserted
 
     def by_api_key(self, api_key: str) -> TenantConfig | None:

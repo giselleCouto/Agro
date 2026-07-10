@@ -75,7 +75,7 @@ Pronto: **https://agroroute.despaxai.com** no ar. O `PUBLIC_BASE_URL`,
    STRIPE_SECRET_KEY=...            # opcional
    STRIPE_WEBHOOK_SECRET=...        # opcional
    # persistência: use o Postgres gerenciado do provedor
-   DATABASE_URL=postgresql+psycopg://user:pass@host:5432/nokahi
+   DATABASE_URL=postgresql://user:pass@host:5432/nokahi
    ```
 
    > No SQLite o disco do PaaS costuma ser efêmero — em produção use **PostgreSQL**
