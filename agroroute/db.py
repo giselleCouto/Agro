@@ -152,6 +152,102 @@ class RouteLogRow(Base):
         }
 
 
+class TelemetryRow(Base):
+    """Telemetria canônica ingerida (bruta ou normalizada de provedores)."""
+    __tablename__ = "telemetry"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    tenant_id = Column(String, index=True, nullable=False)
+    source = Column(String, index=True)          # solinftec | raw | <provedor>
+    equipment_id = Column(String, index=True)
+    model = Column(String, nullable=True)
+    equipment_type = Column(String, nullable=True)
+    operator_id = Column(String, nullable=True)
+    operator_name = Column(String, nullable=True)
+    ts = Column(DateTime, index=True, nullable=True)   # timestamp do dado
+    unit = Column(String, nullable=True)
+    frente = Column(String, nullable=True)
+    state = Column(String, nullable=True)
+    operation = Column(String, nullable=True)
+    engine_hours = Column(Float, nullable=True)
+    odometer = Column(Float, nullable=True)
+    fuel_level = Column(Float, nullable=True)
+    fuel_consumption = Column(Float, nullable=True)
+    engine_temp = Column(Float, nullable=True)
+    rpm = Column(Float, nullable=True)
+    speed = Column(Float, nullable=True)
+    oil_pressure = Column(Float, nullable=True)
+    battery_voltage = Column(Float, nullable=True)
+    lat = Column(Float, nullable=True)
+    lon = Column(Float, nullable=True)
+    ingested_at = Column(DateTime, server_default=func.now())
+    raw = Column(JSON, nullable=True)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id, "source": self.source, "equipment_id": self.equipment_id,
+            "model": self.model, "equipment_type": self.equipment_type,
+            "operator_name": self.operator_name, "ts": self.ts.isoformat() if self.ts else None,
+            "unit": self.unit, "frente": self.frente, "state": self.state,
+            "operation": self.operation, "engine_hours": self.engine_hours,
+            "fuel_level": self.fuel_level, "fuel_consumption": self.fuel_consumption,
+            "engine_temp": self.engine_temp, "rpm": self.rpm, "speed": self.speed,
+            "oil_pressure": self.oil_pressure,
+        }
+
+
+class AlarmRow(Base):
+    """Alarmes de telemetria (ex.: SGPA_ALARMES da Solinftec)."""
+    __tablename__ = "alarms"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    tenant_id = Column(String, index=True, nullable=False)
+    source = Column(String, index=True)
+    equipment_id = Column(String, index=True)
+    model = Column(String, nullable=True)
+    ts = Column(DateTime, index=True, nullable=True)
+    alarm_type = Column(String, nullable=True)
+    value = Column(Float, nullable=True)
+    operation = Column(String, nullable=True)
+    operator_name = Column(String, nullable=True)
+    online = Column(String, nullable=True)
+    ingested_at = Column(DateTime, server_default=func.now())
+
+    def to_dict(self) -> dict:
+        return {"id": self.id, "source": self.source, "equipment_id": self.equipment_id,
+                "model": self.model, "ts": self.ts.isoformat() if self.ts else None,
+                "alarm_type": self.alarm_type, "value": self.value,
+                "operation": self.operation, "operator_name": self.operator_name}
+
+
+class ConnectorRow(Base):
+    """Conector de dados por tenant (Solinftec Flow, HTTP genérico, webhook, arquivo)."""
+    __tablename__ = "connectors"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    tenant_id = Column(String, index=True, nullable=False)
+    name = Column(String, nullable=False)
+    type = Column(String, nullable=False)        # solinftec_flow | generic_http | webhook | file
+    base_url = Column(String, nullable=True)
+    dataset = Column(String, nullable=True)      # telemetry | alarms | gerenciais | historico
+    auth = Column(JSON, nullable=True)           # {header/query/token} — segredos
+    mapping = Column(JSON, nullable=True)        # campo_origem -> campo_canônico
+    schedule = Column(String, nullable=True)     # ex.: "5m", "1h", "1d"
+    enabled = Column(Integer, default=1)
+    last_sync = Column(DateTime, nullable=True)
+    last_status = Column(String, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+    def to_dict(self, include_secrets: bool = False) -> dict:
+        d = {
+            "id": self.id, "name": self.name, "type": self.type, "base_url": self.base_url,
+            "dataset": self.dataset, "mapping": self.mapping, "schedule": self.schedule,
+            "enabled": bool(self.enabled),
+            "last_sync": self.last_sync.isoformat() if self.last_sync else None,
+            "last_status": self.last_status,
+        }
+        if include_secrets:
+            d["auth"] = self.auth
+        return d
+
+
 class LeadRow(Base):
     __tablename__ = "leads"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -233,6 +329,9 @@ __all__ = [
     "VehicleRow",
     "WebhookEventRow",
     "RouteLogRow",
+    "TelemetryRow",
+    "AlarmRow",
+    "ConnectorRow",
     "make_engine",
     "get_engine",
     "session_factory",

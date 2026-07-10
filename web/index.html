@@ -54,6 +54,7 @@ body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
       <div class="nav-item" data-view="rotas" onclick="showView('rotas')"><i data-lucide="route" class="icon-sm"></i> Rotas</div>
       <div class="nav-item" data-view="manutencao" onclick="showView('manutencao')"><i data-lucide="wrench" class="icon-sm"></i> Manutenção</div>
       <div class="nav-item" data-view="inteligencia" onclick="showView('inteligencia')"><i data-lucide="brain-circuit" class="icon-sm"></i> Inteligência</div>
+      <div class="nav-item" data-view="integracoes" onclick="showView('integracoes')"><i data-lucide="plug" class="icon-sm"></i> Integrações</div>
       <div class="mt-auto text-[10px] text-gray-400 px-2">
         <a href="/#contato" class="hover:text-emerald-600">Falar com a NOKAHI</a><br>contato@nokahi.com
       </div>
@@ -64,6 +65,7 @@ body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
       <button class="flex-1 py-2 text-xs font-semibold text-gray-500" data-view="rotas" onclick="showView('rotas')">Rotas</button>
       <button class="flex-1 py-2 text-xs font-semibold text-gray-500" data-view="manutencao" onclick="showView('manutencao')">Manut.</button>
       <button class="flex-1 py-2 text-xs font-semibold text-gray-500" data-view="inteligencia" onclick="showView('inteligencia')">IA</button>
+      <button class="flex-1 py-2 text-xs font-semibold text-gray-500" data-view="integracoes" onclick="showView('integracoes')">Conex.</button>
     </div>
 
     <!-- ===================== MAIN ===================== -->
@@ -234,6 +236,57 @@ body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
         </div>
       </section>
 
+      <!-- ============ VIEW: INTEGRAÇÕES ============ -->
+      <section id="view-integracoes" class="hidden space-y-5">
+        <div>
+          <h1 class="text-lg font-bold flex items-center gap-2"><i data-lucide="plug" class="icon-md text-emerald-600"></i> Integrações de Dados</h1>
+          <p class="text-sm text-gray-500">Conecte qualquer sistema de telemetria — dados brutos, Solinftec (Flow API), HTTP/webhook ou arquivo. A inteligência passa a usar os dados reais automaticamente.</p>
+        </div>
+        <div id="ingest-stats" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
+        <div class="grid lg:grid-cols-2 gap-4">
+          <div class="bg-white rounded-xl border p-5">
+            <h3 class="lbl mb-3">Enviar extração (CSV / XLSX)</h3>
+            <p class="text-xs text-gray-500 mb-3">Ex.: extrações Solinftec (SOL_TELEMETRIA, HORAS_GERENCIAIS, SGPA_ALARMES). O mapeamento do provedor é aplicado automaticamente.</p>
+            <div class="space-y-2">
+              <div class="flex gap-2">
+                <select id="up-source" class="px-3 py-2 rounded-lg border text-sm"><option value="solinftec">Solinftec</option><option value="raw">Bruto (canônico)</option></select>
+                <select id="up-dataset" class="px-3 py-2 rounded-lg border text-sm"><option value="telemetry">Telemetria</option><option value="gerenciais">Horas gerenciais</option><option value="alarms">Alarmes</option></select>
+              </div>
+              <input type="file" id="up-file" accept=".csv,.xlsx,.xlsm" class="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700 file:font-semibold">
+              <button onclick="uploadFile()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="upload" class="icon-sm"></i> Enviar e ingerir</button>
+              <p id="up-msg" class="text-sm"></p>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl border p-5">
+            <h3 class="lbl mb-3">Conectar API (pull)</h3>
+            <p class="text-xs text-gray-500 mb-3">Registre uma API (Solinftec Flow ou HTTP genérica) para puxar dados periodicamente.</p>
+            <div class="space-y-2">
+              <input id="cn-name" placeholder="Nome (ex.: Solinftec Flow SAJB)" class="w-full px-3 py-2 rounded-lg border text-sm">
+              <div class="flex gap-2">
+                <select id="cn-type" class="px-3 py-2 rounded-lg border text-sm"><option value="solinftec_flow">Solinftec Flow</option><option value="generic_http">HTTP genérico</option><option value="webhook">Webhook (push)</option></select>
+                <select id="cn-dataset" class="px-3 py-2 rounded-lg border text-sm"><option value="telemetry">Telemetria</option><option value="gerenciais">Horas</option><option value="alarms">Alarmes</option></select>
+              </div>
+              <input id="cn-url" placeholder="https://flow-api.saas-solinftec.com/…" class="w-full px-3 py-2 rounded-lg border text-sm">
+              <input id="cn-token" placeholder="Token (Bearer) — opcional" class="w-full px-3 py-2 rounded-lg border text-sm">
+              <div class="flex gap-2">
+                <button onclick="createConnector()" class="px-4 py-2 rounded-lg bg-gray-900 hover:bg-black text-white text-sm font-semibold">Registrar conector</button>
+                <span id="cn-msg" class="text-sm self-center"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl border p-5">
+          <h3 class="lbl mb-3">Conectores</h3>
+          <div id="connectors-list" class="space-y-2"></div>
+        </div>
+        <div class="bg-white rounded-xl border p-5">
+          <div class="flex items-center justify-between mb-3"><h3 class="lbl">Telemetria recente</h3><span id="ingest-source" class="text-xs text-gray-400"></span></div>
+          <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-gray-400 text-xs uppercase border-b">
+            <th class="text-left py-2 px-2">Equipamento</th><th class="text-left px-2">Modelo</th><th class="text-left px-2">Frente</th><th class="text-left px-2">Operação</th><th class="text-right px-2">Horas</th><th class="text-right px-2">Vel.</th></tr></thead>
+            <tbody id="ingest-recent"></tbody></table></div>
+        </div>
+      </section>
+
     </main>
   </div>
 </div>
@@ -357,7 +410,7 @@ async function connect() {
 function showView(name) {
   if (!state.config) return;
   state.view = name;
-  ['dashboard','rotas','manutencao','inteligencia'].forEach(v => {
+  ['dashboard','rotas','manutencao','inteligencia','integracoes'].forEach(v => {
     document.getElementById('view-'+v).classList.toggle('hidden', v!==name);
   });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view===name));
@@ -365,6 +418,7 @@ function showView(name) {
   if (name==='manutencao') loadMaintenance();
   if (name==='dashboard') loadDashboard();
   if (name==='inteligencia') loadInteligencia();
+  if (name==='integracoes') loadIntegracoes();
   lucide.createIcons();
 }
 
@@ -720,6 +774,72 @@ function renderInteligencia(d){
       <div class="text-right"><div class="font-bold" style="color:${f.score>=8.5?'#059669':f.score>=7?'#f59e0b':'#dc2626'}">${f.score.toFixed(1)}</div><div class="text-[10px] text-gray-400">${esc(f.status)}</div></div></div>`).join('')}</div>`;
   document.getElementById('intel-avaliacao').innerHTML = mecCard + fornCard;
   lucide.createIcons();
+}
+
+/* ---------- INTEGRAÇÕES ---------- */
+async function loadIntegracoes(){
+  try{
+    const [st, cn, rec] = await Promise.all([
+      api('/v1/ingest/stats'), api('/v1/connectors'), api('/v1/ingest/telemetry?limit=15')]);
+    document.getElementById('ingest-stats').innerHTML = [
+      kpi(st.telemetry_records,'Registros telemetria','#0891b2','database'),
+      kpi(st.alarm_records,'Alarmes','#f59e0b','bell'),
+      kpi(st.equipments,'Equipamentos','#059669','truck'),
+      kpi(Object.keys(st.by_source||{}).length,'Fontes conectadas','#8b5cf6','plug'),
+    ].join('');
+    document.getElementById('ingest-source').textContent = Object.entries(st.by_source||{}).map(([k,v])=>`${k}: ${v}`).join(' · ');
+    renderConnectors(cn.connectors);
+    document.getElementById('ingest-recent').innerHTML = (rec.records||[]).map(r=>`<tr class="border-b last:border-0">
+      <td class="py-1.5 px-2 font-medium">${esc(r.equipment_id||'')}</td><td class="px-2 text-gray-600">${esc(r.model||'—')}</td>
+      <td class="px-2 text-gray-600">${esc(r.frente||'—')}</td><td class="px-2 text-gray-600">${esc(r.operation||r.state||'—')}</td>
+      <td class="px-2 text-right">${r.engine_hours!=null?fN(r.engine_hours,0):'—'}</td><td class="px-2 text-right">${r.speed!=null?fN(r.speed,1):'—'}</td></tr>`).join('')
+      || '<tr><td colspan="6" class="text-center text-gray-400 py-4">Nenhum dado ingerido. Envie uma extração ou conecte uma API.</td></tr>';
+    lucide.createIcons();
+  }catch(e){ document.getElementById('ingest-stats').innerHTML = `<div class="col-span-full text-sm text-red-600">Erro: ${esc(e.message)}</div>`; }
+}
+function renderConnectors(list){
+  const el = document.getElementById('connectors-list');
+  if(!list || !list.length){ el.innerHTML='<div class="text-sm text-gray-400">Nenhum conector. Registre uma API acima.</div>'; return; }
+  el.innerHTML = list.map(c=>`<div class="flex items-center justify-between border rounded-lg p-3">
+    <div><div class="text-sm font-semibold">${esc(c.name)} <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">${esc(c.type)}</span></div>
+    <div class="text-[11px] text-gray-400">${esc(c.base_url||'—')} · ${esc(c.dataset||'')} ${c.last_status?'· '+esc(c.last_status):''}</div></div>
+    ${(c.type==='solinftec_flow'||c.type==='generic_http')?`<button onclick="syncConnector(${c.id})" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1"><i data-lucide="refresh-cw" class="icon-xs"></i> Sincronizar</button>`:'<span class="text-[11px] text-gray-400">push</span>'}</div>`).join('');
+  lucide.createIcons();
+}
+async function uploadFile(){
+  const f = document.getElementById('up-file').files[0];
+  const msg = document.getElementById('up-msg');
+  if(!f){ msg.textContent='Selecione um arquivo.'; msg.className='text-sm text-amber-600'; return; }
+  const src = document.getElementById('up-source').value, ds = document.getElementById('up-dataset').value;
+  msg.textContent='Enviando e ingerindo…'; msg.className='text-sm text-gray-500';
+  try{
+    const fd = new FormData(); fd.append('file', f);
+    const r = await fetch(`/v1/ingest/file?source=${src}&dataset=${ds}`, {method:'POST', headers:{'X-API-Key':state.key}, body:fd});
+    const b = await r.json();
+    if(!r.ok) throw new Error(b.detail||'falha');
+    msg.textContent = `✓ ${b.ingested} registros ingeridos de ${b.arquivo}. A Inteligência já usa esses dados.`;
+    msg.className='text-sm text-emerald-700 font-semibold';
+    loadIntegracoes();
+  }catch(e){ msg.textContent='Erro: '+e.message; msg.className='text-sm text-red-600'; }
+}
+async function createConnector(){
+  const msg = document.getElementById('cn-msg');
+  const body = { name:document.getElementById('cn-name').value.trim(), type:document.getElementById('cn-type').value,
+    dataset:document.getElementById('cn-dataset').value, base_url:document.getElementById('cn-url').value.trim() };
+  const tok = document.getElementById('cn-token').value.trim();
+  if(tok) body.auth = {type:'bearer', token:tok};
+  if(!body.name){ msg.textContent='Informe o nome.'; msg.className='text-sm text-amber-600'; return; }
+  try{
+    await api('/v1/connectors',{method:'POST', body:JSON.stringify(body)});
+    msg.textContent='✓ conector registrado'; msg.className='text-sm text-emerald-700';
+    document.getElementById('cn-name').value=''; document.getElementById('cn-url').value=''; document.getElementById('cn-token').value='';
+    loadIntegracoes();
+  }catch(e){ msg.textContent='Erro: '+e.message; msg.className='text-sm text-red-600'; }
+}
+async function syncConnector(id){
+  try{ const r = await api(`/v1/connectors/${id}/sync`,{method:'POST'});
+    alert(`Sincronizado: ${r.ingested} registros ingeridos.`); loadIntegracoes();
+  }catch(e){ alert('Falha ao sincronizar: '+e.message); }
 }
 
 /* ---------- BILLING ---------- */

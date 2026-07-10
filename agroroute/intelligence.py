@@ -378,10 +378,52 @@ def avaliacao_desempenho() -> dict:
 # Agregador para o dashboard de inteligência
 # ---------------------------------------------------------------------------
 
-def intelligence_overview(tenant_id: str, n: int = 340) -> dict:
-    frota = gerar_frota_telemetria(tenant_id, n)
+def fleet_from_ingest(records: list[dict], alarm_counts: dict[str, int]) -> list[dict]:
+    """Monta a frota de inteligência a partir da telemetria REAL ingerida
+    (último registro por equipamento + contagem de alarmes)."""
+    out = []
+    for i, r in enumerate(records):
+        eq = r.get("equipment_id") or f"eq{i}"
+        alarmes = alarm_counts.get(eq, 0)
+        engine_h = r.get("engine_hours") or 0
+        temp = r.get("engine_temp")
+        temperatura = temp if (temp and temp > 0) else 92
+        cons = r.get("fuel_consumption")
+        consumo_medio = cons if (cons and cons > 0) else 34.0
+        consumo_esperado = 34.0
+        variacao = _clamp((consumo_medio / consumo_esperado - 1) * 100, -6, 40)
+        score = _clamp(100 - alarmes * 4, 22, 99)
+        frenamentos = int(_clamp(alarmes * 1.4, 0, 35))
+        eficiencia = _clamp(90 - alarmes * 2.5, 28, 98)
+        tempo_ocioso = _clamp(0.5 + alarmes * 0.12, 0.1, 4.5)
+        wear = _clamp((engine_h / 100.0) + alarmes * 3, 5, 99) if engine_h else _clamp(alarmes * 6, 5, 99)
+        terrain = _clamp((temperatura - 85) / 25, 0, 1)
+        load = _clamp(1 - eficiencia / 100 + variacao / 60, 0, 1)
+        risco = _risk.risk_from_component(wear, wear / 100, terrain, load) * 100
+        custo_hora = 160.0
+        out.append({
+            "id": eq, "placa": eq, "tipo": r.get("equipment_type") or "Equipamento",
+            "modelo": r.get("model") or "—", "frente": r.get("frente") or "—",
+            "turno": "A", "status": "manutencao" if risco > 88 else "active",
+            "wear_pct": round(wear, 1), "operador": r.get("operator_name") or "—",
+            "score_conducao": round(score, 0), "consumo_esperado": round(consumo_esperado, 1),
+            "consumo_medio": round(consumo_medio, 1), "variacao_consumo": round(variacao, 1),
+            "frenamentos_bruscos": frenamentos, "temperatura_motor": round(temperatura, 0),
+            "tempo_ocioso": round(tempo_ocioso, 1), "eficiencia_operacional": round(eficiencia, 0),
+            "custo_hora": custo_hora, "impacto_ociosidade": round(tempo_ocioso * custo_hora * 0.35, 0),
+            "risco_falha_estimado": round(risco, 0), "probabilidade_falha": round(risco, 0),
+            "score_risco": round(risco, 0), "numero_falhas": min(alarmes, 9),
+            "horas_operacao": round(engine_h or 500, 0), "tempo_reparo": round(min(alarmes, 9) * 3, 1),
+            "custo_parada": round(min(alarmes, 9) * 3500, 0),
+            "tipo_ultima_manutencao": "corretiva" if risco > 70 else "preditiva" if risco > 40 else "preventiva",
+        })
+    return out
+
+
+def build_overview(frota: list[dict], fonte: str) -> dict:
     prev = previsoes_preventivas(frota)
     return {
+        "fonte": fonte,
         "kpis_manutencao": kpis_manutencao(frota),
         "kpis_telemetria": kpis_telemetria(frota),
         "alertas_inteligentes": alertas_inteligentes(frota)[:12],
@@ -396,3 +438,8 @@ def intelligence_overview(tenant_id: str, n: int = 340) -> dict:
         "top_telemetria": sorted(frota, key=lambda v: v["risco_falha_estimado"],
                                  reverse=True)[:12],
     }
+
+
+def intelligence_overview(tenant_id: str, n: int = 340) -> dict:
+    """Painel simulado (demo) — sem telemetria real ingerida."""
+    return build_overview(gerar_frota_telemetria(tenant_id, n), "simulado")

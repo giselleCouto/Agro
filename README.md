@@ -85,6 +85,16 @@ Veículos ficam na tabela `vehicles` ([db.py](agroroute/db.py)); a manutenção 
 
 Otimização **multi-origem/multi-destino** sobre o custo real de rota. `POST /v1/optimize` resolve o **problema de transporte** (quanto enviar de cada talhão para cada usina ao menor custo, via `scipy.linprog`) e dimensiona o nº de viagens; há também **atribuição** de rotas a veículos (algoritmo húngaro). É o "calcular várias rotas ao mesmo tempo" com decisão ótima de alocação.
 
+## Integração de dados / telemetria ([ingest.py](agroroute/ingest.py))
+
+Recebe telemetria de **qualquer sistema** — bruta ou de provedores — normalizando para um modelo canônico que alimenta a inteligência automaticamente. Baseado nos esquemas reais das extrações Solinftec.
+
+- **Solinftec pronto** — mapeamentos embutidos para `SOL_TELEMETRIA`, `HORAS_GERENCIAIS`/`SOL_GERENCIAIS` e `SGPA_ALARMES` (Flow API `flow-api.saas-solinftec.com`).
+- **Qualquer sistema** — um `mapping` de campos (origem → canônico) conecta qualquer ERP/telemetria/banco.
+- **Formas de conexão**: push/webhook (`POST /v1/ingest/telemetry` · `/v1/ingest/alarms`), pull HTTP (`POST /v1/connectors` + `/v1/connectors/{id}/sync`, com auth bearer/header/query/basic), ou **arquivo** CSV/XLSX (`POST /v1/ingest/file`).
+- `GET /v1/ingest/stats` · `GET /v1/ingest/providers` · página **Integrações** no app (upload, conectores, telemetria recente).
+- Quando há telemetria ingerida, `GET /v1/intel/overview` passa a usar os **dados reais** (verificado com extrações Solinftec: 100 registros, 7 equipamentos).
+
 ## Inteligência de frota ([intelligence.py](agroroute/intelligence.py))
 
 Painel completo de inteligência operacional (página **Inteligência** no app), calculado de verdade e ancorado nos modelos de ML — telemetria determinística por tenant. `GET /v1/intel/overview` entrega:

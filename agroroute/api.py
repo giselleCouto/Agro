@@ -30,7 +30,16 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 import httpx  # noqa: E402
-from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Request  # noqa: E402
+from fastapi import (  # noqa: E402
+    BackgroundTasks,
+    Depends,
+    FastAPI,
+    File,
+    Header,
+    HTTPException,
+    Request,
+    UploadFile,
+)
 from fastapi.responses import FileResponse  # noqa: E402
 
 from . import __version__  # noqa: E402
@@ -46,6 +55,7 @@ from .billing import (  # noqa: E402
     webhook_secret,
 )
 from . import or_opt  # noqa: E402
+from . import ingest as ingest_mod  # noqa: E402
 from .assistant import AnalyticalAgent  # noqa: E402
 from .db import get_engine  # noqa: E402
 from .fleet import (  # noqa: E402
@@ -100,6 +110,7 @@ vehicle_store = VehicleStore(engine=_engine)
 route_log = RouteLogStore(engine=_engine)
 agent = AnalyticalAgent(vehicle_store, route_log, billing_store, PLANS)
 _risk_model = MaintenanceRiskModel()
+ingest_store = ingest_mod.IngestStore(engine=_engine)
 
 # assinatura demo perene para o tenant de degustação (MG)
 if store.by_id(DEMO_TENANT_ID):
@@ -406,9 +417,111 @@ def ml_fuel_calibrate(body: dict, tenant: TenantConfig = Depends(get_tenant)):
 
 @app.get("/v1/intel/overview")
 def intel_overview(n: int = 340, tenant: TenantConfig = Depends(get_tenant)):
-    """Painel completo de inteligência de frota (telemetria determinística por tenant)."""
+    """Painel de inteligência. Usa a TELEMETRIA REAL ingerida quando existe;
+    senão, uma frota simulada (demo)."""
+    real = ingest_store.latest_per_equipment(tenant.tenant_id)
+    if real:
+        alarmes = ingest_store.alarm_counts(tenant.tenant_id)
+        frota = intel.fleet_from_ingest(real, alarmes)
+        src = f"telemetria ingerida ({len(frota)} equipamentos)"
+        return intel.build_overview(frota, src)
     n = max(20, min(n, 2000))
     return intel.intelligence_overview(tenant.tenant_id, n)
+
+
+# ---------------------------------------------------------------------------
+# Ingestão de telemetria (dados brutos + provedores como Solinftec)
+# ---------------------------------------------------------------------------
+
+@app.get("/v1/ingest/providers")
+def ingest_providers():
+    """Provedores com mapeamento pronto e os datasets disponíveis."""
+    return {p: list(ds) for p, ds in ingest_mod.PROVIDER_MAPPINGS.items()} | \
+        {"canonical_fields": ingest_mod.TELEMETRY_FIELDS}
+
+
+@app.post("/v1/ingest/telemetry")
+def ingest_telemetry(body: dict, tenant: TenantConfig = Depends(get_tenant)):
+    """Recebe telemetria (bruta ou de provedor). Corpo: {source, dataset?, mapping?, records:[...]}."""
+    records = body.get("records", [])
+    if not isinstance(records, list) or not records:
+        raise HTTPException(status_code=422, detail="informe 'records' (lista não vazia)")
+    if len(records) > 50000:
+        raise HTTPException(status_code=422, detail="máximo de 50.000 registros por lote")
+    n = ingest_store.ingest_telemetry(
+        tenant.tenant_id, records, body.get("source", "raw"),
+        body.get("dataset", "telemetry"), body.get("mapping"))
+    return {"ingested": n, "received": len(records)}
+
+
+@app.post("/v1/ingest/alarms")
+def ingest_alarms(body: dict, tenant: TenantConfig = Depends(get_tenant)):
+    records = body.get("records", [])
+    if not isinstance(records, list) or not records:
+        raise HTTPException(status_code=422, detail="informe 'records' (lista não vazia)")
+    n = ingest_store.ingest_alarms(
+        tenant.tenant_id, records, body.get("source", "raw"), body.get("mapping"))
+    return {"ingested": n, "received": len(records)}
+
+
+@app.post("/v1/ingest/file")
+async def ingest_file(file: UploadFile = File(...), source: str = "solinftec",
+                      dataset: str = "telemetry", tenant: TenantConfig = Depends(get_tenant)):
+    """Upload de extração CSV/XLSX (ex.: Solinftec) — normaliza e ingere."""
+    content = await file.read()
+    if len(content) > 60_000_000:
+        raise HTTPException(status_code=413, detail="arquivo muito grande (máx. 60 MB)")
+    try:
+        records = ingest_mod.parse_tabular(content, file.filename or "arquivo.csv")
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"não foi possível ler o arquivo: {e}")
+    if dataset == "alarms":
+        n = ingest_store.ingest_alarms(tenant.tenant_id, records, source)
+    else:
+        n = ingest_store.ingest_telemetry(tenant.tenant_id, records, source, dataset)
+    return {"ingested": n, "received": len(records), "arquivo": file.filename}
+
+
+@app.get("/v1/ingest/stats")
+def ingest_stats(tenant: TenantConfig = Depends(get_tenant)):
+    return ingest_store.stats(tenant.tenant_id)
+
+
+@app.get("/v1/ingest/telemetry")
+def ingest_recent(limit: int = 50, tenant: TenantConfig = Depends(get_tenant)):
+    return {"records": ingest_store.recent_telemetry(tenant.tenant_id, min(limit, 500))}
+
+
+@app.get("/v1/connectors")
+def connectors_list(tenant: TenantConfig = Depends(get_tenant)):
+    return {"connectors": ingest_store.list_connectors(tenant.tenant_id)}
+
+
+@app.post("/v1/connectors")
+def connectors_create(body: dict, tenant: TenantConfig = Depends(get_tenant)):
+    if not body.get("name") or not body.get("type"):
+        raise HTTPException(status_code=422, detail="informe 'name' e 'type'")
+    if body["type"] not in ("solinftec_flow", "generic_http", "webhook", "file"):
+        raise HTTPException(status_code=422, detail="tipo inválido")
+    return ingest_store.register_connector(tenant.tenant_id, body)
+
+
+@app.post("/v1/connectors/{cid}/sync")
+async def connectors_sync(cid: int, tenant: TenantConfig = Depends(get_tenant)):
+    conn = ingest_store.get_connector(tenant.tenant_id, cid)
+    if not conn:
+        raise HTTPException(status_code=404, detail="conector não encontrado")
+    if conn.type not in ("solinftec_flow", "generic_http"):
+        raise HTTPException(status_code=422, detail="sync só para conectores HTTP (pull)")
+    if not conn.base_url:
+        raise HTTPException(status_code=422, detail="conector sem base_url")
+    try:
+        async with httpx.AsyncClient() as http_client:
+            return await ingest_mod.sync_http_connector(
+                ingest_store, tenant.tenant_id, conn, http_client)
+    except Exception as e:
+        ingest_store.mark_sync(cid, f"erro: {e}")
+        raise HTTPException(status_code=502, detail=f"falha ao sincronizar: {e}")
 
 
 @app.get("/v1/intel/telemetria")
