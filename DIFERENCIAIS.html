@@ -1,0 +1,434 @@
+<title>NOKAHI AgroRoute — Diferenciais competitivos</title>
+<style>
+:root{
+  --bg:#F4F6F1; --surface:#FFFFFF; --surface-2:#EBEFE7; --surface-3:#E2E8DC;
+  --ink:#13201A; --ink-2:#3C4A43; --muted:#6C7870; --line:#DCE3D8; --line-2:#CAD3C4;
+  --primary:#1C5E3B; --primary-2:#123E27; --primary-soft:#E4EEE7;
+  --accent:#B9760F; --accent-soft:#F7EBD6;
+  --terra:#A84E2B; --terra-soft:#F4E2D9;
+  --font-display:"Segoe UI Semibold","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --font-body:Georgia,"Iowan Old Style","Times New Roman",serif;
+  --font-mono:"Cascadia Code","SF Mono",ui-monospace,Consolas,"Liberation Mono",monospace;
+  --maxw:1120px; --prose:68ch; --radius:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0D1510; --surface:#141E17; --surface-2:#1A261E; --surface-3:#213026;
+    --ink:#E9EFE8; --ink-2:#B4C1B7; --muted:#8A968C; --line:#25332A; --line-2:#30412F;
+    --primary:#5AA878; --primary-2:#7FC199; --primary-soft:#16241B;
+    --accent:#E0A544; --accent-soft:#2A2113;
+    --terra:#D07A4F; --terra-soft:#2B1A11;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1510; --surface:#141E17; --surface-2:#1A261E; --surface-3:#213026;
+  --ink:#E9EFE8; --ink-2:#B4C1B7; --muted:#8A968C; --line:#25332A; --line-2:#30412F;
+  --primary:#5AA878; --primary-2:#7FC199; --primary-soft:#16241B;
+  --accent:#E0A544; --accent-soft:#2A2113;
+  --terra:#D07A4F; --terra-soft:#2B1A11;
+}
+:root[data-theme="light"]{
+  --bg:#F4F6F1; --surface:#FFFFFF; --surface-2:#EBEFE7; --surface-3:#E2E8DC;
+  --ink:#13201A; --ink-2:#3C4A43; --muted:#6C7870; --line:#DCE3D8; --line-2:#CAD3C4;
+  --primary:#1C5E3B; --primary-2:#123E27; --primary-soft:#E4EEE7;
+  --accent:#B9760F; --accent-soft:#F7EBD6;
+  --terra:#A84E2B; --terra-soft:#F4E2D9;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);
+  line-height:1.68;font-size:18px;-webkit-font-smoothing:antialiased;margin:0;}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;}
+.eyebrow{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent);font-weight:600;}
+h1,h2,h3,.disp{font-family:var(--font-display);color:var(--ink);
+  letter-spacing:-.018em;text-wrap:balance;font-weight:600;}
+h2{font-size:clamp(26px,3.4vw,36px);line-height:1.1;margin:0 0 .3em;}
+h3{font-size:20px;line-height:1.25;margin:0;}
+p{max-width:var(--prose);}
+a{color:var(--primary);text-underline-offset:3px;}
+strong{font-weight:600;color:var(--ink);}
+code,.mono{font-family:var(--font-mono);font-size:.9em;}
+
+/* ---- hero ---- */
+.hero{position:relative;padding:76px 0 60px;border-bottom:1px solid var(--line);overflow:hidden;}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+   radial-gradient(120% 80% at 88% -10%, color-mix(in srgb,var(--primary) 12%,transparent) 0%, transparent 55%),
+   repeating-linear-gradient(90deg, color-mix(in srgb,var(--line) 55%,transparent) 0 1px, transparent 1px 44px);
+  opacity:.7;mask-image:linear-gradient(180deg,#000 0%,transparent 88%);}
+.brandline{display:flex;align-items:center;gap:12px;position:relative;}
+.mark{width:30px;height:30px;flex:none;}
+.brandline .n{font-family:var(--font-display);font-weight:600;letter-spacing:-.01em;font-size:16px;}
+.brandline .sep{color:var(--line-2);}
+.brandline .t{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.05em;color:var(--muted);}
+.hero h1{font-size:clamp(38px,6.2vw,68px);line-height:1.02;margin:26px 0 0;max-width:16ch;position:relative;}
+.hero h1 .amber{color:var(--accent);}
+.hero .kicker{position:relative;margin:22px 0 0;font-size:clamp(19px,2.2vw,23px);
+  color:var(--ink-2);max-width:40ch;font-family:var(--font-body);}
+.question{position:relative;margin:30px 0 0;padding:20px 24px;background:var(--surface);
+  border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;
+  max-width:60ch;font-size:19px;color:var(--ink);box-shadow:0 1px 0 var(--line);}
+.question .q{font-style:italic;}
+.meta{position:relative;margin-top:30px;display:flex;flex-wrap:wrap;gap:10px;}
+.chip{font-family:var(--font-mono);font-size:12px;letter-spacing:.03em;color:var(--ink-2);
+  background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:6px 13px;}
+
+/* ---- generic section ---- */
+section{padding:60px 0;border-bottom:1px solid var(--line);}
+.lead{font-size:21px;color:var(--ink-2);max-width:64ch;margin:14px 0 0;}
+
+/* ---- observa vs prescreve ---- */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:36px;}
+.panel{border-radius:var(--radius);padding:26px 26px 28px;border:1px solid var(--line);background:var(--surface);}
+.panel.obs{background:var(--surface-2);}
+.panel.pre{background:var(--primary-soft);border-color:color-mix(in srgb,var(--primary) 34%,var(--line));}
+.panel .tag{font-family:var(--font-mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;}
+.panel.obs .tag{color:var(--muted);}
+.panel.pre .tag{color:var(--primary);}
+.panel h3{margin:8px 0 14px;font-size:24px;}
+.panel.pre h3{color:var(--primary-2);}
+.panel ul{margin:0;padding:0;list-style:none;}
+.panel li{position:relative;padding:9px 0 9px 26px;font-size:16.5px;color:var(--ink-2);
+  border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent);line-height:1.5;}
+.panel li:first-child{border-top:none;}
+.panel li::before{position:absolute;left:0;top:9px;font-family:var(--font-mono);font-size:14px;}
+.panel.obs li::before{content:"—";color:var(--muted);}
+.panel.pre li::before{content:"↳";color:var(--primary);font-weight:700;}
+
+/* ---- formula ---- */
+.formula-wrap{margin-top:34px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);overflow:hidden;}
+.formula-head{padding:14px 22px;border-bottom:1px solid var(--line);display:flex;
+  align-items:center;gap:10px;background:var(--surface-2);}
+.formula-head .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;}
+.formula-head span{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.05em;color:var(--muted);}
+.formula{padding:30px 22px;text-align:center;font-family:var(--font-mono);
+  font-size:clamp(17px,2.6vw,25px);color:var(--ink);letter-spacing:.01em;overflow-x:auto;}
+.formula .v{color:var(--accent);}
+.formula .l{color:var(--primary);font-weight:700;}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;
+  border-top:1px solid var(--line);}
+.legend div{padding:13px 20px;border-left:1px solid var(--line);border-top:1px solid var(--line);}
+.legend b{font-family:var(--font-mono);color:var(--accent);font-size:14px;font-weight:600;}
+.legend span{display:block;font-size:14px;color:var(--muted);margin-top:2px;}
+
+/* ---- differentials grid ---- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-top:36px;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px 22px 24px;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 30px -14px color-mix(in srgb,var(--ink) 40%,transparent);
+  border-color:var(--line-2);}
+.card .num{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--accent);
+  letter-spacing:.05em;}
+.card h3{margin:6px 0 10px;font-size:19px;line-height:1.22;}
+.card p{font-size:15.5px;color:var(--ink-2);line-height:1.55;margin:0;max-width:none;}
+.card .vs{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line-2);
+  font-size:13.5px;color:var(--muted);font-family:var(--font-mono);line-height:1.5;}
+.card .vs b{color:var(--terra);font-weight:600;}
+
+/* ---- table ---- */
+.tablewrap{margin-top:34px;overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:15px;}
+thead th{background:var(--surface-2);text-align:left;font-family:var(--font-display);
+  font-weight:600;color:var(--ink);padding:14px 18px;border-bottom:1px solid var(--line-2);
+  font-size:13px;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;}
+tbody td{padding:15px 18px;border-bottom:1px solid var(--line);color:var(--ink-2);
+  vertical-align:top;line-height:1.5;}
+tbody tr:last-child td{border-bottom:none;}
+tbody td:first-child{font-family:var(--font-display);font-weight:600;color:var(--ink);white-space:nowrap;}
+td .players{display:block;font-family:var(--font-mono);font-size:12.5px;color:var(--muted);margin-top:4px;font-weight:400;}
+td .why{color:var(--terra);}
+
+/* ---- callout (solinftec) ---- */
+.callout{margin-top:34px;background:var(--surface);border:1px solid var(--line-2);
+  border-radius:var(--radius);padding:0;overflow:hidden;}
+.callout .bar{background:var(--primary);color:#fff;padding:16px 26px;display:flex;
+  align-items:baseline;gap:12px;flex-wrap:wrap;}
+.callout .bar b{font-family:var(--font-display);font-size:19px;letter-spacing:-.01em;}
+.callout .bar span{font-family:var(--font-mono);font-size:12.5px;opacity:.82;letter-spacing:.04em;}
+.callout .body{padding:24px 26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px;}
+.callout .body h4{font-family:var(--font-display);font-weight:600;font-size:15px;margin:0 0 6px;color:var(--primary);}
+.callout .body.rel{grid-template-columns:1fr;}
+.callout .body p{font-size:15.5px;color:var(--ink-2);margin:0;max-width:none;}
+.rel-strip{background:var(--accent-soft);border-top:1px solid var(--line);padding:20px 26px;}
+.rel-strip h4{color:var(--accent);font-family:var(--font-display);font-weight:600;font-size:15px;margin:0 0 6px;}
+.rel-strip p{margin:0;font-size:15.5px;color:var(--ink-2);max-width:none;}
+
+/* ---- moat / limitations ---- */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:34px;}
+.moat{border-radius:var(--radius);padding:24px 24px 26px;border:1px solid var(--line);}
+.moat.strong{background:var(--primary-soft);border-color:color-mix(in srgb,var(--primary) 30%,var(--line));}
+.moat.window{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 34%,var(--line));}
+.moat .tag{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;}
+.moat.strong .tag{color:var(--primary);}
+.moat.window .tag{color:var(--accent);}
+.moat h3{margin:8px 0 10px;font-size:20px;}
+.moat p{font-size:16px;color:var(--ink-2);margin:0;max-width:none;}
+
+.risks{margin-top:30px;display:grid;gap:2px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+.risk{background:var(--surface);padding:20px 24px;border-top:1px solid var(--line);}
+.risk:first-child{border-top:none;}
+.risk h4{font-family:var(--font-display);font-weight:600;font-size:16.5px;margin:0 0 5px;color:var(--ink);
+  display:flex;align-items:center;gap:10px;}
+.risk h4::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--terra);flex:none;}
+.risk p{font-size:15.5px;color:var(--ink-2);margin:0;max-width:none;}
+.risk .mit{color:var(--primary);font-style:italic;}
+
+/* ---- exec summary ---- */
+.exec{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:8px 30px;margin-top:34px;counter-reset:e;}
+.exec .row{display:flex;gap:20px;padding:22px 0;border-top:1px solid var(--line);align-items:flex-start;}
+.exec .row:first-child{border-top:none;}
+.exec .row::before{counter-increment:e;content:counter(e);font-family:var(--font-display);
+  font-weight:600;font-size:26px;color:var(--accent);line-height:1;min-width:34px;
+  border-right:2px solid var(--line-2);padding-right:16px;}
+.exec .row h3{font-size:18px;margin:0 0 5px;}
+.exec .row p{font-size:15.5px;color:var(--ink-2);margin:0;max-width:none;}
+
+footer{padding:40px 0 64px;color:var(--muted);font-size:13.5px;font-family:var(--font-mono);}
+footer p{max-width:none;}
+
+@media (max-width:760px){
+  body{font-size:17px;}
+  .split,.two{grid-template-columns:1fr;}
+  .hero{padding:52px 0 44px;}
+  section{padding:46px 0;}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+@media print{.card:hover{transform:none;box-shadow:none;}body{font-size:12pt;}}
+
+.reveal{opacity:0;transform:translateY(14px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards;}
+@keyframes rise{to{opacity:1;transform:none;}}
+</style>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="brandline reveal">
+      <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M4 24c6-1 8-14 12-14s6 13 12 14" stroke="var(--primary)" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="16" cy="10" r="2.6" fill="var(--accent)"/>
+        <path d="M4 27h24" stroke="var(--line-2)" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="n">NOKAHI AgroRoute</span>
+      <span class="sep">/</span>
+      <span class="t">Diferenciais competitivos</span>
+    </div>
+
+    <h1 class="reveal">Não compete com telemetria.<br><span class="amber">Consome</span> telemetria.</h1>
+    <p class="kicker reveal">O mercado inteiro observa o custo depois que ele acontece. A NOKAHI prescreve a rota antes — para o custo não acontecer.</p>
+
+    <div class="question reveal">
+      <span class="q">"Por qual dos caminhos possíveis este CVC gasta menos diesel indo deste talhão para esta usina — cheio na ida, vazio na volta, com esta chuva, neste tipo de piso?"</span>
+    </div>
+
+    <div class="meta reveal">
+      <span class="chip">Pesquisa · agro / CCT Brasil</span>
+      <span class="chip">Julho 2026</span>
+      <span class="chip">30+ soluções analisadas</span>
+      <span class="chip">0 concorrentes diretos</span>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Posicionamento</div>
+    <h2>Uma diferença de natureza, não de grau</h2>
+    <p class="lead">As incumbentes respondem <em>onde está e como está o veículo</em>. A NOKAHI responde <em>por onde ele deveria ir para gastar menos</em>. São camadas diferentes da mesma operação — e por isso a NOKAHI é complementar, não concorrente.</p>
+
+    <div class="split">
+      <div class="panel obs">
+        <div class="tag">O mercado</div>
+        <h3>Observa</h3>
+        <ul>
+          <li>Relata consumo, km rodado, pedágio pago</li>
+          <li>Registra a rota que já foi executada</li>
+          <li>Otimiza distância, tempo ou janela de entrega</li>
+          <li>Enxerga o custo no retrovisor</li>
+        </ul>
+      </div>
+      <div class="panel pre">
+        <div class="tag">A NOKAHI</div>
+        <h3>Prescreve</h3>
+        <ul>
+          <li>Calcula o custo de diesel de cada caminho possível</li>
+          <li>Escolhe a rota antes do despacho</li>
+          <li>Otimiza o custo físico real de combustível</li>
+          <li>Entrega 4 rotas rankeadas pelo que você quer minimizar</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="formula-wrap">
+      <div class="formula-head"><span class="dot"></span><span>modelo de custo — calibrado por machine learning contra o consumo real da frota</span></div>
+      <div class="formula">
+        <span class="l">L</span> = ( R<sub>0</sub> + α · <span class="v">rampa%</span> ) · <span class="v">superfície</span> · <span class="v">PBT</span> · <span class="v">Δkm</span> · <span class="v">k<sub>clima</sub></span>
+      </div>
+      <div class="legend">
+        <div><b>rampa%</b><span>elevação SRTM do terreno</span></div>
+        <div><b>superfície</b><span>asfalto / cascalho / terra</span></div>
+        <div><b>PBT</b><span>peso — cheio na ida, vazio na volta</span></div>
+        <div><b>k clima</b><span>chuva real no custo, não só no alerta</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Os 12 diferenciais</div>
+    <h2>Cada um contra o que o mercado faz</h2>
+    <p class="lead">Nenhum player brasileiro combina estes doze pontos. A maioria não faz um só deles.</p>
+
+    <div class="grid">
+      <div class="card"><div class="num">01</div><h3>Custo físico de diesel, não distância/tempo</h3><p>Duas rotas com a mesma quilometragem têm custos radicalmente diferentes se uma tem rampa e terra e a outra é asfalto plano. A NOKAHI faz disso o critério central.</p><div class="vs"><b>vs.</b> RoutEasy, SimpliRoute, Maplink otimizam menor distância ou tempo</div></div>
+
+      <div class="card"><div class="num">02</div><h3>Modelo físico calibrado, não km/L estático</h3><p>Substitui a média fixa digitada pelo usuário por uma função de rampa, PBT, piso e chuva, recalibrada por ML contra o consumo observado.</p><div class="vs"><b>vs.</b> Rotas Brasil, Qualp, AILOG usam km/L fixo digitado</div></div>
+
+      <div class="card"><div class="num">03</div><h3>Assimetria cheio-ida / vazio-volta</h3><p>O CVC pesa dezenas de toneladas na ida e volta vazio. Isso muda o consumo por sentido — e até qual rota é ótima em cada direção.</p><div class="vs"><b>vs.</b> ninguém no comparativo modela os dois sentidos</div></div>
+
+      <div class="card"><div class="num">04</div><h3>Pedágio real por eixo, com eixo suspenso</h3><p>O CVC suspende eixos quando volta vazio, reduzindo o pedágio no retorno. A NOKAHI incorpora isso no custo total.</p><div class="vs"><b>vs.</b> calculadoras cobram por perfil fixo de veículo</div></div>
+
+      <div class="card"><div class="num">05</div><h3>Restrições reais de CVC canavieiro</h3><p>GraphHopper perfil truck com peso, dimensões, zonas urbanas evitadas e vias privadas de treminhão, rodotrem e pentatrem.</p><div class="vs"><b>vs.</b> roteirizadores urbanos assumem caminhão genérico</div></div>
+
+      <div class="card"><div class="num">06</div><h3>Superfície como variável de custo</h3><p>O último quilômetro rural é onde o consumo dispara. A NOKAHI pondera o custo energético de cada piso, não só se é transitável.</p><div class="vs"><b>vs.</b> Senior+GAtec, AxiWays tratam só a navegabilidade</div></div>
+
+      <div class="card"><div class="num">07</div><h3>Clima real no cálculo, não só no alerta</h3><p>Chuva muda aderência, atolamento e consumo — especialmente em terra. A NOKAHI insere k-clima dentro do modelo de custo.</p><div class="vs"><b>vs.</b> as demais tratam clima como alerta separado</div></div>
+
+      <div class="card"><div class="num">08</div><h3>Ranking de 4 rotas, não rota única</h3><p>Alternativas rankeadas por custo real permitem trade-off — a mais barata pode ser mais lenta. Você decide o que minimizar.</p><div class="vs"><b>vs.</b> roteirizadores devolvem "a rota"; rotogramas dizem "quando"</div></div>
+
+      <div class="card"><div class="num">09</div><h3>Ingestão aberta, agnóstica de provedor</h3><p>Recebe dados brutos ou de qualquer provedor por mapeamento de campos. Fica acima da guerra de hardware — não dentro dela.</p><div class="vs"><b>vs.</b> Cobli, Solinftec, Ituran são ecossistemas fechados</div></div>
+
+      <div class="card"><div class="num">10</div><h3>Stack analítico integrado</h3><p>ML de consumo e risco, Pesquisa Operacional de alocação, agente em chat e painel de MTBF/MTTR e manutenção preditiva — no mesmo produto.</p><div class="vs"><b>vs.</b> Sofit, Frota Control "preveem" por regra de data, não ML</div></div>
+
+      <div class="card"><div class="num">11</div><h3>Especialização no par talhão→usina</h3><p>Não é roteirizador urbano adaptado nem plataforma agronômica com módulo de logística. O objeto é a viagem campo→usina.</p><div class="vs"><b>vs.</b> os adjacentes adaptam produtos de outro domínio</div></div>
+
+      <div class="card"><div class="num">12</div><h3>SaaS multi-tenant, por uso, Brasil todo</h3><p>Entrega por uso reduz a barreira de entrada e alinha custo a valor gerado.</p><div class="vs"><b>vs.</b> licença enterprise por usina + hardware embarcado</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Panorama competitivo</div>
+    <h2>Quem existe — e por que não resolve o mesmo problema</h2>
+    <p class="lead">Seis categorias, mais de 30 soluções brasileiras que atendem o agronegócio. Nenhuma faz roteirização econômica por custo físico de diesel para CVCs.</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Categoria</th><th>O que fazem</th><th>Por que não é a NOKAHI</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Telemetria &amp; rastreamento<span class="players">Sascar · Onixsat · Omnilink · Autotrac · Veltec · Cobli · Ituran · Creare</span></td>
+            <td>Localização, antifurto, gestão de risco, comportamento do motorista.</td>
+            <td class="why">Registram a rota executada; não a escolhem por custo. São fonte de dados, não concorrentes.</td>
+          </tr>
+          <tr>
+            <td>Rotogramas do CCT<span class="players">AxiWays/AxiAgro · Aiko · Trust Agro · Senior+GAtec</span></td>
+            <td>Tempo de ciclo, sincronia colhedora↔caminhão↔usina, segurança, conformidade.</td>
+            <td class="why">Dizem quando despachar e se a via serve; a NOKAHI diz por onde gastar menos.</td>
+          </tr>
+          <tr>
+            <td>Roteirização / TMS urbano<span class="players">RoutEasy · SimpliRoute · Maplink · Qualp · Rotas Brasil</span></td>
+            <td>Distância/tempo/janela para last-mile; pedágio e matriz por API.</td>
+            <td class="why">Consumo é média estática; nenhum modela física do terreno nem CVC canavieiro.</td>
+          </tr>
+          <tr>
+            <td>Despesa de frota / marketplace<span class="players">Roadcard/Pamcard · Frete.com/CargoX</span></td>
+            <td>Pagam e contabilizam pedágio e combustível depois; casam carga↔caminhão.</td>
+            <td class="why">Nenhum é roteirizador. Complementares como fonte de custo.</td>
+          </tr>
+          <tr>
+            <td>Gestão agrícola / precisão<span class="players">Aegro · Agrare · Strider · FieldView · John Deere · Trimble Ag · Jacto/Otmis</span></td>
+            <td>Agronomia, monitoramento de lavoura, gestão fiscal, guiagem dentro do talhão.</td>
+            <td class="why">O roteiro que geram é intra-talhão, não transporte rodoviário externo. Zero sobreposição.</td>
+          </tr>
+          <tr>
+            <td>Gestão de manutenção<span class="players">Sofit · Frota Control · TrackMaker · Golfleet · Prime Frotas</span></td>
+            <td>Manutenção por quilometragem/data; TCO por veículo.</td>
+            <td class="why">"Previsão" por regra de intervalo, não ML; nenhum liga manutenção ao custo por rota.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <div class="bar"><b>O caso especial: Solinftec</b><span>o concorrente mais próximo em inteligência — e o parceiro mais estratégico</span></div>
+      <div class="body">
+        <div>
+          <h4>Por que é a mais avançada</h4>
+          <p>ML real, agente multiagente (Alice), predição de falha por código de erro, otimização de transbordo, presente em mais de 90% da cana brasileira.</p>
+        </div>
+        <div>
+          <h4>Por que não é a mesma coisa</h4>
+          <p>Otimiza a operação agronômica e a logística interna da moagem, em ecossistema proprietário de computador de bordo. Não é engine aberta de rota rodoviária de menor custo por par origem-destino.</p>
+        </div>
+      </div>
+      <div class="rel-strip">
+        <h4>A relação NOKAHI</h4>
+        <p>Ingere a telemetria da Solinftec via Flow API e adiciona a camada econômica que a Solinftec não entrega. A NOKAHI ganha se a Solinftec existir e for boa — melhores dados de entrada calibram melhor o modelo físico.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Defensabilidade</div>
+    <h2>Onde está o fosso — e onde é só janela</h2>
+    <div class="two">
+      <div class="moat strong">
+        <div class="tag">Fosso</div>
+        <h3>Profundidade que exige três domínios ao mesmo tempo</h3>
+        <p>Modelo físico (rampa + PBT + superfície + clima), pedágio por eixo com eixo suspenso, restrições reais de CVC e agnosticismo de dados. Nenhum player adjacente domina simultaneamente logística rodoviária, física de consumo e realidade canavieira.</p>
+      </div>
+      <div class="moat window">
+        <div class="tag">Janela</div>
+        <h3>Nada impede um incumbente de internalizar a camada</h3>
+        <p>Um rotograma ou a própria Solinftec poderia adicionar um modelo de custo. A vantagem é de profundidade e tempo de mercado, não barreira intransponível. A resposta: aprofundar a calibração (difícil de copiar rápido) e firmar o posicionamento complementar antes que alguém decida competir.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Leitura honesta</div>
+    <h2>Limitações e riscos</h2>
+    <p class="lead">Um documento de diferenciais que só lista forças não é confiável. Os riscos reais:</p>
+    <div class="risks">
+      <div class="risk"><h4>Dependência de dados de terceiros</h4><p>A NOKAHI não fabrica hardware nem coleta telemetria própria. Quem controla o hardware controla a torneira de dados. <span class="mit">Mitigação parcial: a ingestão agnóstica reduz a dependência de um único provedor — mas não de algum provedor.</span></p></div>
+      <div class="risk"><h4>A calibração é o produto, e precisa de tempo</h4><p>Os -23% só se materializam com o modelo bem calibrado por frota e terreno. Em cliente novo, sem histórico, há risco de cold-start e a meta varia muito por operação.</p></div>
+      <div class="risk"><h4>A meta de -23% precisa de validação publicável</h4><p>É um alvo, não um resultado provado no material. Precisa de estudos de caso auditáveis para não soar como marketing.</p></div>
+      <div class="risk"><h4>Assimetria de marca</h4><p>Solinftec, Sascar, Trimble e John Deere têm base instalada e canal de venda consultiva dentro das usinas. A NOKAHI entra como camada nova sobre incumbentes poderosas.</p></div>
+      <div class="risk"><h4>Integração real é mais difícil que "mapear campos"</h4><p>Cada provedor tem formato, latência, lacunas e ruído próprios. O custo de integração e a qualidade heterogênea dos dados são risco operacional recorrente.</p></div>
+      <div class="risk"><h4>Escopo rodoviário externo, não intra-talhão</h4><p>Forte no par talhão→usina em vias mapeáveis. A micro-logística da frente de colheita é território de Solinftec e AxiWays — a NOKAHI complementa, não substitui.</p></div>
+    </div>
+  </div>
+</section>
+
+<section style="border-bottom:none;">
+  <div class="wrap">
+    <div class="eyebrow">Resumo executivo</div>
+    <h2>O essencial em quatro pontos</h2>
+    <div class="exec">
+      <div class="row"><div><h3>Categoria própria</h3><p>Cria uma categoria — roteirização econômica por custo físico para CVCs — em vez de disputar as saturadas: telemetria, rastreamento, TMS urbano, gestão agrícola.</p></div></div>
+      <div class="row"><div><h3>Complementar por design</h3><p>É a camada de otimização que se assenta sobre a de observação que o mercado já vende — ingerindo, inclusive, os dados dos "concorrentes".</p></div></div>
+      <div class="row"><div><h3>Profundidade técnica como diferencial</h3><p>Modelo físico calibrado, assimetria de carga, pedágio por eixo, superfície e clima no custo, restrições de CVC — nenhum player brasileiro combina isso hoje.</p></div></div>
+      <div class="row"><div><h3>Honestidade sobre a defensabilidade</h3><p>A vantagem é de profundidade e tempo, não um fosso permanente. A estratégia é aprofundar a calibração e firmar o posicionamento complementar.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Fonte: pesquisa de mercado NOKAHI · julho/2026. Soluções citadas pertencem a seus respectivos detentores; a análise reflete posicionamento público conhecido na data.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var els=document.querySelectorAll('.reveal');
+  els.forEach(function(el,i){el.style.animationDelay=(0.06*i)+'s';});
+})();
+</script>
