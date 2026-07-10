@@ -50,15 +50,17 @@ PLANS: dict[str, Plan] = {
         routes_per_month=300, public=False,
         description="Degustação da plataforma na região do Triângulo Mineiro (MG)",
     ),
+    # Preços por USINA/mês, calibrados para margem BRUTA >= 80% (custo direto de
+    # hospedagem+suporte ~R$ 2,2k/usina/mês). Ver BUSINESS_CASE.md.
     "essencial": Plan(
-        id="essencial", name="Essencial", price_month_brl=1990.0,
-        routes_per_month=1000,
-        description="1 usina · até 1.000 rotas/mês · clima real e pedágio por eixo",
+        id="essencial", name="Essencial", price_month_brl=10900.0,
+        routes_per_month=3000,
+        description="1 usina · até 3.000 rotas/mês · cobertura Brasil · clima real e pedágio por eixo",
     ),
     "profissional": Plan(
-        id="profissional", name="Profissional", price_month_brl=4990.0,
-        routes_per_month=10000,
-        description="Multi-usina · 10.000 rotas/mês · roteirizador dedicado · API",
+        id="profissional", name="Profissional", price_month_brl=18900.0,
+        routes_per_month=25000,
+        description="Grupo/multi-usina · 25.000 rotas/mês · roteirizador dedicado · API · suporte prioritário",
     ),
     "enterprise": Plan(
         id="enterprise", name="Enterprise", price_month_brl=0.0,
