@@ -1,0 +1,10 @@
+# HTTPS automático (Let's Encrypt) para o subdomínio.
+# Troque o e-mail para receber avisos de expiração de certificado.
+{
+	email contato@nokahi.com
+}
+
+agroroute.despaxai.com {
+	encode gzip zstd
+	reverse_proxy api:8000
+}

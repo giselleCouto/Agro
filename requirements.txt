@@ -1,5 +1,6 @@
 fastapi>=0.109
-uvicorn>=0.25
+uvicorn[standard]>=0.25
+gunicorn>=21.2
 httpx>=0.26
 pydantic>=2.5
 SQLAlchemy>=2.0

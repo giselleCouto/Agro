@@ -1,0 +1,52 @@
+# Deploy do NOKAHI AgroRoute em agroroute.despaxai.com (VPS + Docker + Caddy)
+#
+#   cd deploy && docker compose up -d --build
+#
+# O Caddy obtém e renova o certificado HTTPS (Let's Encrypt) automaticamente,
+# desde que o DNS de agroroute.despaxai.com aponte para este servidor e as
+# portas 80/443 estejam abertas. Ver DEPLOY.md.
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      - PUBLIC_BASE_URL=https://agroroute.despaxai.com
+      - ALLOWED_HOSTS=agroroute.despaxai.com
+      - AGROROUTE_TRUST_PROXY=1
+      - FORWARDED_ALLOW_IPS=*
+      # segredos (Stripe, admin, SMTP) — preencha em deploy/.env
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      - STRIPE_PRICE_ESSENCIAL=${STRIPE_PRICE_ESSENCIAL:-}
+      - STRIPE_PRICE_PROFISSIONAL=${STRIPE_PRICE_PROFISSIONAL:-}
+      - AGROROUTE_ADMIN_TOKEN=${AGROROUTE_ADMIN_TOKEN:-}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - LEAD_NOTIFY_EMAILS=${LEAD_NOTIFY_EMAILS:-contato@nokahi.com,giselle@coutofalcao.com}
+      # para escalar (múltiplos workers), aponte para PostgreSQL:
+      - DATABASE_URL=${DATABASE_URL:-}
+    volumes:
+      - agrodata:/app/data
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  agrodata:
+  caddy_data:
+  caddy_config:

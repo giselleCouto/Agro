@@ -94,12 +94,32 @@ DEMO_TENANT_ID = "demo-mg"
 ADMIN_TOKEN = os.environ.get("AGROROUTE_ADMIN_TOKEN")
 # só confia em X-Forwarded-For atrás de um proxy reverso confiável
 TRUST_PROXY = os.environ.get("AGROROUTE_TRUST_PROXY", "").lower() in ("1", "true", "yes")
+# URL pública canônica (ex.: https://agroroute.despaxai.com). Usada em URLs
+# absolutas (checkout Stripe, webhook). Sem ela, deriva do request.
+PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/")
+# hosts permitidos (TrustedHost) e origens CORS — listas separadas por vírgula
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()]
+CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
 
 app = FastAPI(
     title="NOKAHI AgroRoute",
     version=__version__,
     description="Roteirização econômica multi-tenant para frotas agrícolas pesadas",
 )
+
+if ALLOWED_HOSTS:
+    from starlette.middleware.trustedhost import TrustedHostMiddleware
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
+if CORS_ORIGINS:
+    from fastapi.middleware.cors import CORSMiddleware
+    app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS,
+                       allow_methods=["*"], allow_headers=["*"])
+
+
+def public_base_url(request: Request) -> str:
+    """URL pública canônica: PUBLIC_BASE_URL se configurada, senão o request
+    (que já reflete o Host/proto reais quando o servidor honra proxy headers)."""
+    return PUBLIC_BASE_URL or str(request.base_url).rstrip("/")
 
 # banco compartilhado por todos os stores
 _engine = get_engine()
@@ -583,7 +603,7 @@ async def billing_checkout(
     if plan_id == "enterprise":
         raise HTTPException(status_code=422,
                             detail=f"Enterprise: fale com {CONTACT_EMAIL}")
-    base_url = str(request.base_url).rstrip("/")
+    base_url = public_base_url(request)
     async with httpx.AsyncClient() as http_client:
         url = await create_checkout_session(tenant.tenant_id, PLANS[plan_id], base_url, http_client)
     return {"checkout_url": url, "sandbox": stripe_key() is None}
