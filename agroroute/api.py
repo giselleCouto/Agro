@@ -56,7 +56,8 @@ from .fleet import (  # noqa: E402
     fleet_summary,
 )
 from .geo import haversine_km  # noqa: E402
-from .leads import LeadIn, LeadStore  # noqa: E402
+from . import intelligence as intel  # noqa: E402
+from .leads import LeadIn, LeadStore, _RateLimiter  # noqa: E402
 from .ml import DemandForecaster, FuelCalibrator, MaintenanceRiskModel  # noqa: E402
 from .notify import send_lead_notification  # noqa: E402
 from .pricing import PRICE, QuoteRequest, quote  # noqa: E402
@@ -64,6 +65,7 @@ from .models import (  # noqa: E402
     DEFAULT_FLEET,
     BatchRouteRequest,
     BatchRouteResponse,
+    OptimizeRequest,
     RouteJob,
     RouteJobResult,
     TenantConfig,
@@ -272,19 +274,16 @@ def assistant_suggestions(tenant: TenantConfig = Depends(get_tenant)):
 # ---------------------------------------------------------------------------
 
 @app.post("/v1/optimize")
-def optimize(body: dict, tenant: TenantConfig = Depends(get_tenant)):
+def optimize(req: OptimizeRequest, tenant: TenantConfig = Depends(get_tenant)):
     """Aloca o transporte de N origens (talhões) para M destinos (usinas) ao
     menor custo total (problema de transporte), usando o custo real por km do
     veículo escolhido. Também dimensiona o nº de viagens.
     """
-    origins = body.get("origins", [])
-    destinations = body.get("destinations", [])
-    if not origins or not destinations:
-        raise HTTPException(status_code=422, detail="informe origens e destinos")
+    origins, destinations = req.origins, req.destinations
     if len(origins) * len(destinations) > 400:
         raise HTTPException(status_code=422, detail="máximo de 400 pares origem×destino")
     try:
-        vehicle = tenant.vehicle(body.get("vehicle_id", "treminhao"))
+        vehicle = tenant.vehicle(req.vehicle_id)
     except KeyError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
@@ -295,14 +294,14 @@ def optimize(body: dict, tenant: TenantConfig = Depends(get_tenant)):
     cost_per_km = fuel_l_per_km * tenant.diesel_price + vehicle.maintenance_rs_km
     payload = max(1.0, vehicle.payload_t)
 
-    supply = [float(o.get("supply", payload)) for o in origins]
-    demand = [float(d.get("demand", payload)) for d in destinations]
+    supply = [o.supply if o.supply is not None else payload for o in origins]
+    demand = [d.demand if d.demand is not None else payload for d in destinations]
     # matriz de custo por tonelada = (km * custo/km) / carga útil
     cost = []
     for o in origins:
         row = []
         for d in destinations:
-            km = haversine_km(o["lat"], o["lon"], d["lat"], d["lon"])
+            km = haversine_km(o.lat, o.lon, d.lat, d.lon)
             row.append(round(km * cost_per_km / payload, 4))
         cost.append(row)
 
@@ -319,9 +318,9 @@ def optimize(body: dict, tenant: TenantConfig = Depends(get_tenant)):
             if t > 0.01:
                 trips = int(-(-t // payload))  # ceil
                 total_trips += trips
-                km = haversine_km(o["lat"], o["lon"], d["lat"], d["lon"])
+                km = haversine_km(o.lat, o.lon, d.lat, d.lon)
                 plan.append({
-                    "origin": o.get("name", f"O{i+1}"), "destination": d.get("name", f"D{j+1}"),
+                    "origin": o.name or f"O{i+1}", "destination": d.name or f"D{j+1}",
                     "tonnes": round(t, 1), "trips": trips, "distance_km": round(km, 1),
                     "cost": round(t * cost[i][j], 2),
                 })
@@ -338,8 +337,14 @@ def optimize(body: dict, tenant: TenantConfig = Depends(get_tenant)):
 # Precificação por uso (calculadora)
 # ---------------------------------------------------------------------------
 
+_quote_limiter = _RateLimiter(limit=30, window=60)
+
+
 @app.post("/v1/billing/quote")
-def billing_quote(req: QuoteRequest):
+def billing_quote(req: QuoteRequest, request: Request):
+    # endpoint público (calculadora da landing) -> limite por IP
+    if not _quote_limiter.allow(client_ip(request)):
+        raise HTTPException(status_code=429, detail="muitas solicitações — tente em instantes")
     return quote(req)
 
 
@@ -393,6 +398,24 @@ def ml_fuel_calibrate(body: dict, tenant: TenantConfig = Depends(get_tenant)):
     actual = [p[1] for p in pairs]
     cal = FuelCalibrator().fit(pred, actual)
     return cal.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Inteligência de frota (KPIs, telemetria, alertas, manutenção preditiva)
+# ---------------------------------------------------------------------------
+
+@app.get("/v1/intel/overview")
+def intel_overview(n: int = 340, tenant: TenantConfig = Depends(get_tenant)):
+    """Painel completo de inteligência de frota (telemetria determinística por tenant)."""
+    n = max(20, min(n, 2000))
+    return intel.intelligence_overview(tenant.tenant_id, n)
+
+
+@app.get("/v1/intel/telemetria")
+def intel_telemetria(n: int = 340, tenant: TenantConfig = Depends(get_tenant)):
+    n = max(20, min(n, 2000))
+    frota = intel.gerar_frota_telemetria(tenant.tenant_id, n)
+    return {"kpis": intel.kpis_telemetria(frota), "veiculos": frota[:60]}
 
 
 # ---------------------------------------------------------------------------

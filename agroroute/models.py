@@ -176,6 +176,20 @@ class BatchRouteRequest(BaseModel):
     jobs: list[RouteJob]
 
 
+class OptimizePoint(BaseModel):
+    name: Optional[str] = None
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+    supply: Optional[float] = Field(default=None, ge=0)   # oferta (origem), t
+    demand: Optional[float] = Field(default=None, ge=0)   # demanda (destino), t
+
+
+class OptimizeRequest(BaseModel):
+    vehicle_id: str = "treminhao"
+    origins: list[OptimizePoint] = Field(min_length=1)
+    destinations: list[OptimizePoint] = Field(min_length=1)
+
+
 class CostBreakdown(BaseModel):
     fuel_liters: float
     fuel_cost: float

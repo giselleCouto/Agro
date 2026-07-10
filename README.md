@@ -85,6 +85,17 @@ Veículos ficam na tabela `vehicles` ([db.py](agroroute/db.py)); a manutenção 
 
 Otimização **multi-origem/multi-destino** sobre o custo real de rota. `POST /v1/optimize` resolve o **problema de transporte** (quanto enviar de cada talhão para cada usina ao menor custo, via `scipy.linprog`) e dimensiona o nº de viagens; há também **atribuição** de rotas a veículos (algoritmo húngaro). É o "calcular várias rotas ao mesmo tempo" com decisão ótima de alocação.
 
+## Inteligência de frota ([intelligence.py](agroroute/intelligence.py))
+
+Painel completo de inteligência operacional (página **Inteligência** no app), calculado de verdade e ancorado nos modelos de ML — telemetria determinística por tenant. `GET /v1/intel/overview` entrega:
+
+- **KPIs de manutenção** — disponibilidade, MTBF, MTTR, % corretiva, custo de paradas.
+- **KPIs de telemetria** — score de condução, eficiência, operadores agressivos, variação de consumo.
+- **Alertas inteligentes** — detecção de anomalias (consumo, frenagem, temperatura, ociosidade, score) com os limiares do dashboard v8.
+- **Alertas preditivos** — probabilidade de falha por veículo (via `MaintenanceRiskModel`), com recomendação e prazo.
+- **Manutenção preventiva** — cronograma de intervenções (componente crítico, dias até intervenção, prioridade, custo estimado).
+- **Períodos críticos**, **mapa de risco por frente** (heatmap), **impacto financeiro** (ociosidade/consumo/manutenção) e **avaliação de mecânicos e fornecedores** (scoring).
+
 ## Agente analítico ([assistant.py](agroroute/assistant.py))
 
 Chatbot flutuante (ícone no canto inferior do app) que responde sobre a operação — frota, manutenção (com risco por ML), rotas/economia, previsão de demanda, plano/uso e otimização — computando as respostas sobre os **dados reais do tenant**. Determinístico e offline (`POST /v1/assistant`), com gancho opcional para LLM.

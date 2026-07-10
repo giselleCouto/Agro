@@ -53,6 +53,7 @@ body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
       <div class="nav-item active" data-view="dashboard" onclick="showView('dashboard')"><i data-lucide="layout-dashboard" class="icon-sm"></i> Dashboard</div>
       <div class="nav-item" data-view="rotas" onclick="showView('rotas')"><i data-lucide="route" class="icon-sm"></i> Rotas</div>
       <div class="nav-item" data-view="manutencao" onclick="showView('manutencao')"><i data-lucide="wrench" class="icon-sm"></i> Manutenção</div>
+      <div class="nav-item" data-view="inteligencia" onclick="showView('inteligencia')"><i data-lucide="brain-circuit" class="icon-sm"></i> Inteligência</div>
       <div class="mt-auto text-[10px] text-gray-400 px-2">
         <a href="/#contato" class="hover:text-emerald-600">Falar com a NOKAHI</a><br>contato@nokahi.com
       </div>
@@ -61,7 +62,8 @@ body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
     <div class="md:hidden fixed bottom-0 inset-x-0 bg-white border-t z-[1100] flex">
       <button class="flex-1 py-2 text-xs font-semibold text-gray-500" data-view="dashboard" onclick="showView('dashboard')">Dashboard</button>
       <button class="flex-1 py-2 text-xs font-semibold text-gray-500" data-view="rotas" onclick="showView('rotas')">Rotas</button>
-      <button class="flex-1 py-2 text-xs font-semibold text-gray-500" data-view="manutencao" onclick="showView('manutencao')">Manutenção</button>
+      <button class="flex-1 py-2 text-xs font-semibold text-gray-500" data-view="manutencao" onclick="showView('manutencao')">Manut.</button>
+      <button class="flex-1 py-2 text-xs font-semibold text-gray-500" data-view="inteligencia" onclick="showView('inteligencia')">IA</button>
     </div>
 
     <!-- ===================== MAIN ===================== -->
@@ -198,6 +200,40 @@ body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
         <div><h3 class="lbl mb-2">Detalhamento por veículo</h3><div id="maint-vehicles" class="space-y-3"></div></div>
       </section>
 
+      <!-- ============ VIEW: INTELIGÊNCIA ============ -->
+      <section id="view-inteligencia" class="hidden space-y-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-lg font-bold flex items-center gap-2"><i data-lucide="brain-circuit" class="icon-md text-emerald-600"></i> Inteligência de Frota</h1>
+            <p class="text-sm text-gray-500">KPIs, telemetria, alertas e manutenção preditiva — calculados sobre a operação.</p>
+          </div>
+          <span class="text-xs text-gray-400" id="intel-scope"></span>
+        </div>
+        <div id="intel-loading" class="text-center text-gray-400 py-10">Carregando inteligência…</div>
+        <div id="intel-content" class="hidden space-y-6">
+          <div><h3 class="lbl mb-2">Disponibilidade &amp; confiabilidade</h3><div id="intel-kpis-manut" class="grid grid-cols-2 lg:grid-cols-5 gap-3"></div></div>
+          <div><h3 class="lbl mb-2">Telemetria &amp; condução</h3><div id="intel-kpis-tel" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div></div>
+          <div class="grid lg:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl border p-5"><h3 class="lbl mb-3">Alertas inteligentes</h3><div id="intel-alertas" class="space-y-2 max-h-96 overflow-y-auto"></div></div>
+            <div class="bg-white rounded-xl border p-5">
+              <div class="flex items-center justify-between mb-3"><h3 class="lbl">Alertas preditivos de manutenção</h3><div id="intel-pred-badges" class="flex gap-1.5"></div></div>
+              <div id="intel-preditivos" class="space-y-2 max-h-96 overflow-y-auto"></div></div>
+          </div>
+          <div class="bg-white rounded-xl border p-5">
+            <div class="flex items-center justify-between mb-3"><h3 class="lbl">Cronograma de manutenção preventiva</h3><span id="intel-prev-kpis" class="text-xs text-gray-500"></span></div>
+            <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-gray-400 text-xs uppercase border-b">
+              <th class="text-left py-2 px-2">Veículo</th><th class="text-left px-2">Componente</th><th class="text-right px-2">Prob. falha</th><th class="text-right px-2">Dias</th><th class="text-left px-2">Prioridade</th><th class="text-right px-2">Custo est.</th></tr></thead>
+              <tbody id="intel-cronograma"></tbody></table></div>
+          </div>
+          <div><h3 class="lbl mb-2">Períodos críticos</h3><div id="intel-periodos" class="grid md:grid-cols-3 gap-3"></div></div>
+          <div class="grid lg:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl border p-5"><h3 class="lbl mb-3">Mapa de risco por frente</h3><div id="intel-heatmap" class="space-y-2"></div></div>
+            <div class="bg-white rounded-xl border p-5"><h3 class="lbl mb-3">Impacto financeiro (mês)</h3><div id="intel-financeiro"></div></div>
+          </div>
+          <div><h3 class="lbl mb-2">Avaliação de mecânicos &amp; fornecedores</h3><div id="intel-avaliacao" class="grid lg:grid-cols-2 gap-4"></div></div>
+        </div>
+      </section>
+
     </main>
   </div>
 </div>
@@ -321,13 +357,14 @@ async function connect() {
 function showView(name) {
   if (!state.config) return;
   state.view = name;
-  ['dashboard','rotas','manutencao'].forEach(v => {
+  ['dashboard','rotas','manutencao','inteligencia'].forEach(v => {
     document.getElementById('view-'+v).classList.toggle('hidden', v!==name);
   });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view===name));
   if (name==='rotas') { ensureMap(); setTimeout(()=>map && map.invalidateSize(), 60); }
   if (name==='manutencao') loadMaintenance();
   if (name==='dashboard') loadDashboard();
+  if (name==='inteligencia') loadInteligencia();
   lucide.createIcons();
 }
 
@@ -591,6 +628,97 @@ function renderMaintenance(data){
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">${v.maintenance.map(p=>{const s=SEV[p.severity];
         return `<div class="${s.bg} ${s.bd} border rounded-lg p-3"><div class="flex items-center justify-between mb-1"><span class="text-xs font-semibold">${p.label}</span><span class="text-[10px] font-semibold" style="color:${s.c}">${fN(p.wear_pct,0)}%</span></div><div class="bar"><div style="width:${p.wear_pct}%;background:${s.c}"></div></div></div>`;
       }).join('')}</div></div>`).join('');
+  lucide.createIcons();
+}
+
+/* ---------- INTELIGÊNCIA ---------- */
+async function loadInteligencia(){
+  document.getElementById('intel-loading').classList.remove('hidden');
+  document.getElementById('intel-content').classList.add('hidden');
+  try{
+    const d = await api('/v1/intel/overview?n=340');
+    renderInteligencia(d);
+    document.getElementById('intel-loading').classList.add('hidden');
+    document.getElementById('intel-content').classList.remove('hidden');
+    lucide.createIcons();
+  }catch(e){ document.getElementById('intel-loading').textContent = 'Erro ao carregar: '+esc(e.message); }
+}
+const SEVA = {alta:{c:'#dc2626',bg:'bg-red-50',bd:'border-red-200'}, media:{c:'#f59e0b',bg:'bg-amber-50',bd:'border-amber-200'}};
+const NIVEL = {critico:{c:'#dc2626',t:'Crítico'},alto:{c:'#f97316',t:'Alto'},medio:{c:'#f59e0b',t:'Médio'},baixo:{c:'#16a34a',t:'Baixo'}};
+function renderInteligencia(d){
+  document.getElementById('intel-scope').textContent = `${d.kpis_manutencao.totalVeiculos} veículos monitorados`;
+  const km = d.kpis_manutencao;
+  document.getElementById('intel-kpis-manut').innerHTML = [
+    kpi(km.disponibilidade.toFixed(1)+'%','Disponibilidade', km.disponibilidade>=95?'#059669':km.disponibilidade>=90?'#f59e0b':'#dc2626','gauge'),
+    kpi(km.mtbf.toFixed(0)+'h','MTBF','#0891b2','clock'),
+    kpi(km.mttr.toFixed(1)+'h','MTTR','#f59e0b','wrench'),
+    kpi(km.percentualCorretiva.toFixed(0)+'%','Corretiva', km.percentualCorretiva<=30?'#059669':'#dc2626','trending-up'),
+    kpi('R$ '+Math.round(km.custoTotalParadas/1000)+'k','Custo paradas','#dc2626','dollar-sign'),
+  ].join('');
+  const kt = d.kpis_telemetria;
+  document.getElementById('intel-kpis-tel').innerHTML = [
+    kpi(kt.media_score_conducao,'Score condução', kt.media_score_conducao>=70?'#059669':'#f59e0b','activity'),
+    kpi(kt.media_eficiencia+'%','Eficiência oper.', kt.media_eficiencia>=70?'#059669':'#f59e0b','gauge'),
+    kpi(kt.operadores_agressivos,'Operadores agressivos','#dc2626','alert-triangle'),
+    kpi('R$ '+kt.media_custo_hora,'Custo médio/hora','#0891b2','dollar-sign'),
+  ].join('');
+  // alertas inteligentes
+  document.getElementById('intel-alertas').innerHTML = d.alertas_inteligentes.map(a=>{const s=SEVA[a.severidade];
+    return `<div class="flex items-start gap-2 ${s.bg} ${s.bd} border rounded-lg p-2.5">
+      <span class="w-2 h-2 rounded-full mt-1.5 shrink-0" style="background:${s.c}"></span>
+      <div class="min-w-0"><div class="text-xs"><b>${esc(a.placa)}</b> · <span class="text-gray-500">${esc(a.operador)}</span></div>
+      <div class="text-xs text-gray-600">${esc(a.msg)}</div></div></div>`;}).join('') || '<div class="text-sm text-emerald-700">Sem alertas.</div>';
+  // preditivos
+  const p = d.alertas_preditivos;
+  document.getElementById('intel-pred-badges').innerHTML =
+    `<span class="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-bold">${p.criticos} críticos</span>
+     <span class="text-[10px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 font-bold">${p.altos} altos</span>
+     <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold">${p.medios} médios</span>`;
+  document.getElementById('intel-preditivos').innerHTML = p.alertas.map(a=>{const nv=NIVEL[a.nivel];
+    return `<div class="flex items-center gap-3 border rounded-lg p-2.5"><i data-lucide="wrench" class="icon-sm" style="color:${nv.c}"></i>
+      <div class="flex-1 min-w-0"><div class="text-xs font-semibold">${esc(a.placa)} <span class="text-gray-400">· ${esc(a.tipo)}</span></div>
+      <div class="text-[11px] text-gray-500">${esc(a.recomendacao)}</div></div>
+      <div class="text-right"><div class="text-sm font-bold" style="color:${nv.c}">${a.probabilidade_falha.toFixed(0)}%</div><div class="text-[10px] text-gray-400">${a.numero_falhas} falhas</div></div></div>`;}).join('');
+  // cronograma
+  const PRIO={urgente:'#dc2626',alta:'#f97316',media:'#f59e0b',baixa:'#16a34a'};
+  document.getElementById('intel-prev-kpis').textContent = `${d.previsao_kpis.intervencoes_urgentes} urgentes · ${d.previsao_kpis.proximos_7_dias} nos próximos 7 dias · risco médio ${d.previsao_kpis.risco_medio}%`;
+  document.getElementById('intel-cronograma').innerHTML = d.cronograma.map(c=>`<tr class="border-b last:border-0">
+    <td class="py-1.5 px-2 font-medium">${esc(c.placa)} <span class="text-gray-400 text-xs">${esc(c.tipo)}</span></td>
+    <td class="px-2 text-gray-600">${esc(c.componente_critico)}</td>
+    <td class="px-2 text-right font-semibold">${c.probabilidade_falha.toFixed(0)}%</td>
+    <td class="px-2 text-right">${c.dias_ate_intervencao}d</td>
+    <td class="px-2"><span class="text-[10px] px-2 py-0.5 rounded-full font-bold" style="background:${PRIO[c.prioridade]}22;color:${PRIO[c.prioridade]}">${c.prioridade}</span></td>
+    <td class="px-2 text-right text-gray-600">${fR(c.custo_estimado)}</td></tr>`).join('');
+  // periodos criticos
+  const PCOR={amber:'#f59e0b',red:'#dc2626',purple:'#8b5cf6'};
+  document.getElementById('intel-periodos').innerHTML = d.periodos_criticos.map(pc=>{const c=PCOR[pc.cor];
+    return `<div class="bg-white rounded-xl border p-4" style="border-top:3px solid ${c}">
+      <div class="flex items-center justify-between mb-2"><div><div class="font-semibold text-sm">${esc(pc.nome)}</div><div class="text-[11px] text-gray-400">${esc(pc.horario)}</div></div>
+      <span class="text-sm font-bold" style="color:${c}">${pc.percentual.toFixed(1)}%</span></div>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div><div class="text-gray-400">Irregulares</div><b>${pc.totalIrregulares}</b></div>
+        <div><div class="text-gray-400">Perda est.</div><b class="text-red-600">${fR(pc.perda)}</b></div></div></div>`;}).join('');
+  // heatmap por frente
+  const maxIdx = Math.max(...d.heatmap.map(h=>h.indice_quebra),0.0001);
+  document.getElementById('intel-heatmap').innerHTML = d.heatmap.map(h=>{const col=h.nivel_risco==='alto'?'#dc2626':h.nivel_risco==='medio'?'#f59e0b':'#16a34a';
+    return `<div><div class="flex justify-between text-xs mb-1"><span class="font-medium">${esc(h.nome)}</span><span class="text-gray-500">${h.total_falhas} falhas · ${fR(h.custo_paradas)}</span></div>
+      <div class="bar"><div style="width:${(h.indice_quebra/maxIdx*100).toFixed(0)}%;background:${col}"></div></div></div>`;}).join('');
+  // financeiro
+  const f=d.impacto_financeiro;
+  document.getElementById('intel-financeiro').innerHTML = `
+    <div class="text-2xl font-black text-red-600 mb-2">${fR(f.total_mensal)}</div>
+    <div class="space-y-1.5 text-sm">
+      ${[['Ociosidade',f.ociosidade],['Consumo extra',f.consumo_extra],['Manutenção extra',f.manutencao_extra]].map(([l,v])=>`<div class="flex justify-between"><span class="text-gray-500">${l}</span><b>${fR(v)}</b></div>`).join('')}
+      <div class="flex justify-between pt-2 border-t"><span class="text-emerald-700 font-semibold">Economia potencial</span><b class="text-emerald-700">${fR(f.economia_potencial)}</b></div></div>`;
+  // avaliacao
+  const av=d.avaliacao;
+  const mecCard = `<div class="bg-white rounded-xl border p-4"><h4 class="text-sm font-bold mb-3 flex items-center gap-1.5"><i data-lucide="users" class="icon-sm text-cyan-600"></i> Mecânicos</h4>
+    ${av.mecanicos.map(m=>`<div class="flex items-center justify-between py-2 border-b last:border-0"><div><div class="text-sm font-medium">${esc(m.nome)}</div><div class="text-[11px] text-gray-400">${esc(m.especialidade)} · ${m.os_concluidas} OS</div></div>
+      <div class="text-right"><div class="font-bold" style="color:${m.score>=8.5?'#059669':m.score>=7?'#f59e0b':'#dc2626'}">${m.score.toFixed(1)}</div><div class="text-[10px] text-gray-400">${esc(m.classificacao)}</div></div></div>`).join('')}</div>`;
+  const fornCard = `<div class="bg-white rounded-xl border p-4"><h4 class="text-sm font-bold mb-3 flex items-center gap-1.5"><i data-lucide="package" class="icon-sm text-violet-600"></i> Fornecedores</h4>
+    ${av.fornecedores.map(f=>`<div class="flex items-center justify-between py-2 border-b last:border-0"><div><div class="text-sm font-medium">${esc(f.nome)}</div><div class="text-[11px] text-gray-400">${f.pedidos} pedidos · prazo ${f.prazo_medio_dias}d</div></div>
+      <div class="text-right"><div class="font-bold" style="color:${f.score>=8.5?'#059669':f.score>=7?'#f59e0b':'#dc2626'}">${f.score.toFixed(1)}</div><div class="text-[10px] text-gray-400">${esc(f.status)}</div></div></div>`).join('')}</div>`;
+  document.getElementById('intel-avaliacao').innerHTML = mecCard + fornCard;
   lucide.createIcons();
 }
 

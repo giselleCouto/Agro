@@ -52,7 +52,9 @@ class FuelCalibrator:
         self.factor = float(np.dot(p, a) / np.dot(p, p))
         pred = self.factor * p
         ss_res = float(np.sum((a - pred) ** 2))
-        ss_tot = float(np.sum((a - np.mean(a)) ** 2)) or 1.0
+        # modelo pela origem (sem intercepto) -> R² usa soma de quadrados NÃO
+        # centrada (sum(a²)); a versão centrada dá R² negativo espúrio
+        ss_tot = float(np.sum(a ** 2)) or 1.0
         self.r2 = 1.0 - ss_res / ss_tot
         self.mape = float(np.mean(np.abs((a - pred) / a))) if np.all(a != 0) else None
         return self

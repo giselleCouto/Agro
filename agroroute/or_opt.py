@@ -38,25 +38,28 @@ def solve_transportation(
     S, D = len(supply), len(demand)
     c = np.asarray(cost, dtype=float).reshape(S * D)
     total_supply, total_demand = float(sum(supply)), float(sum(demand))
+    deliver = min(total_supply, total_demand)  # quanto é possível/necessário mover
 
     # x[i*D + j] >= 0 ; minimizar c·x
-    # oferta: sum_j x[i,j] <= supply[i]   (A_ub)
     A_ub, b_ub = [], []
+    # oferta: sum_j x[i,j] <= supply[i]
     for i in range(S):
         row = np.zeros(S * D)
         row[i * D:(i + 1) * D] = 1.0
         A_ub.append(row); b_ub.append(supply[i])
-
-    # demanda: sum_i x[i,j] >= demand[j]  ->  -sum <= -demand
-    feasible_demand = min(total_demand, total_supply)
-    scale = (feasible_demand / total_demand) if total_demand > 0 else 0.0
+    # demanda como LIMITE SUPERIOR: sum_i x[i,j] <= demand[j]
     for j in range(D):
         row = np.zeros(S * D)
         for i in range(S):
-            row[i * D + j] = -1.0
-        A_ub.append(row); b_ub.append(-demand[j] * scale)
+            row[i * D + j] = 1.0
+        A_ub.append(row); b_ub.append(demand[j])
+
+    # move exatamente min(oferta, demanda) unidades pelo caminho mais barato
+    A_eq = [np.ones(S * D)]
+    b_eq = [deliver]
 
     res = linprog(c, A_ub=np.array(A_ub), b_ub=np.array(b_ub),
+                  A_eq=np.array(A_eq), b_eq=b_eq,
                   bounds=[(0, None)] * (S * D), method="highs")
     if not res.success:
         return {"success": False, "message": res.message}
@@ -66,7 +69,7 @@ def solve_transportation(
         "flows": np.round(flow, 3).tolist(),
         "total_cost": round(float(res.fun), 2),
         "delivered": round(float(flow.sum()), 3),
-        "unmet_demand": round(max(0.0, total_demand - total_supply), 3),
+        "unmet_demand": round(max(0.0, total_demand - deliver), 3),
     }
 
 
