@@ -177,6 +177,33 @@ class IngestStore:
             s.commit()
         return n
 
+    def telemetry_count(self, tenant_id: str) -> int:
+        with self._Session() as s:
+            return s.query(TelemetryRow).filter(TelemetryRow.tenant_id == tenant_id).count()
+
+    def seed_canonical(self, tenant_id: str, records: Iterable[dict],
+                       source: str = "solinftec") -> int:
+        """Insere telemetria já canônica (para materialidade da demo)."""
+        n = 0
+        with write_lock(), self._Session() as s:
+            for c in records:
+                s.add(TelemetryRow(tenant_id=tenant_id, source=source, raw=_json_safe(c),
+                                   **{k: c.get(k) for k in TELEMETRY_FIELDS}))
+                n += 1
+            s.commit()
+        return n
+
+    def seed_alarms_canonical(self, tenant_id: str, records: Iterable[dict],
+                              source: str = "solinftec") -> int:
+        n = 0
+        with write_lock(), self._Session() as s:
+            for c in records:
+                s.add(AlarmRow(tenant_id=tenant_id, source=source,
+                               **{k: c.get(k) for k in ALARM_FIELDS}))
+                n += 1
+            s.commit()
+        return n
+
     def recent_telemetry(self, tenant_id: str, limit: int = 100) -> list[dict]:
         with self._Session() as s:
             rows = s.query(TelemetryRow).filter(TelemetryRow.tenant_id == tenant_id)\

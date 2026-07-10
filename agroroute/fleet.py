@@ -130,6 +130,18 @@ class RouteLogStore:
                 .order_by(RouteLogRow.created_at.desc()).limit(limit).all()
             return [r.to_dict() for r in rows]
 
+    def count(self, tenant_id: str) -> int:
+        with self._Session() as s:
+            return s.query(RouteLogRow).filter(RouteLogRow.tenant_id == tenant_id).count()
+
+    def seed_history(self, tenant_id: str, rows: list[dict]) -> int:
+        """Insere histórico de rotas (para materialidade do dashboard na demo)."""
+        with write_lock(), self._Session() as s:
+            for r in rows:
+                s.add(RouteLogRow(tenant_id=tenant_id, **r))
+            s.commit()
+            return len(rows)
+
     def stats(self, tenant_id: str) -> dict:
         with self._Session() as s:
             rows = s.query(RouteLogRow).filter(RouteLogRow.tenant_id == tenant_id).all()
@@ -191,5 +203,32 @@ DEMO_VEHICLES = {
         {"plate": "MG-2F03", "type": "treminhao", "display_name": "Treminhão MG-03",
          "odometer_km": 360000, "tire_km": 60000, "brake_km": 48500,
          "suspension_km": 55000, "engine_hours": 14100, "status": "active"},
+        {"plate": "MG-2G04", "type": "rodotrem", "display_name": "Rodotrem MG-04",
+         "odometer_km": 210000, "tire_km": 44000, "brake_km": 33000,
+         "suspension_km": 70000, "engine_hours": 10200, "status": "active"},
+        {"plate": "MG-2H05", "type": "pentatrem", "display_name": "Pentatrem MG-05",
+         "odometer_km": 95000, "tire_km": 18000, "brake_km": 12000,
+         "suspension_km": 28000, "engine_hours": 4800, "status": "active"},
+        {"plate": "MG-2J06", "type": "treminhao", "display_name": "Treminhão MG-06",
+         "odometer_km": 415000, "tire_km": 79000, "brake_km": 49500,
+         "suspension_km": 118000, "engine_hours": 14700, "status": "maintenance"},
+        {"plate": "MG-2K07", "type": "rodotrem", "display_name": "Rodotrem MG-07",
+         "odometer_km": 260000, "tire_km": 52000, "brake_km": 27000,
+         "suspension_km": 84000, "engine_hours": 11800, "status": "active"},
+        {"plate": "MG-2L08", "type": "treminhao", "display_name": "Treminhão MG-08",
+         "odometer_km": 175000, "tire_km": 36000, "brake_km": 22000,
+         "suspension_km": 52000, "engine_hours": 8300, "status": "active"},
+        {"plate": "MG-2M09", "type": "pentatrem", "display_name": "Pentatrem MG-09",
+         "odometer_km": 320000, "tire_km": 62000, "brake_km": 41000,
+         "suspension_km": 96000, "engine_hours": 13100, "status": "active"},
+        {"plate": "MG-2N10", "type": "rodotrem", "display_name": "Rodotrem MG-10",
+         "odometer_km": 140000, "tire_km": 24000, "brake_km": 16000,
+         "suspension_km": 44000, "engine_hours": 6200, "status": "active"},
+        {"plate": "MG-2P11", "type": "treminhao", "display_name": "Treminhão MG-11",
+         "odometer_km": 388000, "tire_km": 74000, "brake_km": 46000,
+         "suspension_km": 112000, "engine_hours": 14300, "status": "active"},
+        {"plate": "MG-2Q12", "type": "rodotrem", "display_name": "Rodotrem MG-12",
+         "odometer_km": 88000, "tire_km": 15000, "brake_km": 9000,
+         "suspension_km": 22000, "engine_hours": 3900, "status": "inactive"},
     ],
 }

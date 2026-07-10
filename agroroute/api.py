@@ -56,6 +56,7 @@ from .billing import (  # noqa: E402
 )
 from . import or_opt  # noqa: E402
 from . import ingest as ingest_mod  # noqa: E402
+from . import demo_seed  # noqa: E402
 from .assistant import AnalyticalAgent  # noqa: E402
 from .db import get_engine  # noqa: E402
 from .fleet import (  # noqa: E402
@@ -144,6 +145,10 @@ if store.by_id(DEMO_TENANT_ID):
 for _tid, _vehicles in DEMO_VEHICLES.items():
     if store.by_id(_tid):
         vehicle_store.seed(_tid, _vehicles)
+
+# materialidade da demo: histórico de rotas + telemetria/alarmes Solinftec (idempotente)
+if store.by_id(DEMO_TENANT_ID):
+    demo_seed.seed_demo(DEMO_TENANT_ID, ingest_store, route_log)
 
 
 # ---------------------------------------------------------------------------

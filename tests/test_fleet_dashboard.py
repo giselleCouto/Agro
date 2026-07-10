@@ -29,8 +29,8 @@ def test_fleet_endpoint_seeded():
     r = client.get("/v1/fleet", headers=DEMO)
     assert r.status_code == 200
     body = r.json()
-    assert len(body["vehicles"]) == 3          # demo-mg semeado
-    assert body["summary"]["total"] == 3
+    assert len(body["vehicles"]) >= 10          # demo-mg semeado (frota de materialidade)
+    assert body["summary"]["total"] == len(body["vehicles"])
     assert "severity_counts" in body["summary"]
     assert all("maintenance" in v for v in body["vehicles"])
 
