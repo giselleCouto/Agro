@@ -2,193 +2,187 @@
 
 _Roteirização econômica multi-tenant para o transporte canavieiro — cobertura Brasil inteiro._
 _Valores em BRL. Premissas base 2025/2026; câmbio ~R$ 5,40/USD. Fontes ao final._
+_Revisão jul/2026: preços recalibrados (mais competitivos), economia de diesel de ~16% e meta de margem líquida ≥ 23%._
 
-> **Conclusão executiva (leia primeiro).** A meta de **80% de lucro líquido é matematicamente
-> inviável no Brasil**: só **impostos (~17,5%) + taxas de pagamento (~4,7%) já consomem ~22% da
-> receita**, antes de qualquer servidor ou salário. O teto teórico de margem líquida deste negócio
-> é **~63,5%**. O que É atingível — e é o que "80%" normalmente significa em SaaS — é **margem
-> BRUTA ≥ 80%** (receita menos hospedagem+suporte). Os preços foram calibrados para isso. A margem
-> **líquida** saudável (25–35%) depende de **volume de clientes** para diluir o time fixo, não de preço.
+> **Conclusão executiva (leia primeiro).**
+> 1. **O cliente sempre ganha.** Com economia real de **~16%** de diesel, cada CVC economiza da ordem de **R$ 3 mil/mês**. Em todos os planos o cliente economiza **10× a 19×** o que paga — a economia é muito maior que a mensalidade.
+> 2. **Cada contrato nasce lucrativo.** Com a nova tabela, todo contrato tem **40–53% de margem de contribuição** (receita menos custo variável e impostos). Não existe cliente que dê prejuízo na margem.
+> 3. **A margem líquida ≥ 23% é questão de volume, não de preço.** Impostos + taxas já consomem ~22% da receita; o time é custo fixo. A NOKAHI cruza **23% de margem líquida** a partir de **~5 usinas** (Corporativo, fase enxuta) — e como uma usina roda dezenas de CVCs, esse é o patamar realista de entrada. Preço alto não antecipa isso; **volume, sim**.
 
 ---
 
 ## 1. O produto e o mercado
 
-A NOKAHI encontra, para cada viagem talhão→usina, a rota de **menor custo real** (combustível por
-rampa/peso/superfície/clima, pedágio por eixo e manutenção), respeitando as restrições dos CVCs
-(treminhão/rodotrem/pentatrem) e as condições de cada dia. ROI típico por usina: **R$ 200 mil a
-R$ 1,2 milhão/ano** em diesel economizado (base −23%).
+O **AgroRoute** (solução da **NOKAHI**) encontra, para cada viagem talhão→usina, a rota de **menor custo real**
+(combustível por rampa/peso/superfície/clima, pedágio por eixo e manutenção), respeitando as restrições dos CVCs
+(treminhão/rodotrem/pentatrem) e as condições de cada dia. Com economia de diesel de **~16%**, o ROI típico por
+usina fica em **R$ 1,5 a 6 milhões/ano** em diesel economizado (frotas de dezenas a centenas de CVCs).
 
-Além da roteirização, a plataforma entrega três diferenciais analíticos: **modelos de ML** (calibração
-de consumo pela telemetria, risco de manutenção por componente, previsão de demanda de rotas),
-**pesquisa operacional** (alocação ótima multi-origem/multi-destino — problema de transporte e
-atribuição de frota) e um **agente analítico em chat** que responde perguntas sobre a operação sobre
-os dados reais do cliente.
+Além da roteirização, a plataforma entrega três diferenciais analíticos: **modelos de ML** (calibração de consumo
+pela telemetria, risco de manutenção por componente, previsão de demanda), **pesquisa operacional** (alocação ótima
+multi-origem/multi-destino) e um **agente analítico em chat** sobre os dados reais do cliente.
 
 | Dimensão | Número | Fonte |
 |---|---|---|
 | Moagem de cana 2024/25 | 676,96 Mt (2ª maior da história) | CONAB |
 | Usinas/plantas no Brasil | ~380 (261 operando no Centro-Sul) | UNICA |
-| Gasto setorial só com transporte de cana | ~R$ 9 bi/ano (CCT total R$ 20–25 bi) | UNICA/estudos CCT |
+| Gasto setorial com transporte de cana | ~R$ 9 bi/ano (CCT total R$ 20–25 bi) | UNICA/estudos CCT |
 | Frota pesada dedicada (CVCs) | ~12–18 mil unidades | estimativa (moagem ~2× vs. 2008) |
 | SaaS de roteirização/telemetria no BR | R$ 50–120/veículo/mês | Glassdoor/mercado |
 
-**TAM / SAM / SOM** (base preço-âncora R$ 15 mil/usina/mês = R$ 180 mil/usina/ano):
+**TAM / SAM / SOM** (âncora = plano Corporativo, R$ 12,9 mil/usina/mês = ~R$ 155 mil/usina/ano):
 
-- **TAM** — 380 usinas × R$ 180 mil = **~R$ 68 mi/ano**.
-- **SAM** — 261 usinas operando no Centro-Sul × R$ 180 mil = **~R$ 47 mi/ano**.
-- **SOM (Ano 3)** — 35 usinas = **~R$ 6,3 mi/ano** (~9% do TAM).
+- **TAM** — 380 usinas × R$ 155 mil = **~R$ 59 mi/ano**.
+- **SAM** — 261 usinas Centro-Sul × R$ 155 mil = **~R$ 40 mi/ano**.
+- **SOM (Ano 3)** — 35 usinas = **~R$ 5,4 mi/ano** (~9% do TAM).
 
 ---
 
-## 2. Estrutura de custos
+## 2. A economia do cliente — por que a conta sempre fecha a favor dele
 
-### 2.1 Custo FIXO anual — **R$ 2.378.000** (independe do nº de clientes)
+Premissas conservadoras por CVC em operação de safra:
 
-| Bloco | R$/ano | Nota |
+| Premissa | Valor |
+|---|---:|
+| Rodagem | 350 km/dia × 26 dias = 9.100 km/mês |
+| Consumo médio (carregado ida + vazio volta) | 0,42 L/km → ~3.822 L/mês |
+| Preço do diesel S10 (2026) | R$ 6,20/L |
+| **Gasto de diesel por CVC/mês** | **~R$ 23,7 mil** |
+| Economia com o AgroRoute (**16%**) | **~R$ 3,8 mil/mês por CVC** |
+
+Para blindar o ROI, as tabelas abaixo usam um ponto ainda mais **conservador: R$ 3.000 de economia/CVC/mês**
+(≈ 12,7% do gasto). Mesmo assim, a economia supera a mensalidade com folga enorme.
+
+---
+
+## 3. Estrutura de custos
+
+### 3.1 Custo variável por contrato
+
+| Item | Valor |
+|---|---:|
+| Base por contrato (infra + suporte incremental) | R$ 800/mês |
+| Por veículo monitorado (telemetria, storage, ML) | R$ 30/mês |
+
+> Ex.: um contrato Profissional (30 veículos) custa **R$ 800 + 30×30 = R$ 1.700/mês** de custo variável direto.
+
+### 3.2 Impostos + taxas — **~22% da receita** (escala com o preço, não com o nº de clientes)
+
+- **Até R$ 4,8 mi/ano:** Simples Nacional **Anexo III** com Fator R ≥ 28% → DAS efetivo **~17,5%**.
+- **Acima de R$ 4,8 mi/ano:** Lucro Presumido, tributos efetivos **~17–19%**.
+- **Taxas de pagamento (Stripe):** ~4,7%. **Migrar para Pix (1,19%)** derruba a carga total para ~19% — alavanca fácil.
+- **Carga efetiva usada nas contas: 22% da receita.**
+
+### 3.3 Custo FIXO — a variável de decisão real (independe do nº de clientes)
+
+O ponto de equilíbrio depende do **tamanho do time**. Três cenários:
+
+| Cenário | Custo fixo | Composição |
 |---|---:|---|
-| **Pessoal** (8 posições, custo-empresa) | 1.848.000 | ~R$ 154 mil/mês; encargos CLT ~1,75× já embutidos (13º, férias, FGTS, INSS patronal, benefícios) |
-| **Infra cloud base** (AWS sa-east-1) | 230.000 | Cai para ~R$ 160 mil/ano com Savings Plans/Reserved Instances |
-| Ferramentas/SaaS internos | 60.000 | GitHub, observabilidade, comunicação, design |
-| Jurídico + contábil (BPO) | 60.000 | Recorrente + pontual |
-| Marketing/comercial fixo | 180.000 | Eventos setoriais, conteúdo, viagens de venda |
-| **TOTAL FIXO** | **2.378.000** | Pessoal = ~78% do fixo — é a variável de decisão real |
-
-**Time mínimo viável (8 posições):** backend sênior, engenheiro de dados/GIS, SRE/DevOps, frontend,
-produto/PM, comercial, suporte/CS e fundador/admin parcial. É o mínimo para manter e evoluir um SaaS
-B2B com componente pesado de dados/GIS e cobertura nacional.
-
-### 2.2 Infra cloud — detalhe (produção, AWS São Paulo, 2 instâncias de redundância)
-
-Total base **~R$ 19,2 mil/mês (~R$ 230 mil/ano)**; faixa R$ 9,9 mil–43,8 mil/mês. Maior item: a
-**RAM alta do GraphHopper** (grafo de todo o Brasil, 64 GB/instância) + **RDS Multi-AZ**.
-
-| Item | R$/mês (base) |
-|---|---:|
-| GraphHopper self-hosted (Brasil inteiro, 2× 64 GB RAM) | 6.340 |
-| PostgreSQL gerenciado (RDS Multi-AZ) + storage | 4.100 |
-| Servidores de aplicação (FastAPI, 2×) | 2.070 |
-| Cache + fila (ElastiCache + SQS) | 1.350 |
-| OpenTopoData self-hosted (SRTM/Copernicus) | 1.200 |
-| Egress / banda (sa-east-1 = egress mais caro da AWS) | 810 |
-| Armazenamento (EBS grafo/OSM/DEM + S3) | 810 |
-| Observabilidade (logs/métricas/alertas) | 810 |
-| NAT Gateway / rede VPC | 520 |
-| Backups (snapshots RDS/EBS) | 430 |
-| CDN (CloudFront) | 380 |
-| Balanceador (ALB + LCUs) | 190 |
-| DNS/segredos/registro (Route 53, Secrets, ECR) | 160 |
-| **Total** | **~19.180** |
-
-### 2.3 Custo VARIÁVEL por usina-cliente — **R$ 26.000/ano** (~R$ 2.170/mês)
-
-| Item | R$/usina/ano |
-|---|---:|
-| Cloud incremental (rotas/dia, storage, egress, cache) | 18.000 |
-| Suporte/onboarding incremental (integração, viagens) | 8.000 |
-| **Subtotal opex variável** | **26.000** |
-
-### 2.4 Impostos + taxas — **~22% da receita** (escala com preço, não com nº de clientes)
-
-- **Até R$ 4,8 mi/ano (Anos 1–2):** Simples Nacional **Anexo III** com Fator R ≥ 28% → DAS efetivo
-  **~19,6%** (embute ISS, PIS, COFINS, IRPJ, CSLL e CPP da folha num único imposto). O time enxuto
-  naturalmente mantém folha ≥ 28% da receita.
-- **Acima de R$ 4,8 mi/ano (Ano 3):** Simples é vedado → **Lucro Presumido**, tributos efetivos
-  **~17–19%** (ISS 2–5% + PIS/COFINS 3,65% + IRPJ + CSLL sobre base presumida de 32%). Atenção: no
-  Presumido a folha (CPP ~20% + FGTS) é paga à parte — já contabilizada em Pessoal.
-- **Taxas de pagamento (Stripe):** ~4,7% (cartão nacional 3,99% + billing 0,7%). **Migrar para Pix
-  (1,19%)** derruba para ~2% — é a alavanca de margem mais fácil.
-- **Carga efetiva total recomendada: ~22% da receita** (17,5% tributos + 4,7% taxas).
+| **Solo / bootstrap** (fase piloto — hoje) | ~R$ 18 mil/mês | fundador + infra enxuta + ferramentas/contábil |
+| **Enxuto** (crescimento) | ~R$ 54 mil/mês | +2–3 pessoas (dev, dados/GIS, suporte/comercial) |
+| **Time completo** (escala nacional) | ~R$ 198 mil/mês | 8 posições + marketing + infra GraphHopper Brasil |
 
 ---
 
-## 3. Por que 80% de lucro líquido é impossível — e o que é possível
+## 4. Preços — tabela recalibrada (competitiva, com limite de rotas E de veículos)
 
-Margem líquida de 80% exige **custos totais ≤ 20% da receita**. Mas **impostos + taxas já são ~22%
-da receita** — o teto de 20% é estourado pela Receita Federal + adquirente **antes** de pagar uma
-pessoa ou um servidor. A equação `(0,20 − 0,22) × Receita ≥ Custo Fixo` tem coeficiente **negativo**:
-**nenhum preço ou volume** a resolve.
+Implementada em [`agroroute/billing.py`](agroroute/billing.py) (planos) e [`agroroute/pricing.py`](agroroute/pricing.py)
+(calculadora por uso). **Para contratar, o cliente fala com o comercial** (`contato@nokahi.com`); a demo é limitada a 5 rotas.
 
-- **Teto teórico de margem líquida** (fixo diluído em N→∞, Pix, preço no topo): **~63,5%**.
-- **"80%" atingível = margem BRUTA** (receita − hospedagem − suporte): **80–86%** nos preços abaixo.
+| Plano | Preço/mês | Veículos | Rotas/mês | Público-alvo |
+|---|---:|---:|---:|---|
+| **Demonstração** | grátis | até 25 (vitrine) | 5 | degustação — libera após contato |
+| **Essencial** | **R$ 2.900** | até 10 | 1.500 | transportador/pequena frota |
+| **Profissional** | **R$ 5.900** | até 30 | 6.000 | frota média / grupo |
+| **Corporativo** | **R$ 12.900** | até 80 | 20.000 | usina típica |
+| **Enterprise** | sob consulta | ilimitado | ilimitado | grupo multi-usina / SLA |
 
-| Métrica | Definição | NOKAHI |
-|---|---|---|
-| Margem **bruta** | (Receita − infra − suporte) / Receita | **80–86%** ✅ (meta reinterpretada) |
-| Margem de contribuição pós-impostos | (Receita − variável − impostos − taxas) / Receita | ~60–63% |
-| Margem **líquida** (após time fixo) | Lucro / Receita | −201% (Y1) → +26–30% (Y3) |
+> Entrada **a partir de R$ 2.900/mês** (era R$ 10.900) — muito mais competitivo, com escopo dimensionado por veículos e rotas.
+
+### 4.1 O cliente economiza 10× a 19× o que paga
+
+Economia conservadora de **R$ 3.000/CVC/mês**, frota no teto do plano:
+
+| Plano | Paga/ano | Economiza/ano | Sobra p/ o cliente | ROI |
+|---|---:|---:|---:|---:|
+| Essencial (10 CVCs) | R$ 34.800 | R$ 360.000 | **R$ 325.200** | **10×** |
+| Profissional (30 CVCs) | R$ 70.800 | R$ 1.080.000 | **R$ 1.009.200** | **15×** |
+| Corporativo (80 CVCs) | R$ 154.800 | R$ 2.880.000 | **R$ 2.725.200** | **19×** |
+
+Mesmo cortando a economia pela metade (R$ 1.500/CVC/mês), o ROI ainda é de **5× a 9×**. A conta fecha a favor do cliente em qualquer cenário realista.
+
+### 4.2 Cada contrato já nasce lucrativo (margem de contribuição)
+
+Receita − custo variável − 22% de impostos/taxas:
+
+| Plano | Receita | Custo variável | Impostos+taxas | **Contribuição** | Margem |
+|---|---:|---:|---:|---:|---:|
+| Essencial | R$ 2.900 | R$ 1.100 | R$ 638 | **R$ 1.162** | **40%** |
+| Profissional | R$ 5.900 | R$ 1.700 | R$ 1.298 | **R$ 2.902** | **49%** |
+| Corporativo | R$ 12.900 | R$ 3.200 | R$ 2.838 | **R$ 6.862** | **53%** |
+
+**Nenhum cliente dá prejuízo na margem** — todo contrato entra com 40–53% de contribuição para pagar o fixo e virar lucro.
 
 ---
 
-## 4. Preços — por uso, calibrados para margem bruta ≥ 80%
+## 5. Margem líquida ≥ 23% — a partir de quantas usinas
 
-O custo para o cliente é **dimensionado pelos drivers que geram o custo de infraestrutura**: nº de
-veículos monitorados, nº de rotas calculadas/mês, nº de origens (talhões) e nº de destinos
-(usinas/pátios). Cada unidade é cobrada com **markup ≥ 5×** sobre seu custo variável → margem bruta
-≥ 80% por unidade. Implementado em `agroroute/pricing.py` (endpoint `POST /v1/billing/quote` +
-calculadora na landing).
+Margem líquida = (Σ contribuição − custo fixo) / receita. O número de usinas para cruzar **23% líquido**
+depende do cenário de custo fixo e do mix de planos:
 
-    mensalidade = base + veículos·pv + max(0, rotas − inclusas)·pr + origens·po + destinos·pd
-
-| Componente | Preço | Custo variável | Margem |
+| Mix predominante | Solo (R$ 18k/mês) | Enxuto (R$ 54k/mês) | Time completo (R$ 198k/mês) |
 |---|---:|---:|---:|
-| Plataforma (base) — dashboard, agente analítico, suporte | R$ 2.900/mês | ~R$ 400 | 86% |
-| Por veículo monitorado | R$ 160/mês | ~R$ 30 | 81% |
-| Por rota (acima de **500 inclusas**) | R$ 1,20 | ~R$ 0,25 | 79% |
-| Por origem (talhão) | R$ 14/mês | ~R$ 2,50 | 82% |
-| Por destino (usina/pátio) | R$ 95/mês | ~R$ 18 | 81% |
+| **Corporativo** (usina típica) | **5 usinas** → 25,3% | 14 usinas → 23,3% | 51 usinas |
+| **Profissional** | 12 usinas → 23,8% | 35 usinas | 129 usinas |
+| **Essencial** (pequeno) | 37 usinas | 110 usinas | 400 usinas |
 
-**Exemplo — usina média** (30 veículos · 4.000 rotas/mês · 60 talhões · 3 destinos):
-`2.900 + 30×160 + 3.500×1,20 + 60×14 + 3×95` = **R$ 13.025/mês** (R$ 156 mil/ano) · margem bruta **80,8%**.
-Isso ancora a faixa dos planos-pacote **Essencial R$ 10.900** e **Profissional R$ 18.900** (`billing.py`),
-que embalam faixas de uso para simplificar a venda. WTP de mercado: R$ 6–40 mil/usina/mês; ROI do
-cliente: R$ 200 mil–1,2 mi/ano.
+**Ponto de equilíbrio (lucro zero)** — apenas cobrir o fixo:
 
----
+| Mix | Solo | Enxuto |
+|---|---:|---:|
+| Corporativo | 3 usinas | 8 usinas |
+| Profissional | 7 usinas | 19 usinas |
 
-## 5. Projeção de resultado (P&L) — preço-âncora R$ 15 mil/usina/mês
+**Leitura:** como uma **usina roda dezenas de CVCs** (plano Corporativo/Enterprise), o caminho real é o da primeira
+linha. Na **fase enxuta atual**, **~5 usinas Corporativo** já colocam a NOKAHI em **>25% de margem líquida** — e o
+ponto de equilíbrio é de **apenas ~3 usinas**. Baixar o preço tornou a entrada mais competitiva sem comprometer isso,
+porque a contribuição por contrato permanece alta (40–53%).
 
-| Ano | Usinas | Receita | Custo fixo | Custo variável | Impostos+taxas (22%) | **Resultado líquido** | Margem |
+> **Por que não dá para "garantir 23% líquido no 1º cliente":** com qualquer time fixo, um único contrato não dilui o
+> fixo. A honestidade do modelo é esta — o preço garante **contribuição** positiva desde o 1º cliente; a **margem
+> líquida** ≥ 23% chega com o **volume** (poucas usinas, dado que são clientes grandes).
+
+### 5.1 Projeção de resultado (P&L) — carteira de usinas Corporativo, fase enxuta (R$ 54k/mês)
+
+| Ano | Usinas | Receita/ano | Custo fixo | Variável | Impostos+taxas (22%) | **Líquido** | Margem |
 |---:|---:|---:|---:|---:|---:|---:|---:|
-| **1** | 5 | 900.000 | 2.378.000 | 130.000 | 198.000 | **−1.806.000** | −201% |
-| **2** | 15 | 2.700.000 | 2.378.000 | 390.000 | 594.000 | **−662.000** | −24,5% |
-| **3** | 35 | 6.300.000 | 2.378.000 | 910.000 | 1.386.000 | **+1.626.000** | **+25,8%** |
+| **1** | 4 | 619.200 | 648.000 | 153.600 | 136.224 | **−318.624** | −51% |
+| **2** | 14 | 2.167.200 | 648.000 | 537.600 | 476.784 | **+504.816** | **+23,3%** |
+| **3** | 30 | 4.644.000 | 648.000 | 1.152.000 | 1.021.680 | **+1.822.320** | **+39,2%** |
 
-**Preço de break-even (lucro zero) por ano** — evidencia que o gargalo é volume, não preço:
-
-| Ano | Usinas | Preço/usina/mês p/ empatar |
-|---:|---:|---:|
-| 1 | 5 | R$ 53.600 _(acima do WTP → Y1 é fase de investimento)_ |
-| 2 | 15 | R$ 19.700 _(viável, perto do zero)_ |
-| 3 | 35 | R$ 10.000 _(folga confortável)_ |
-
-O Ano 1 é **estruturalmente deficitário** (queima de caixa para provar ROI em pilotos) — normal e
-esperado. O negócio **respira a partir de ~15–20 usinas**, quando a receita dilui o time fixo.
+O **Ano 1** ainda é fase de investimento (provar ROI em pilotos). O negócio **respira a partir de ~14 usinas** no
+cenário enxuto — ou de **~5 usinas** no cenário solo/bootstrap (hoje), que é o mais provável na largada.
 
 ---
 
 ## 6. Recomendações
 
-1. **Reformule a meta interna:** persiga **margem bruta ≥ 80%** (já entregue) e **margem líquida de
-   25–35% no regime (Ano 3+)** — padrão best-in-class de SaaS B2B no Brasil. 80% líquido não existe aqui.
-2. **O caminho para lucro é volume + preço-prêmio**, não corte de custo — o time já é o mínimo viável.
-   Cada usina nova é altamente lucrativa na margem (contribuição ~60% pós-impostos); o desafio é
-   **fechar 15→35 contratos** para amortizar o fixo.
-3. **Alavancas de margem controláveis:**
-   - **Pix** em vez de cartão: −3,5 p.p. de custo sobre a receita (a mais fácil).
-   - **Savings Plans/RI na AWS**: −~R$ 70 mil/ano no fixo.
-   - **Fator R ≥ 28%** para permanecer no Simples Anexo III enquanto a receita permitir.
-4. **Precificar por valor (% do ROI)**, não por custo: com economia comprovada de R$ 200 mil–1,2 mi/ano,
-   R$ 15–18 mil/mês é uma fração pequena do ganho do cliente.
+1. **Ancore a venda no ROI do cliente, não no preço.** Ele economiza 10–19× a mensalidade; o preço é detalhe.
+2. **Fase de largada = solo/bootstrap.** Mantenha o fixo enxuto enquanto fecha as primeiras 5–8 usinas; nesse cenário
+   a NOKAHI já opera com margem líquida ≥ 23% a partir de ~5 usinas Corporativo.
+3. **Alavancas de margem controláveis:** **Pix** em vez de cartão (−3,5 p.p. sobre a receita); **Fator R ≥ 28%** para
+   permanecer no Simples; **infra enxuta** (OSRM público na largada, GraphHopper Brasil só quando o volume justificar).
+4. **Fechamento consultivo.** A demo (5 rotas) gera o lead; a contratação passa pelo comercial (`contato@nokahi.com`),
+   permitindo dimensionar plano por frota e cobrar por valor.
 
 ---
 
 ## Fontes
 
-Custos AWS sa-east-1: aws-pricing.com, DoiT Compute, AWS pricing (RDS/EC2/ELB/S3/EBS/CloudFront/
-ElastiCache/VPC/CloudWatch). Salários: Glassdoor BR, Robert Half Guia Salarial 2026, salario.com.br,
-PM3/Tera. Tributação: Simples Nacional (LC 123/2006, Anexos III/V, Fator R), Lucro Presumido (RFB);
-Stripe Brasil (pricing). Mercado: CONAB (moagem 2024/25), UNICA (usinas Centro-Sul), estudos de CCT.
+Custos AWS sa-east-1: aws-pricing.com, DoiT Compute, AWS pricing. Salários: Glassdoor BR, Robert Half 2026,
+salario.com.br. Tributação: Simples Nacional (LC 123/2006, Anexos III/V, Fator R), Lucro Presumido (RFB); Stripe
+Brasil. Diesel: ANP/média de mercado 2026. Mercado: CONAB (moagem 2024/25), UNICA (usinas Centro-Sul), estudos de CCT.
 
-> Estimativas de planejamento com faixas low/base/high; validar com contador e cotações AWS antes de
-> decisões financeiras. Câmbio e preços de cloud variam.
+> Estimativas de planejamento com faixas low/base/high; validar com contador e cotações antes de decisões financeiras.
+> A economia de ~16% é a média atual observada e deve ser confirmada por estudo de caso auditável por operação.

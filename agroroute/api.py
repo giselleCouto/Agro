@@ -283,6 +283,15 @@ def fleet(tenant: TenantConfig = Depends(get_tenant)):
 
 @app.post("/v1/fleet")
 def fleet_add(vehicle: VehicleIn, tenant: TenantConfig = Depends(get_tenant)):
+    # limite de veículos do plano (rotas são limitadas no billing; veículos, aqui)
+    sub = billing_store.get_or_create(tenant.tenant_id)
+    plan = PLANS.get(sub.plan_id, PLANS["essencial"])
+    if vehicle_store.count(tenant.tenant_id) >= plan.max_vehicles:
+        raise HTTPException(
+            status_code=403,
+            detail=(f"limite de {plan.max_vehicles} veículos do plano {plan.name} "
+                    f"atingido — fale com a NOKAHI ({CONTACT_EMAIL}) para ampliar"),
+        )
     try:
         return vehicle_store.create(tenant.tenant_id, vehicle)
     except ValueError as e:
@@ -304,7 +313,8 @@ def dashboard(tenant: TenantConfig = Depends(get_tenant)):
         "recent_routes": route_log.recent(tenant.tenant_id, 8),
         "billing": {"plan_id": sub.plan_id, "plan_name": plan.name,
                     "status": sub.status, "routes_used_month": sub.routes_used_month,
-                    "routes_per_month": plan.routes_per_month},
+                    "routes_per_month": plan.routes_per_month,
+                    "max_vehicles": plan.max_vehicles, "vehicles": summary["total"]},
     }
 
 
@@ -619,6 +629,7 @@ def billing_status(tenant: TenantConfig = Depends(get_tenant)):
         **sub.model_dump(exclude={"provider_sub_id", "stripe_customer_id"}),
         "plan_name": plan.name,
         "routes_per_month": plan.routes_per_month,
+        "max_vehicles": plan.max_vehicles,
         "price_month_brl": plan.price_month_brl,
     }
 

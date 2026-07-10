@@ -62,7 +62,7 @@ def test_api_returns_402_without_valid_subscription(fresh_store):
 def test_plans_and_status_endpoints(fresh_store):
     r = client.get("/v1/billing/plans")
     assert r.status_code == 200
-    assert set(r.json()) == {"essencial", "profissional", "enterprise"}
+    assert set(r.json()) == {"essencial", "profissional", "corporativo", "enterprise"}
     assert "stripe_price_id" not in r.json()["essencial"]
 
     r = client.get("/v1/billing/status", headers=KEY)

@@ -14,10 +14,10 @@ def test_price_params_are_monthly_brl_in_cents():
     p = PLANS["essencial"]
     params = stripe_setup.price_params(p, "prod_1")
     assert params["currency"] == "brl"
-    assert params["unit_amount"] == "1090000"  # R$ 10.900,00
+    assert params["unit_amount"] == "290000"  # R$ 2.900,00
     assert params["recurring[interval]"] == "month"
     assert params["lookup_key"] == "nokahi_essencial_monthly"
-    assert stripe_setup.price_params(PLANS["profissional"], "prod_2")["unit_amount"] == "1890000"
+    assert stripe_setup.price_params(PLANS["profissional"], "prod_2")["unit_amount"] == "590000"
 
 
 def test_upsert_env_preserves_and_updates(tmp_path):

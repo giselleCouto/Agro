@@ -75,7 +75,7 @@ def test_allocate_trips_respects_capacity():
 # ---- Precificação por uso ----
 def test_quote_dimensions_and_margin():
     q = quote(QuoteRequest(vehicles=30, routes_per_month=4000, origins=60, destinations=3))
-    assert q["monthly_total"] == 13025.0
+    assert q["monthly_total"] == 10525.0
     assert q["gross_margin_pct"] >= 80.0
     # confere que os 4 drivers entram na conta
     labels = " ".join(i["item"] for i in q["items"])

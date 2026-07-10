@@ -7,10 +7,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from fastapi.testclient import TestClient
 
 from agroroute.api import app
+from agroroute.billing import PLANS
 from agroroute.fleet import predict_maintenance
 
 client = TestClient(app)
 DEMO = {"X-API-Key": "demo-mg-2026"}
+REG = {"X-API-Key": "demo-key"}   # tenant regular (não travado), p/ testar cotas
 
 
 def test_predict_maintenance_severities():
@@ -62,3 +64,28 @@ def test_dashboard_endpoint():
 
 def test_fleet_requires_auth():
     assert client.get("/v1/fleet").status_code in (401, 422)
+
+
+def test_plan_config_has_route_and_vehicle_caps():
+    # a tabela recalibrada limita rotas E veículos por plano
+    assert (PLANS["essencial"].price_month_brl, PLANS["essencial"].routes_per_month,
+            PLANS["essencial"].max_vehicles) == (2900.0, 1500, 10)
+    assert (PLANS["profissional"].routes_per_month, PLANS["profissional"].max_vehicles) == (6000, 30)
+    assert (PLANS["corporativo"].routes_per_month, PLANS["corporativo"].max_vehicles) == (20000, 80)
+    # planos crescem em ambos os eixos
+    for a, b in [("essencial", "profissional"), ("profissional", "corporativo")]:
+        assert PLANS[b].max_vehicles > PLANS[a].max_vehicles
+        assert PLANS[b].routes_per_month > PLANS[a].routes_per_month
+
+
+def test_vehicle_cap_blocks_beyond_plan():
+    # força o plano Essencial (até 10 veículos) neste tenant e preenche até o teto
+    client.get("/v1/billing/dev/activate?plan_id=essencial", headers=REG)
+    cap = PLANS["essencial"].max_vehicles
+    cur = len(client.get("/v1/fleet", headers=REG).json()["vehicles"])
+    for i in range(cur, cap):
+        assert client.post("/v1/fleet", json={"plate": f"CAP-{i}", "type": "treminhao"},
+                           headers=REG).status_code == 200
+    over = client.post("/v1/fleet", json={"plate": "CAP-OVER", "type": "treminhao"}, headers=REG)
+    assert over.status_code == 403
+    assert "limite" in over.json()["detail"].lower()

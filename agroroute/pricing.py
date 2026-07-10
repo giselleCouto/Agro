@@ -16,19 +16,21 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-# Preços unitários (BRL). Calibrados p/ margem bruta >= 80%.
+# Preços unitários (BRL). Recalibrados (jul/2026) p/ margem bruta >= 80% e
+# alinhados aos planos-pacote: base 1400 + 10·150 = 2900 (Essencial),
+# 1400 + 30·150 = 5900 (Profissional). Ver BUSINESS_CASE.md.
 PRICE = {
-    "base_month": 2900.0,       # plataforma: dashboard, agente analítico, suporte
-    "per_vehicle": 160.0,       # por veículo monitorado/mês
+    "base_month": 1400.0,       # plataforma: dashboard, agente analítico, suporte
+    "per_vehicle": 150.0,       # por veículo monitorado/mês
     "included_routes": 500,     # rotas inclusas na base
-    "per_route": 1.20,          # rota excedente
+    "per_route": 1.00,          # rota excedente
     "per_origin": 14.0,         # por talhão/origem cadastrada/mês
     "per_destination": 95.0,    # por usina/pátio de destino/mês
 }
 
-# Custo variável por unidade (para exibir a margem — não é preço)
+# Custo variável por unidade (para exibir a margem — não é preço). Infra enxuta.
 UNIT_COST = {
-    "platform": 400.0, "per_vehicle": 30.0, "per_route": 0.25,
+    "platform": 250.0, "per_vehicle": 30.0, "per_route": 0.18,
     "per_origin": 2.5, "per_destination": 18.0,
 }
 

@@ -39,32 +39,40 @@ class Plan(BaseModel):
     name: str
     price_month_brl: float
     routes_per_month: int
+    max_vehicles: int = 10**9              # limite de veículos cadastrados
     description: str
     public: bool = True                    # aparece na vitrine de preços?
     stripe_price_id: Optional[str] = None
 
 
+# Tabela recalibrada (jul/2026): preços mais competitivos, com limite de ROTAS e
+# de VEÍCULOS por plano. Base de valor: economia real de ~16% de diesel — cada
+# contrato nasce com 40–53% de margem de contribuição e o cliente economiza
+# 10–19× o que paga (ver BUSINESS_CASE.md, seções 4 e 5).
 PLANS: dict[str, Plan] = {
     "demo": Plan(
         id="demo", name="Demonstração", price_month_brl=0.0,
-        routes_per_month=5, public=False,
-        description="Degustação (limite de 5 rotas) — recursos completos após contato",
+        routes_per_month=5, max_vehicles=25, public=False,
+        description="Degustação (limite de 5 rotas) — recursos completos após contato com o comercial",
     ),
-    # Preços por USINA/mês, calibrados para margem BRUTA >= 80% (custo direto de
-    # hospedagem+suporte ~R$ 2,2k/usina/mês). Ver BUSINESS_CASE.md.
     "essencial": Plan(
-        id="essencial", name="Essencial", price_month_brl=10900.0,
-        routes_per_month=3000,
-        description="1 usina · até 3.000 rotas/mês · cobertura Brasil · clima real e pedágio por eixo",
+        id="essencial", name="Essencial", price_month_brl=2900.0,
+        routes_per_month=1500, max_vehicles=10,
+        description="Até 10 veículos · 1.500 rotas/mês · cobertura Brasil · clima real e pedágio por eixo",
     ),
     "profissional": Plan(
-        id="profissional", name="Profissional", price_month_brl=18900.0,
-        routes_per_month=25000,
-        description="Grupo/multi-usina · 25.000 rotas/mês · roteirizador dedicado · API · suporte prioritário",
+        id="profissional", name="Profissional", price_month_brl=5900.0,
+        routes_per_month=6000, max_vehicles=30,
+        description="Até 30 veículos · 6.000 rotas/mês · inteligência de frota · API · suporte prioritário",
+    ),
+    "corporativo": Plan(
+        id="corporativo", name="Corporativo", price_month_brl=12900.0,
+        routes_per_month=20000, max_vehicles=80,
+        description="Até 80 veículos · 20.000 rotas/mês · roteirizador dedicado · integração de telemetria",
     ),
     "enterprise": Plan(
         id="enterprise", name="Enterprise", price_month_brl=0.0,
-        routes_per_month=10**9,
+        routes_per_month=10**9, max_vehicles=10**9,
         description="Frota ilimitada · SLA · integração telemetria/ERP · sob consulta",
     ),
 }
