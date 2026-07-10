@@ -45,6 +45,8 @@ from .billing import (  # noqa: E402
     verify_stripe_signature,
     webhook_secret,
 )
+from . import or_opt  # noqa: E402
+from .assistant import AnalyticalAgent  # noqa: E402
 from .db import get_engine  # noqa: E402
 from .fleet import (  # noqa: E402
     DEMO_VEHICLES,
@@ -53,8 +55,11 @@ from .fleet import (  # noqa: E402
     VehicleStore,
     fleet_summary,
 )
+from .geo import haversine_km  # noqa: E402
 from .leads import LeadIn, LeadStore  # noqa: E402
+from .ml import DemandForecaster, FuelCalibrator, MaintenanceRiskModel  # noqa: E402
 from .notify import send_lead_notification  # noqa: E402
+from .pricing import PRICE, QuoteRequest, quote  # noqa: E402
 from .models import (  # noqa: E402
     DEFAULT_FLEET,
     BatchRouteRequest,
@@ -91,6 +96,8 @@ billing_store = BillingStore(engine=_engine)
 lead_store = LeadStore(engine=_engine)
 vehicle_store = VehicleStore(engine=_engine)
 route_log = RouteLogStore(engine=_engine)
+agent = AnalyticalAgent(vehicle_store, route_log, billing_store, PLANS)
+_risk_model = MaintenanceRiskModel()
 
 # assinatura demo perene para o tenant de degustação (MG)
 if store.by_id(DEMO_TENANT_ID):
@@ -243,6 +250,149 @@ def dashboard(tenant: TenantConfig = Depends(get_tenant)):
                     "status": sub.status, "routes_used_month": sub.routes_used_month,
                     "routes_per_month": plan.routes_per_month},
     }
+
+
+# ---------------------------------------------------------------------------
+# Agente analítico (chatbot)
+# ---------------------------------------------------------------------------
+
+@app.post("/v1/assistant")
+def assistant(body: dict, tenant: TenantConfig = Depends(get_tenant)):
+    question = (body.get("question") or "").strip()
+    return agent.answer(tenant.tenant_id, question)
+
+
+@app.get("/v1/assistant/suggestions")
+def assistant_suggestions(tenant: TenantConfig = Depends(get_tenant)):
+    return {"suggestions": AnalyticalAgent.SUGGESTIONS}
+
+
+# ---------------------------------------------------------------------------
+# Pesquisa Operacional — otimização multi-origem/multi-destino
+# ---------------------------------------------------------------------------
+
+@app.post("/v1/optimize")
+def optimize(body: dict, tenant: TenantConfig = Depends(get_tenant)):
+    """Aloca o transporte de N origens (talhões) para M destinos (usinas) ao
+    menor custo total (problema de transporte), usando o custo real por km do
+    veículo escolhido. Também dimensiona o nº de viagens.
+    """
+    origins = body.get("origins", [])
+    destinations = body.get("destinations", [])
+    if not origins or not destinations:
+        raise HTTPException(status_code=422, detail="informe origens e destinos")
+    if len(origins) * len(destinations) > 400:
+        raise HTTPException(status_code=422, detail="máximo de 400 pares origem×destino")
+    try:
+        vehicle = tenant.vehicle(body.get("vehicle_id", "treminhao"))
+    except KeyError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+    # custo por km do veículo (modelo físico: combustível + manutenção)
+    from .cost import R0
+    pbt = vehicle.tare_t + vehicle.payload_t
+    fuel_l_per_km = R0 * pbt
+    cost_per_km = fuel_l_per_km * tenant.diesel_price + vehicle.maintenance_rs_km
+    payload = max(1.0, vehicle.payload_t)
+
+    supply = [float(o.get("supply", payload)) for o in origins]
+    demand = [float(d.get("demand", payload)) for d in destinations]
+    # matriz de custo por tonelada = (km * custo/km) / carga útil
+    cost = []
+    for o in origins:
+        row = []
+        for d in destinations:
+            km = haversine_km(o["lat"], o["lon"], d["lat"], d["lon"])
+            row.append(round(km * cost_per_km / payload, 4))
+        cost.append(row)
+
+    result = or_opt.solve_transportation(supply, demand, cost)
+    if not result["success"]:
+        raise HTTPException(status_code=422, detail=result.get("message", "otimização inviável"))
+
+    # traduz o fluxo em plano legível + nº de viagens
+    plan = []
+    total_trips = 0
+    for i, o in enumerate(origins):
+        for j, d in enumerate(destinations):
+            t = result["flows"][i][j]
+            if t > 0.01:
+                trips = int(-(-t // payload))  # ceil
+                total_trips += trips
+                km = haversine_km(o["lat"], o["lon"], d["lat"], d["lon"])
+                plan.append({
+                    "origin": o.get("name", f"O{i+1}"), "destination": d.get("name", f"D{j+1}"),
+                    "tonnes": round(t, 1), "trips": trips, "distance_km": round(km, 1),
+                    "cost": round(t * cost[i][j], 2),
+                })
+    plan.sort(key=lambda p: p["cost"], reverse=True)
+    return {
+        "vehicle": vehicle.id, "payload_t": payload,
+        "total_cost": result["total_cost"], "total_tonnes": result["delivered"],
+        "total_trips": total_trips, "unmet_demand_t": result["unmet_demand"],
+        "plan": plan,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Precificação por uso (calculadora)
+# ---------------------------------------------------------------------------
+
+@app.post("/v1/billing/quote")
+def billing_quote(req: QuoteRequest):
+    return quote(req)
+
+
+@app.get("/v1/billing/pricing")
+def billing_pricing():
+    return PRICE
+
+
+# ---------------------------------------------------------------------------
+# Machine Learning
+# ---------------------------------------------------------------------------
+
+@app.get("/v1/ml/maintenance-risk")
+def ml_maintenance_risk(tenant: TenantConfig = Depends(get_tenant)):
+    """Risco (probabilidade) de intervenção por componente, via regressão logística."""
+    out = []
+    for v in vehicle_store.list_with_maintenance(tenant.tenant_id):
+        comps = []
+        for p in v["maintenance"]:
+            usage = min(1.0, (p["current"] or 0) / (p["limit"] or 1))
+            risk = _risk_model.risk_from_component(p["wear_pct"], usage)
+            comps.append({"component": p["component"], "label": p["label"],
+                          "wear_pct": p["wear_pct"], "risk_pct": round(risk * 100, 0),
+                          "risk_label": MaintenanceRiskModel.label(risk)})
+        out.append({"plate": v["plate"], "type": v["type"], "components": comps})
+    return {"vehicles": out}
+
+
+@app.get("/v1/ml/demand-forecast")
+def ml_demand_forecast(horizon: int = 7, tenant: TenantConfig = Depends(get_tenant)):
+    recent = route_log.recent(tenant.tenant_id, 200)
+    by_day: dict[str, int] = {}
+    for r in recent:
+        day = (r.get("created_at") or "")[:10]
+        by_day[day] = by_day.get(day, 0) + 1
+    series = [by_day[d] for d in sorted(by_day)]
+    if len(series) < 2:
+        return {"forecast": [], "history": series, "message": "histórico insuficiente"}
+    fc = DemandForecaster().fit(series)
+    return {"forecast": fc.forecast(min(horizon, 30)), "history": series,
+            "trend": "alta" if fc.slope > 0.1 else "baixa" if fc.slope < -0.1 else "estável"}
+
+
+@app.post("/v1/ml/fuel-calibrate")
+def ml_fuel_calibrate(body: dict, tenant: TenantConfig = Depends(get_tenant)):
+    """Calibra o modelo de consumo a partir de pares (previsto, real) da telemetria."""
+    pairs = body.get("pairs", [])
+    if not pairs:
+        raise HTTPException(status_code=422, detail="informe pares [previsto, real]")
+    pred = [p[0] for p in pairs]
+    actual = [p[1] for p in pairs]
+    cal = FuelCalibrator().fit(pred, actual)
+    return cal.as_dict()
 
 
 # ---------------------------------------------------------------------------

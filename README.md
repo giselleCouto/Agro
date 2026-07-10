@@ -75,6 +75,24 @@ Veículos ficam na tabela `vehicles` ([db.py](agroroute/db.py)); a manutenção 
 
 `RouteJob.max_alternatives=4` por padrão. O roteirizador devolve as alternativas que consegue (OSRM público até 3, GraphHopper conforme o grafo) e o serviço completa até 4 com **desvios reais** por ponto intermediário (waypoints deslocados perpendicularmente à linha origem→destino), deduplicando por distância. Rotas que violam zona urbana nunca vencem uma segura no ranking.
 
+## Machine Learning ([ml.py](agroroute/ml.py))
+
+- **FuelCalibrator** — mínimos quadrados que calibra o modelo de consumo por veículo a partir da telemetria (litros previstos × reais); fecha o loop de aprendizado. `POST /v1/ml/fuel-calibrate`.
+- **MaintenanceRiskModel** — regressão logística (scikit-learn) que estima a probabilidade de intervenção por componente; pesos padrão calibrados por domínio, re-treinável. `GET /v1/ml/maintenance-risk`.
+- **DemandForecaster** — previsão de demanda diária de rotas (tendência + sazonalidade semanal). `GET /v1/ml/demand-forecast`.
+
+## Pesquisa Operacional ([or_opt.py](agroroute/or_opt.py))
+
+Otimização **multi-origem/multi-destino** sobre o custo real de rota. `POST /v1/optimize` resolve o **problema de transporte** (quanto enviar de cada talhão para cada usina ao menor custo, via `scipy.linprog`) e dimensiona o nº de viagens; há também **atribuição** de rotas a veículos (algoritmo húngaro). É o "calcular várias rotas ao mesmo tempo" com decisão ótima de alocação.
+
+## Agente analítico ([assistant.py](agroroute/assistant.py))
+
+Chatbot flutuante (ícone no canto inferior do app) que responde sobre a operação — frota, manutenção (com risco por ML), rotas/economia, previsão de demanda, plano/uso e otimização — computando as respostas sobre os **dados reais do tenant**. Determinístico e offline (`POST /v1/assistant`), com gancho opcional para LLM.
+
+## Precificação por uso ([pricing.py](agroroute/pricing.py))
+
+O custo ao cliente é dimensionado por **veículos, rotas, origens e destinos** — cada unidade com markup ≥ 5× (margem bruta ≥ 80%). `POST /v1/billing/quote` (público) alimenta a calculadora da landing. Ver **[BUSINESS_CASE.md](BUSINESS_CASE.md)** para o modelo de custos, a análise da meta de 80% e o P&L.
+
 ## Banco de dados
 
 Fonte de verdade em SQLAlchemy ([db.py](agroroute/db.py)) — tabelas `tenants`, `subscriptions`, `leads`.

@@ -162,6 +162,36 @@ body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
   <div id="plans-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-4xl mx-auto">
     <!-- preenchido via /v1/billing/plans; fallback estático abaixo -->
   </div>
+
+  <!-- calculadora de preço por uso -->
+  <div class="max-w-4xl mx-auto mt-10 bg-white rounded-2xl border p-6 sm:p-8">
+    <div class="flex items-center gap-2 mb-1">
+      <i data-lucide="calculator" class="icon-sm text-emerald-600"></i>
+      <h3 class="text-lg font-bold">Calcule o preço da sua operação</h3>
+    </div>
+    <p class="text-sm text-gray-500 mb-5">O custo é dimensionado pelo que você usa: veículos, rotas
+      calculadas, origens (talhões) e destinos (usinas).</p>
+    <div class="grid sm:grid-cols-4 gap-4">
+      <label class="block"><span class="text-xs font-semibold text-gray-500">Veículos</span>
+        <input type="number" id="calc-veh" value="30" min="0" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm" oninput="calcQuote()"></label>
+      <label class="block"><span class="text-xs font-semibold text-gray-500">Rotas/mês</span>
+        <input type="number" id="calc-rot" value="4000" min="0" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm" oninput="calcQuote()"></label>
+      <label class="block"><span class="text-xs font-semibold text-gray-500">Origens (talhões)</span>
+        <input type="number" id="calc-ori" value="60" min="0" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm" oninput="calcQuote()"></label>
+      <label class="block"><span class="text-xs font-semibold text-gray-500">Destinos (usinas)</span>
+        <input type="number" id="calc-dest" value="3" min="0" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm" oninput="calcQuote()"></label>
+    </div>
+    <div class="mt-5 grid sm:grid-cols-3 gap-4 items-center">
+      <div class="sm:col-span-2"><div id="calc-items" class="text-xs text-gray-500 space-y-1"></div></div>
+      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+        <div class="text-[10px] uppercase tracking-wide text-emerald-700 font-semibold">Estimativa mensal</div>
+        <div id="calc-total" class="text-3xl font-black text-emerald-700">—</div>
+        <div id="calc-annual" class="text-[11px] text-emerald-600"></div>
+      </div>
+    </div>
+    <p class="text-[11px] text-gray-400 mt-3">Estimativa; a proposta final considera volume e SLA.
+      Inclui 500 rotas/mês na base. <a href="/app?demo=1" class="text-emerald-700 underline">Testar a demo</a>.</p>
+  </div>
 </section>
 
 <!-- ===================== CTA FINAL ===================== -->
@@ -263,6 +293,29 @@ renderPlans(FALLBACK_PLANS);
 fetch('/v1/billing/plans').then(r=>r.json())
   .then(p => renderPlans(Object.values(p)))
   .catch(()=>{});
+
+const fRk = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+let calcTimer;
+function calcQuote(){
+  clearTimeout(calcTimer);
+  calcTimer = setTimeout(async () => {
+    const body = {
+      vehicles: +document.getElementById('calc-veh').value||0,
+      routes_per_month: +document.getElementById('calc-rot').value||0,
+      origins: +document.getElementById('calc-ori').value||0,
+      destinations: +document.getElementById('calc-dest').value||0,
+    };
+    try{
+      const r = await fetch('/v1/billing/quote', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+      const q = await r.json();
+      document.getElementById('calc-total').textContent = fRk(q.monthly_total);
+      document.getElementById('calc-annual').textContent = fRk(q.annual_total) + '/ano';
+      document.getElementById('calc-items').innerHTML = q.items.filter(i=>i.subtotal>0)
+        .map(i => `<div class="flex justify-between"><span>${i.item}${i.qty>1?` · ${i.qty}×`:''}</span><b>${fRk(i.subtotal)}</b></div>`).join('');
+    }catch{ document.getElementById('calc-total').textContent = '—'; }
+  }, 250);
+}
+calcQuote();
 
 async function submitLead(e) {
   e.preventDefault();

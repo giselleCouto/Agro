@@ -19,6 +19,12 @@ rampa/peso/superfície/clima, pedágio por eixo e manutenção), respeitando as 
 (treminhão/rodotrem/pentatrem) e as condições de cada dia. ROI típico por usina: **R$ 200 mil a
 R$ 1,2 milhão/ano** em diesel economizado (base −23%).
 
+Além da roteirização, a plataforma entrega três diferenciais analíticos: **modelos de ML** (calibração
+de consumo pela telemetria, risco de manutenção por componente, previsão de demanda de rotas),
+**pesquisa operacional** (alocação ótima multi-origem/multi-destino — problema de transporte e
+atribuição de frota) e um **agente analítico em chat** que responde perguntas sobre a operação sobre
+os dados reais do cliente.
+
 | Dimensão | Número | Fonte |
 |---|---|---|
 | Moagem de cana 2024/25 | 676,96 Mt (2ª maior da história) | CONAB |
@@ -114,20 +120,29 @@ pessoa ou um servidor. A equação `(0,20 − 0,22) × Receita ≥ Custo Fixo` t
 
 ---
 
-## 4. Preços — calibrados para margem bruta ≥ 80%
+## 4. Preços — por uso, calibrados para margem bruta ≥ 80%
 
-Custo variável direto por usina ≈ **R$ 2.170/mês**. Para **margem bruta ≥ 80%**, o preço-piso é
-`2.170 / 0,20 ≈ R$ 10.850/mês`. Preços definidos no produto (`agroroute/billing.py`):
+O custo para o cliente é **dimensionado pelos drivers que geram o custo de infraestrutura**: nº de
+veículos monitorados, nº de rotas calculadas/mês, nº de origens (talhões) e nº de destinos
+(usinas/pátios). Cada unidade é cobrada com **markup ≥ 5×** sobre seu custo variável → margem bruta
+≥ 80% por unidade. Implementado em `agroroute/pricing.py` (endpoint `POST /v1/billing/quote` +
+calculadora na landing).
 
-| Plano | Preço/usina/mês | Rotas/mês | Margem bruta | Alvo |
-|---|---:|---:|---:|---|
-| **Essencial** | **R$ 10.900** | 3.000 | **80,1%** | 1 usina, piloto |
-| **Profissional** | **R$ 18.900** | 25.000 | **88,5%** | grupo/multi-usina |
-| **Enterprise** | sob consulta | ilimitado | — | grandes grupos, SLA |
-| _Demonstração_ | R$ 0 | 300 | — | degustação MG |
+    mensalidade = base + veículos·pv + max(0, rotas − inclusas)·pr + origens·po + destinos·pd
 
-**Preço-âncora de venda recomendado: R$ 15–18 mil/usina/mês**, ancorado em % do ROI comprovado
-(economia de R$ 200 mil–1,2 mi/ano por usina sustenta com folga; WTP de mercado R$ 6–40 mil/mês).
+| Componente | Preço | Custo variável | Margem |
+|---|---:|---:|---:|
+| Plataforma (base) — dashboard, agente analítico, suporte | R$ 2.900/mês | ~R$ 400 | 86% |
+| Por veículo monitorado | R$ 160/mês | ~R$ 30 | 81% |
+| Por rota (acima de **500 inclusas**) | R$ 1,20 | ~R$ 0,25 | 79% |
+| Por origem (talhão) | R$ 14/mês | ~R$ 2,50 | 82% |
+| Por destino (usina/pátio) | R$ 95/mês | ~R$ 18 | 81% |
+
+**Exemplo — usina média** (30 veículos · 4.000 rotas/mês · 60 talhões · 3 destinos):
+`2.900 + 30×160 + 3.500×1,20 + 60×14 + 3×95` = **R$ 13.025/mês** (R$ 156 mil/ano) · margem bruta **80,8%**.
+Isso ancora a faixa dos planos-pacote **Essencial R$ 10.900** e **Profissional R$ 18.900** (`billing.py`),
+que embalam faixas de uso para simplificar a venda. WTP de mercado: R$ 6–40 mil/usina/mês; ROI do
+cliente: R$ 200 mil–1,2 mi/ano.
 
 ---
 
