@@ -157,6 +157,17 @@ def get_tenant(x_api_key: str = Header(...)) -> TenantConfig:
     return tenant
 
 
+DEMO_LOCK_MSG = ("Recurso disponível após ativação — fale com a NOKAHI "
+                 "(contato@nokahi.com) para liberar o acesso completo.")
+
+
+def block_if_demo(tenant: TenantConfig) -> None:
+    """Trava recursos avançados/de escrita no modo demonstração até o cliente
+    entrar em contato. A demo permite apenas calcular até 5 rotas (degustação)."""
+    if store.is_demo(tenant.tenant_id):
+        raise HTTPException(status_code=403, detail=DEMO_LOCK_MSG)
+
+
 def require_admin(x_admin_token: str = Header(default="")) -> None:
     if not ADMIN_TOKEN:
         raise HTTPException(
@@ -314,6 +325,7 @@ def optimize(req: OptimizeRequest, tenant: TenantConfig = Depends(get_tenant)):
     menor custo total (problema de transporte), usando o custo real por km do
     veículo escolhido. Também dimensiona o nº de viagens.
     """
+    block_if_demo(tenant)
     origins, destinations = req.origins, req.destinations
     if len(origins) * len(destinations) > 400:
         raise HTTPException(status_code=422, detail="máximo de 400 pares origem×destino")
@@ -426,6 +438,7 @@ def ml_demand_forecast(horizon: int = 7, tenant: TenantConfig = Depends(get_tena
 @app.post("/v1/ml/fuel-calibrate")
 def ml_fuel_calibrate(body: dict, tenant: TenantConfig = Depends(get_tenant)):
     """Calibra o modelo de consumo a partir de pares (previsto, real) da telemetria."""
+    block_if_demo(tenant)
     pairs = body.get("pairs", [])
     if not pairs:
         raise HTTPException(status_code=422, detail="informe pares [previsto, real]")
@@ -467,6 +480,7 @@ def ingest_providers():
 @app.post("/v1/ingest/telemetry")
 def ingest_telemetry(body: dict, tenant: TenantConfig = Depends(get_tenant)):
     """Recebe telemetria (bruta ou de provedor). Corpo: {source, dataset?, mapping?, records:[...]}."""
+    block_if_demo(tenant)
     records = body.get("records", [])
     if not isinstance(records, list) or not records:
         raise HTTPException(status_code=422, detail="informe 'records' (lista não vazia)")
@@ -480,6 +494,7 @@ def ingest_telemetry(body: dict, tenant: TenantConfig = Depends(get_tenant)):
 
 @app.post("/v1/ingest/alarms")
 def ingest_alarms(body: dict, tenant: TenantConfig = Depends(get_tenant)):
+    block_if_demo(tenant)
     records = body.get("records", [])
     if not isinstance(records, list) or not records:
         raise HTTPException(status_code=422, detail="informe 'records' (lista não vazia)")
@@ -492,6 +507,7 @@ def ingest_alarms(body: dict, tenant: TenantConfig = Depends(get_tenant)):
 async def ingest_file(file: UploadFile = File(...), source: str = "solinftec",
                       dataset: str = "telemetry", tenant: TenantConfig = Depends(get_tenant)):
     """Upload de extração CSV/XLSX (ex.: Solinftec) — normaliza e ingere."""
+    block_if_demo(tenant)
     content = await file.read()
     if len(content) > 60_000_000:
         raise HTTPException(status_code=413, detail="arquivo muito grande (máx. 60 MB)")
@@ -523,6 +539,7 @@ def connectors_list(tenant: TenantConfig = Depends(get_tenant)):
 
 @app.post("/v1/connectors")
 def connectors_create(body: dict, tenant: TenantConfig = Depends(get_tenant)):
+    block_if_demo(tenant)
     if not body.get("name") or not body.get("type"):
         raise HTTPException(status_code=422, detail="informe 'name' e 'type'")
     if body["type"] not in ("solinftec_flow", "generic_http", "webhook", "file"):
@@ -532,6 +549,7 @@ def connectors_create(body: dict, tenant: TenantConfig = Depends(get_tenant)):
 
 @app.post("/v1/connectors/{cid}/sync")
 async def connectors_sync(cid: int, tenant: TenantConfig = Depends(get_tenant)):
+    block_if_demo(tenant)
     conn = ingest_store.get_connector(tenant.tenant_id, cid)
     if not conn:
         raise HTTPException(status_code=404, detail="conector não encontrado")
@@ -601,6 +619,7 @@ def billing_status(tenant: TenantConfig = Depends(get_tenant)):
 async def billing_checkout(
     body: dict, request: Request, tenant: TenantConfig = Depends(get_tenant)
 ):
+    block_if_demo(tenant)
     plan_id = body.get("plan_id", "essencial")
     if plan_id not in PLANS or not PLANS[plan_id].public:
         raise HTTPException(status_code=422, detail="plano desconhecido")
@@ -617,6 +636,7 @@ async def billing_checkout(
 def billing_dev_activate(plan_id: str = "essencial",
                          tenant: TenantConfig = Depends(get_tenant)):
     """Sandbox de desenvolvimento: ativa a assinatura sem passar pelo Stripe."""
+    block_if_demo(tenant)
     if stripe_key():
         raise HTTPException(status_code=404, detail="indisponível com Stripe configurado")
     if plan_id not in PLANS or not PLANS[plan_id].public:

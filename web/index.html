@@ -75,7 +75,7 @@ body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
       <div id="demo-banner" class="hidden mb-4 rounded-xl border-2 border-emerald-300 bg-emerald-50 p-4 flex items-center justify-between gap-3">
         <div class="flex items-center gap-2 text-sm text-emerald-800">
           <i data-lucide="play-circle" class="icon-sm"></i>
-          <span><b>Modo demonstração</b> — <span id="demo-region"></span>. Explore o Dashboard, calcule rotas e veja a manutenção. Para usar sua operação, <a href="/#contato" class="underline">fale com a NOKAHI</a>.</span>
+          <span><b>Modo demonstração</b> — <span id="demo-region"></span>. Teste de até <b>5 rotas</b>; os recursos completos (integrações, otimização, planos) são liberados após contato. Para usar sua operação, <a href="/#contato" class="underline">fale com a NOKAHI</a>.</span>
         </div>
         <a href="/#contato" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold whitespace-nowrap">Assinar</a>
       </div>
@@ -101,7 +101,7 @@ body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
         <div class="grid lg:grid-cols-3 gap-4">
           <div class="lg:col-span-2 bg-white rounded-xl border p-5">
             <h3 class="lbl mb-3">Rotas calculadas — custo por viagem</h3>
-            <div style="height:220px"><canvas id="dash-routes-chart"></canvas></div>
+            <div id="dash-routes-box" style="height:220px"><canvas id="dash-routes-chart"></canvas></div>
           </div>
           <div class="bg-white rounded-xl border p-5">
             <h3 class="lbl mb-3">Situação da frota</h3>
@@ -242,6 +242,10 @@ body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
           <h1 class="text-lg font-bold flex items-center gap-2"><i data-lucide="plug" class="icon-md text-emerald-600"></i> Integrações de Dados</h1>
           <p class="text-sm text-gray-500">Conecte qualquer sistema de telemetria — dados brutos, Solinftec (Flow API), HTTP/webhook ou arquivo. A inteligência passa a usar os dados reais automaticamente.</p>
         </div>
+        <div id="integ-lock" class="hidden rounded-xl border-2 border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-800 flex items-center gap-2">
+          <i data-lucide="lock" class="icon-sm"></i>
+          <span><b>Modo demonstração:</b> a ingestão de dados e os conectores são liberados após a ativação. <a href="/#contato" class="underline font-semibold">Fale com a NOKAHI</a> para conectar sua telemetria.</span>
+        </div>
         <div id="ingest-stats" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
         <div class="grid lg:grid-cols-2 gap-4">
           <div class="bg-white rounded-xl border p-5">
@@ -356,7 +360,7 @@ body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
 
 <script>
 const state = { key:null, config:null, fleet:{}, vehicle:'treminhao', climate:'auto', roundTrip:true,
-  origin:null, dest:null, jobs:[], result:null, billing:null, view:'dashboard', mapReady:false, dashboard:null };
+  origin:null, dest:null, jobs:[], result:null, billing:null, view:'dashboard', mapReady:false, dashboard:null, isDemo:false };
 let map, originMarker=null, destMarker=null, routeLayers=[], staticLayers=[];
 let costChart=null, elevChart=null, dashRoutesChart=null, dashStatusChart=null;
 
@@ -391,6 +395,7 @@ async function connect() {
   if (!state.key) { alert('Informe a chave de acesso.'); return; }
   try {
     state.config = await api('/v1/tenant/config');
+    state.isDemo = !!state.config.is_demo;
     state.fleet = await api('/v1/vehicles');
     const badge = document.getElementById('tenant-badge');
     badge.textContent = '✓ ' + state.config.name.split('—')[0].trim();
@@ -627,12 +632,17 @@ function renderDashboard(d){
   ].join('');
   // chart rotas recentes (custo)
   const rec=(d.recent_routes||[]).slice().reverse();
-  if(dashRoutesChart)dashRoutesChart.destroy();
-  dashRoutesChart=new Chart(document.getElementById('dash-routes-chart'),{type:'bar',
-    data:{labels:rec.map((r,i)=>'#'+(i+1)),datasets:[{label:'Custo/viagem',data:rec.map(r=>r.total_cost),backgroundColor:'#059669',borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fR(c.raw)+' · '+fN(rec[c.dataIndex].distance_km)+' km'}}},
-      scales:{x:{grid:{display:false},ticks:{color:TICK,font:{size:10}}},y:{grid:{color:GRID},ticks:{color:TICK,font:{size:10},callback:v=>'R$'+v}}}}});
-  if(!rec.length)document.getElementById('dash-routes-chart').parentElement.innerHTML='<div class="h-full flex items-center justify-center text-sm text-gray-400">Calcule rotas para ver o histórico</div>';
+  if(dashRoutesChart){dashRoutesChart.destroy();dashRoutesChart=null;}
+  const rbox=document.getElementById('dash-routes-box');
+  if(!rec.length){
+    rbox.innerHTML='<div class="h-full flex items-center justify-center text-sm text-gray-400">Calcule rotas para ver o histórico</div>';
+  }else{
+    rbox.innerHTML='<canvas id="dash-routes-chart"></canvas>';   // recria o canvas a cada render
+    dashRoutesChart=new Chart(document.getElementById('dash-routes-chart'),{type:'bar',
+      data:{labels:rec.map((r,i)=>'#'+(i+1)),datasets:[{label:'Custo/viagem',data:rec.map(r=>r.total_cost),backgroundColor:'#059669',borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fR(c.raw)+' · '+fN(rec[c.dataIndex].distance_km)+' km'}}},
+        scales:{x:{grid:{display:false},ticks:{color:TICK,font:{size:10}}},y:{grid:{color:GRID},ticks:{color:TICK,font:{size:10},callback:v=>'R$'+v}}}}});
+  }
   // donut status
   const st=f.by_status;
   if(dashStatusChart)dashStatusChart.destroy();
@@ -778,6 +788,9 @@ function renderInteligencia(d){
 
 /* ---------- INTEGRAÇÕES ---------- */
 async function loadIntegracoes(){
+  document.getElementById('integ-lock').classList.toggle('hidden', !state.isDemo);
+  ['up-file','cn-name','cn-url','cn-token'].forEach(id=>{const e=document.getElementById(id); if(e) e.disabled = state.isDemo;});
+  lucide.createIcons();
   try{
     const [st, cn, rec] = await Promise.all([
       api('/v1/ingest/stats'), api('/v1/connectors'), api('/v1/ingest/telemetry?limit=15')]);
@@ -807,8 +820,9 @@ function renderConnectors(list){
   lucide.createIcons();
 }
 async function uploadFile(){
-  const f = document.getElementById('up-file').files[0];
   const msg = document.getElementById('up-msg');
+  if(state.isDemo){ msg.textContent='Ingestão liberada após ativação — fale com a NOKAHI (contato@nokahi.com).'; msg.className='text-sm text-emerald-700'; return; }
+  const f = document.getElementById('up-file').files[0];
   if(!f){ msg.textContent='Selecione um arquivo.'; msg.className='text-sm text-amber-600'; return; }
   const src = document.getElementById('up-source').value, ds = document.getElementById('up-dataset').value;
   msg.textContent='Enviando e ingerindo…'; msg.className='text-sm text-gray-500';
@@ -824,6 +838,7 @@ async function uploadFile(){
 }
 async function createConnector(){
   const msg = document.getElementById('cn-msg');
+  if(state.isDemo){ msg.textContent='Conectores liberados após ativação — fale com a NOKAHI.'; msg.className='text-sm text-emerald-700'; return; }
   const body = { name:document.getElementById('cn-name').value.trim(), type:document.getElementById('cn-type').value,
     dataset:document.getElementById('cn-dataset').value, base_url:document.getElementById('cn-url').value.trim() };
   const tok = document.getElementById('cn-token').value.trim();
@@ -858,13 +873,15 @@ async function openBilling(){
   document.getElementById('billing-modal').classList.remove('hidden');
   try{
     const plans=await api('/v1/billing/plans'); const b=state.billing;
-    document.getElementById('billing-current').innerHTML=b?`Plano atual: <b>${esc(b.plan_name)}</b> (${esc(b.status)}) · uso: <b>${b.routes_used_month}</b> rotas`:'';
+    document.getElementById('billing-current').innerHTML = state.isDemo
+      ? `<div class="text-sm bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg p-3">Modo demonstração: até <b>5 rotas</b> para teste. Os planos e recursos completos são liberados após contato — <a href="/#contato" class="underline font-semibold">fale com a NOKAHI</a>.</div>`
+      : (b?`Plano atual: <b>${esc(b.plan_name)}</b> (${esc(b.status)}) · uso: <b>${b.routes_used_month}</b> rotas`:'');
     document.getElementById('billing-plans').innerHTML=Object.values(plans).map(p=>`
       <div class="rounded-xl border p-4 flex flex-col gap-2 ${b?.plan_id===p.id?'border-emerald-500 ring-1 ring-emerald-500':''}">
         <div class="font-bold text-sm">${esc(p.name)}</div>
         <div class="text-2xl font-extrabold">${p.price_month_brl>0?fR(p.price_month_brl):'Sob consulta'}<span class="text-xs font-medium text-gray-400">${p.price_month_brl>0?'/mês':''}</span></div>
         <p class="text-[11px] text-gray-500 flex-1">${esc(p.description)}</p>
-        ${p.id==='enterprise'?`<a href="/#contato" class="text-center px-3 py-2 rounded-lg border text-xs font-bold text-gray-700 hover:bg-gray-50">Falar com vendas</a>`
+        ${(p.id==='enterprise'||state.isDemo)?`<a href="/#contato" class="text-center px-3 py-2 rounded-lg border text-xs font-bold text-emerald-700 border-emerald-200 hover:bg-emerald-50">Fale com a NOKAHI</a>`
           :`<button onclick="subscribe('${p.id}')" class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">${b?.plan_id===p.id&&b?.status==='active'?'Renovar':'Assinar'}</button>`}
       </div>`).join('');
   }catch(e){ document.getElementById('billing-plans').innerHTML=`<div class="col-span-full text-sm text-red-600">Não foi possível carregar os planos: ${esc(e.message)}</div>`; }

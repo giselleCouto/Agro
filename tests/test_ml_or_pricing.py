@@ -13,6 +13,7 @@ from agroroute.pricing import QuoteRequest, quote
 
 client = TestClient(app)
 DEMO = {"X-API-Key": "demo-mg-2026"}
+NONDEMO = {"X-API-Key": "demo-key"}   # tenant "demo" (não is_demo) p/ recursos travados na demo
 
 
 # ---- ML ----
@@ -96,7 +97,7 @@ def test_optimize_endpoint():
                     {"name": "Talhão B", "lat": -19.95, "lon": -48.20, "supply": 140}],
         "destinations": [{"name": "Usina Delta", "lat": -19.97, "lon": -47.78, "demand": 200}],
     }
-    r = client.post("/v1/optimize", json=body, headers=DEMO)
+    r = client.post("/v1/optimize", json=body, headers=NONDEMO)
     assert r.status_code == 200
     d = r.json()
     assert d["total_cost"] > 0

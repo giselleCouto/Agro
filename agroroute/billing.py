@@ -47,8 +47,8 @@ class Plan(BaseModel):
 PLANS: dict[str, Plan] = {
     "demo": Plan(
         id="demo", name="Demonstração", price_month_brl=0.0,
-        routes_per_month=300, public=False,
-        description="Degustação da plataforma na região do Triângulo Mineiro (MG)",
+        routes_per_month=5, public=False,
+        description="Degustação (limite de 5 rotas) — recursos completos após contato",
     ),
     # Preços por USINA/mês, calibrados para margem BRUTA >= 80% (custo direto de
     # hospedagem+suporte ~R$ 2,2k/usina/mês). Ver BUSINESS_CASE.md.
