@@ -25,6 +25,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
     create_engine,
     func,
     select,
@@ -91,6 +92,8 @@ class SubscriptionRow(Base):
 
 class VehicleRow(Base):
     __tablename__ = "vehicles"
+    # placa única por tenant: torna a semeadura idempotente sob concorrência
+    __table_args__ = (UniqueConstraint("tenant_id", "plate", name="uq_vehicle_tenant_plate"),)
     id = Column(Integer, primary_key=True, autoincrement=True)
     tenant_id = Column(String, index=True, nullable=False)
     plate = Column(String, nullable=False)
@@ -315,11 +318,21 @@ _engine = None
 _Session = None
 
 
+def _create_all(engine) -> None:
+    """create_all tolerante a corrida de DDL entre workers no boot (Postgres):
+    se outro worker criar as tabelas ao mesmo tempo, a 2ª chamada (checkfirst)
+    apenas confirma que já existem."""
+    try:
+        Base.metadata.create_all(engine)
+    except Exception:
+        Base.metadata.create_all(engine, checkfirst=True)
+
+
 def get_engine():
     global _engine, _Session
     if _engine is None:
         _engine = make_engine()
-        Base.metadata.create_all(_engine)
+        _create_all(_engine)
         _Session = sessionmaker(bind=_engine, expire_on_commit=False, future=True)
     return _engine
 
@@ -327,7 +340,7 @@ def get_engine():
 def session_factory(engine=None):
     """Devolve um sessionmaker ligado ao engine dado (ou ao engine global)."""
     if engine is not None:
-        Base.metadata.create_all(engine)
+        _create_all(engine)
         return sessionmaker(bind=engine, expire_on_commit=False, future=True)
     get_engine()
     return _Session

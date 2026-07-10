@@ -79,7 +79,11 @@ class VehicleStore:
         with write_lock(), self._Session() as s:
             row = VehicleRow(tenant_id=tenant_id, **v.model_dump())
             s.add(row)
-            s.commit()
+            try:
+                s.commit()
+            except IntegrityError:
+                s.rollback()
+                raise ValueError(f"placa {v.plate} já cadastrada para este tenant")
             s.refresh(row)
             return row.to_dict()
 

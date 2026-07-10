@@ -278,7 +278,10 @@ def fleet(tenant: TenantConfig = Depends(get_tenant)):
 
 @app.post("/v1/fleet")
 def fleet_add(vehicle: VehicleIn, tenant: TenantConfig = Depends(get_tenant)):
-    return vehicle_store.create(tenant.tenant_id, vehicle)
+    try:
+        return vehicle_store.create(tenant.tenant_id, vehicle)
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
 
 
 @app.get("/v1/dashboard")

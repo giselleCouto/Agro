@@ -138,7 +138,11 @@ class BillingStore:
                     routes_used_month=0, usage_month=_current_month(), provider="sandbox",
                 )
                 s.add(row)
-                s.commit()
+                try:
+                    s.commit()
+                except IntegrityError:
+                    s.rollback()  # outro worker criou (Postgres multi-worker)
+                    row = s.get(SubscriptionRow, tenant_id)
             return Subscription.from_row(row)
 
     def update(self, sub: Subscription) -> None:
@@ -198,7 +202,11 @@ class BillingStore:
                 row.routes_used_month = 0
             if row.status in ("trialing", "active") and now > (row.period_end or 0):
                 row.status = "past_due"
-            s.commit()
+            try:
+                s.commit()
+            except IntegrityError:
+                s.rollback()  # outro worker criou a linha ao mesmo tempo
+                row = s.get(SubscriptionRow, tenant_id)
             return Subscription.from_row(row)
 
     def find_by_provider_sub(self, sub_id: str) -> Subscription | None:
@@ -230,19 +238,29 @@ class BillingStore:
         no SQLite é no-op, mas o `write_lock` global serializa as escritas.
         """
         with write_lock(), self._Session() as s:
-            row = (
-                s.query(SubscriptionRow)
-                .filter(SubscriptionRow.tenant_id == tenant_id)
-                .with_for_update()
-                .first()
-            )
+            def _locked_row():
+                return (
+                    s.query(SubscriptionRow)
+                    .filter(SubscriptionRow.tenant_id == tenant_id)
+                    .with_for_update()
+                    .first()
+                )
+            row = _locked_row()
             if row is None:
-                row = SubscriptionRow(
+                # cria a linha (tolerando corrida entre workers) e re-obtém com
+                # o lock de linha antes de consumir a cota
+                s.add(SubscriptionRow(
                     tenant_id=tenant_id, plan_id="essencial", status="trialing",
                     period_end=time.time() + TRIAL_DAYS * 24 * 3600,
                     routes_used_month=0, usage_month=_current_month(), provider="sandbox",
-                )
-                s.add(row)
+                ))
+                try:
+                    s.commit()
+                except IntegrityError:
+                    s.rollback()
+                row = _locked_row()
+                if row is None:
+                    return BillingDecision(False, "não foi possível iniciar a assinatura")
             now = time.time()
             month = _current_month()
             if row.usage_month != month:

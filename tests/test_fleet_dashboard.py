@@ -44,6 +44,13 @@ def test_fleet_add_vehicle():
     assert after == before + 1
 
 
+def test_fleet_add_duplicate_plate_conflict():
+    v = {"plate": "DUP-PLATE-1", "type": "treminhao"}
+    assert client.post("/v1/fleet", json=v, headers=DEMO).status_code == 200
+    r = client.post("/v1/fleet", json=v, headers=DEMO)   # placa repetida
+    assert r.status_code == 409
+
+
 def test_dashboard_endpoint():
     r = client.get("/v1/dashboard", headers=DEMO)
     assert r.status_code == 200
