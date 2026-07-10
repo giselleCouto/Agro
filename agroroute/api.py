@@ -109,7 +109,11 @@ app = FastAPI(
 
 if ALLOWED_HOSTS:
     from starlette.middleware.trustedhost import TrustedHostMiddleware
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
+    # mantém o domínio custom E permite os domínios das plataformas (Railway/
+    # Render/Fly) e healthchecks, para a URL do provedor seguir funcionando
+    _platform = ["*.up.railway.app", "*.railway.app", "*.railway.internal",
+                 "*.onrender.com", "*.fly.dev", "localhost", "127.0.0.1"]
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS + _platform)
 if CORS_ORIGINS:
     from fastapi.middleware.cors import CORSMiddleware
     app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS,

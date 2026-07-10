@@ -83,6 +83,10 @@ Pronto: **https://agroroute.despaxai.com** no ar. O `PUBLIC_BASE_URL`,
 3. Em **Custom Domain**, adicione `agroroute.despaxai.com`; o provedor mostra o
    host CNAME a usar no Passo 1 e emite o TLS automaticamente.
 
+> **Porta:** o container escuta automaticamente na porta que a plataforma injeta
+> (`$PORT`) — não fixe uma porta. A URL do provedor (ex.: `*.up.railway.app`)
+> continua funcionando mesmo com `ALLOWED_HOSTS` setado.
+
 ---
 
 ## Passo 2 — Stripe (cobrança real)
