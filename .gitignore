@@ -1,0 +1,24 @@
+# segredos e ambiente
+.env
+
+# banco de dados local
+*.db
+data/*.db
+
+# billing/estado legado (migrado para o banco)
+data/billing.json
+
+# GraphHopper (dados pesados)
+graphhopper/data/graph-cache/
+graphhopper/data/srtm/
+graphhopper/data/*.osm.pbf
+graphhopper/*.jar
+graphhopper/*.zip
+graphhopper/jre/
+graphhopper/jre-tmp/
+graphhopper/*.log
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/

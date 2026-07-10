@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOKAHI · O Waze do Agro — reduza até 23% do diesel da sua safra</title>
+<meta name="description" content="Roteirização inteligente para o transporte de cana-de-açúcar. Usinas reduzem em média 23% o consumo de combustível por safra.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@0.454.0/dist/umd/lucide.min.js"></script>
+<style>
+body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
+.icon-xs{width:14px;height:14px}.icon-sm{width:18px;height:18px}.icon-md{width:22px;height:22px}.icon-lg{width:26px;height:26px}
+</style>
+</head>
+<body class="bg-white text-gray-900">
+
+<!-- ===================== NAV ===================== -->
+<header class="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
+        <i data-lucide="leaf" class="icon-md text-white"></i>
+      </div>
+      <div>
+        <span class="text-base font-bold tracking-tight">NOKAHI</span>
+        <p class="text-[10px] text-gray-500 tracking-wider uppercase leading-none">Waze do Agro</p>
+      </div>
+    </div>
+    <nav class="hidden sm:flex items-center gap-6 text-sm text-gray-600">
+      <a href="#como" class="hover:text-gray-900">Como funciona</a>
+      <a href="#recursos" class="hover:text-gray-900">Recursos</a>
+      <a href="#planos" class="hover:text-gray-900">Planos</a>
+      <a href="#contato" class="hover:text-gray-900">Contato</a>
+    </nav>
+    <div class="flex items-center gap-2">
+      <a href="/app" class="px-4 py-2 rounded-lg border text-sm font-semibold text-gray-700 hover:bg-gray-50">Entrar</a>
+      <a href="/app?demo=1" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold">Testar demo</a>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section class="relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30"></div>
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28 text-center">
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-6">
+      <i data-lucide="trending-down" class="icon-xs"></i> Resultado medido em usinas de cana-de-açúcar
+    </div>
+    <h1 class="text-4xl sm:text-6xl font-black tracking-tight leading-tight max-w-4xl mx-auto">
+      Reduza até <span class="text-emerald-600">23% do diesel</span> da sua safra com rotas inteligentes
+    </h1>
+    <p class="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
+      O NOKAHI é o Waze do agro: encontra, para cada viagem do seu canavial à usina,
+      a rota de <b>menor custo real</b> — combustível, pedágio e desgaste — respeitando
+      as restrições dos seus caminhões e as condições de cada dia.
+    </p>
+    <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="/app?demo=1" class="px-8 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2">
+        <i data-lucide="play-circle" class="icon-sm"></i> Testar a demo grátis
+      </a>
+      <a href="#contato" class="px-8 py-3.5 rounded-xl border-2 font-bold text-base text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2">
+        <i data-lucide="calendar" class="icon-sm"></i> Falar com um especialista
+      </a>
+    </div>
+    <p class="mt-4 text-sm text-gray-500">
+      Demonstração aberta na região do <b>Triângulo Mineiro (MG)</b> — sem cadastro. Experimente agora.
+    </p>
+
+    <!-- stats -->
+    <div class="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+      <div class="bg-white rounded-2xl border p-6 shadow-sm">
+        <div class="text-4xl font-black text-emerald-600">−23%</div>
+        <div class="text-sm text-gray-500 mt-1">consumo de combustível<br>por safra</div>
+      </div>
+      <div class="bg-white rounded-2xl border p-6 shadow-sm">
+        <div class="text-4xl font-black text-gray-900">R$ milhões</div>
+        <div class="text-sm text-gray-500 mt-1">de economia potencial<br>por usina/safra</div>
+      </div>
+      <div class="bg-white rounded-2xl border p-6 shadow-sm">
+        <div class="text-4xl font-black text-gray-900">Brasil</div>
+        <div class="text-sm text-gray-500 mt-1">cobertura nacional,<br>incluindo vias internas</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== COMO FUNCIONA ===================== -->
+<section id="como" class="max-w-7xl mx-auto px-4 sm:px-6 py-20">
+  <div class="text-center mb-12">
+    <h2 class="text-3xl font-black tracking-tight">Como funciona</h2>
+    <p class="text-gray-500 mt-2">Três passos, sem hardware novo e sem mudar sua operação.</p>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <div class="rounded-2xl border p-6">
+      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white font-black flex items-center justify-center mb-4">1</div>
+      <h3 class="font-bold mb-2">Informe origem e destino</h3>
+      <p class="text-sm text-gray-500">Talhão, fazenda ou coordenada → usina. Individualmente ou em lote, para a frota inteira de uma vez.</p>
+    </div>
+    <div class="rounded-2xl border p-6">
+      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white font-black flex items-center justify-center mb-4">2</div>
+      <h3 class="font-bold mb-2">Escolha o caminhão e a carga</h3>
+      <p class="text-sm text-gray-500">Treminhão, rodotrem ou pentatrem, cheio ou vazio — cada configuração muda a rota ideal, e o NOKAHI sabe disso.</p>
+    </div>
+    <div class="rounded-2xl border p-6">
+      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white font-black flex items-center justify-center mb-4">3</div>
+      <h3 class="font-bold mb-2">Receba a rota mais econômica</h3>
+      <p class="text-sm text-gray-500">Compare alternativas com o custo real de cada viagem e a projeção de economia na safra inteira.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== RECURSOS ===================== -->
+<section id="recursos" class="bg-gray-50 border-y">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-20">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-black tracking-tight">Feito para o transporte pesado do agro</h2>
+      <p class="text-gray-500 mt-2">Roteirizadores comuns planejam para carros. O NOKAHI planeja para a sua frota canavieira.</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div class="bg-white rounded-2xl border p-6">
+        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="truck" class="icon-md text-emerald-700"></i></div>
+        <h3 class="font-bold mb-1.5">Rotas que respeitam seu caminhão</h3>
+        <p class="text-sm text-gray-500">Peso, dimensões e restrições urbanas de cada composição são considerados antes de sugerir qualquer caminho — nada de rota que o rodotrem não passa.</p>
+      </div>
+      <div class="bg-white rounded-2xl border p-6">
+        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="cloud-rain" class="icon-md text-emerald-700"></i></div>
+        <h3 class="font-bold mb-1.5">Clima do dia, custo do dia</h3>
+        <p class="text-sm text-gray-500">A mesma estrada custa diferente depois de uma semana de chuva. O NOKAHI monitora as condições reais da região e recalcula o custo de cada trecho.</p>
+      </div>
+      <div class="bg-white rounded-2xl border p-6">
+        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="coins" class="icon-md text-emerald-700"></i></div>
+        <h3 class="font-bold mb-1.5">Pedágio real, por eixo</h3>
+        <p class="text-sm text-gray-500">Cada praça no caminho entra na conta com a tarifa da sua composição — inclusive a diferença de ir carregado e voltar vazio.</p>
+      </div>
+      <div class="bg-white rounded-2xl border p-6">
+        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="mountain" class="icon-md text-emerald-700"></i></div>
+        <h3 class="font-bold mb-1.5">Relevo e piso na conta</h3>
+        <p class="text-sm text-gray-500">Subidas, asfalto, cascalho ou terra: o custo de combustível e de manutenção muda com o terreno — e a comparação entre rotas também.</p>
+      </div>
+      <div class="bg-white rounded-2xl border p-6">
+        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="layers" class="icon-md text-emerald-700"></i></div>
+        <h3 class="font-bold mb-1.5">Frota inteira, de uma vez</h3>
+        <p class="text-sm text-gray-500">Calcule centenas de rotas simultaneamente no início da safra e replaneje em minutos quando o cenário muda.</p>
+      </div>
+      <div class="bg-white rounded-2xl border p-6">
+        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="building-2" class="icon-md text-emerald-700"></i></div>
+        <h3 class="font-bold mb-1.5">Cada usina no seu ambiente</h3>
+        <p class="text-sm text-gray-500">Plataforma multiempresa: suas rotas, tarifas, frota e vias internas ficam isoladas e configuradas para a sua operação.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PLANOS ===================== -->
+<section id="planos" class="max-w-7xl mx-auto px-4 sm:px-6 py-20">
+  <div class="text-center mb-12">
+    <h2 class="text-3xl font-black tracking-tight">Planos por assinatura mensal</h2>
+    <p class="text-gray-500 mt-2">Comece com 14 dias de teste. Cancele quando quiser.</p>
+  </div>
+  <div id="plans-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-4xl mx-auto">
+    <!-- preenchido via /v1/billing/plans; fallback estático abaixo -->
+  </div>
+</section>
+
+<!-- ===================== CTA FINAL ===================== -->
+<!-- ===================== CONTATO / LEAD ===================== -->
+<section id="contato" class="bg-gray-50 border-y">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-20 grid md:grid-cols-2 gap-10 items-start">
+    <div>
+      <h2 class="text-3xl font-black tracking-tight">Fale com a NOKAHI</h2>
+      <p class="text-gray-600 mt-3">Conte sobre sua operação e nós retornamos com uma estimativa de economia
+        para a sua frota e uma demonstração guiada. Sem compromisso.</p>
+      <ul class="mt-6 space-y-3 text-sm text-gray-600">
+        <li class="flex items-center gap-2"><i data-lucide="check-circle" class="icon-sm text-emerald-600"></i> Resposta em até 1 dia útil</li>
+        <li class="flex items-center gap-2"><i data-lucide="check-circle" class="icon-sm text-emerald-600"></i> Teste grátis por 14 dias</li>
+        <li class="flex items-center gap-2"><i data-lucide="check-circle" class="icon-sm text-emerald-600"></i> Demo aberta no Triângulo Mineiro (MG)</li>
+      </ul>
+      <p class="mt-6 text-sm text-gray-500 flex items-center gap-2">
+        <i data-lucide="mail" class="icon-sm"></i> <a href="mailto:contato@nokahi.com" class="text-emerald-700 hover:underline">contato@nokahi.com</a>
+      </p>
+    </div>
+    <form id="lead-form" class="bg-white rounded-2xl border p-6 space-y-3 shadow-sm" onsubmit="submitLead(event)">
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div><label class="text-xs font-semibold text-gray-500">Nome *</label>
+          <input name="name" required class="w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></div>
+        <div><label class="text-xs font-semibold text-gray-500">Usina / Empresa</label>
+          <input name="company" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></div>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div><label class="text-xs font-semibold text-gray-500">E-mail *</label>
+          <input name="email" type="email" required class="w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></div>
+        <div><label class="text-xs font-semibold text-gray-500">Telefone / WhatsApp</label>
+          <input name="phone" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></div>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div><label class="text-xs font-semibold text-gray-500">Cargo</label>
+          <input name="role" placeholder="Ex: Gerente de logística" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></div>
+        <div><label class="text-xs font-semibold text-gray-500">Tamanho da frota</label>
+          <select name="fleet_size" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="">Selecione…</option><option>1–10 caminhões</option><option>11–50 caminhões</option>
+            <option>51–200 caminhões</option><option>200+ caminhões</option>
+          </select></div>
+      </div>
+      <div><label class="text-xs font-semibold text-gray-500">Mensagem</label>
+        <textarea name="message" rows="3" placeholder="Conte sobre sua operação e sua região" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea></div>
+      <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
+      <button type="submit" id="lead-submit" class="w-full px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm">
+        Quero falar com a NOKAHI
+      </button>
+      <p id="lead-msg" class="hidden text-sm text-center"></p>
+    </form>
+  </div>
+</section>
+
+<section class="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16 text-center">
+    <h2 class="text-3xl font-black tracking-tight">Quanto custa cada quilômetro da sua safra?</h2>
+    <p class="mt-3 text-emerald-100">Descubra em minutos quanto sua usina pode economizar. Teste grátis por 14 dias.</p>
+    <div class="mt-7 flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="/app?demo=1" class="px-8 py-3.5 rounded-xl bg-white text-emerald-700 font-bold hover:bg-emerald-50">Testar a demo agora</a>
+      <a href="#contato" class="px-8 py-3.5 rounded-xl border-2 border-white/60 font-bold hover:bg-white/10">Falar com especialista</a>
+    </div>
+  </div>
+</section>
+
+<footer class="border-t">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
+    <div class="flex items-center gap-2">
+      <div class="w-6 h-6 rounded bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
+        <i data-lucide="leaf" class="icon-xs text-white"></i>
+      </div>
+      <span><b class="text-gray-600">NOKAHI</b> · Waze do Agro · © 2026</span>
+    </div>
+    <a href="mailto:contato@nokahi.com" class="hover:text-gray-600">contato@nokahi.com</a>
+  </div>
+</footer>
+
+<script>
+lucide.createIcons();
+
+const FALLBACK_PLANS = [
+  {id:'essencial', name:'Essencial', price_month_brl:1990, description:'1 usina · até 1.000 rotas/mês · clima real e pedágio por eixo'},
+  {id:'profissional', name:'Profissional', price_month_brl:4990, description:'Multi-usina · 10.000 rotas/mês · roteirizador dedicado · API'},
+  {id:'enterprise', name:'Enterprise', price_month_brl:0, description:'Frota ilimitada · SLA · integração telemetria/ERP · sob consulta'},
+];
+const fR = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:0});
+
+function renderPlans(plans) {
+  document.getElementById('plans-grid').innerHTML = plans.map((p,i) => `
+    <div class="rounded-2xl border p-6 flex flex-col gap-3 ${i===1?'border-emerald-500 ring-2 ring-emerald-500 shadow-xl relative':''}">
+      ${i===1?'<span class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold">MAIS ESCOLHIDO</span>':''}
+      <div class="font-bold">${p.name}</div>
+      <div class="text-3xl font-black">${p.price_month_brl>0?fR(p.price_month_brl):'Sob consulta'}<span class="text-sm font-medium text-gray-400">${p.price_month_brl>0?'/mês':''}</span></div>
+      <p class="text-sm text-gray-500 flex-1">${p.description}</p>
+      ${p.id==='enterprise'
+        ? '<a href="#contato" class="text-center px-4 py-2.5 rounded-xl border font-bold text-sm text-gray-700 hover:bg-gray-50">Falar com vendas</a>'
+        : `<a href="/app?demo=1" class="text-center px-4 py-2.5 rounded-xl ${i===1?'bg-emerald-600 hover:bg-emerald-700 text-white':'border text-gray-700 hover:bg-gray-50'} font-bold text-sm">Começar teste grátis</a>`}
+    </div>`).join('');
+}
+renderPlans(FALLBACK_PLANS);
+fetch('/v1/billing/plans').then(r=>r.json())
+  .then(p => renderPlans(Object.values(p)))
+  .catch(()=>{});
+
+async function submitLead(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('lead-submit');
+  const msg = document.getElementById('lead-msg');
+  const payload = Object.fromEntries(new FormData(form).entries());
+  payload.source = 'landing';
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  try {
+    const r = await fetch('/v1/leads', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    if (!r.ok) {
+      let detail = 'falha ao enviar';
+      try { detail = (await r.json()).detail || detail; } catch {}
+      throw new Error(detail);
+    }
+    form.reset();
+    msg.textContent = '✓ Recebido! A NOKAHI entrará em contato em breve.';
+    msg.className = 'text-sm text-center text-emerald-700 font-semibold';
+  } catch (err) {
+    msg.textContent = 'Não foi possível enviar: ' + err.message + '. Escreva para contato@nokahi.com.';
+    msg.className = 'text-sm text-center text-red-600';
+  } finally {
+    msg.classList.remove('hidden');
+    btn.disabled = false; btn.textContent = 'Quero falar com a NOKAHI';
+  }
+}
+</script>
+</body>
+</html>

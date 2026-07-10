@@ -1,0 +1,18 @@
+# GraphHopper self-hosted para o NOKAHI AgroRoute
+#
+# Dev (São Paulo):  docker compose up -d      (dados já em ./data)
+# Produção (Brasil): troque o pbf por brazil-latest.osm.pbf (Geofabrik) e
+#                    suba JAVA_OPTS para -Xmx12g; o import demora ~1h.
+services:
+  graphhopper:
+    image: israelhikingmap/graphhopper:latest
+    container_name: agroroute-graphhopper
+    command: ["--config", "/data/config.yml"]
+    volumes:
+      - ./data:/data
+      - ./config.yml:/data/config.yml:ro
+    ports:
+      - "8989:8989"
+    environment:
+      - JAVA_OPTS=-Xmx6g -Xms2g
+    restart: unless-stopped

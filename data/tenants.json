@@ -1,0 +1,67 @@
+{
+  "tenants": [
+    {
+      "tenant_id": "sajb",
+      "name": "SAJB / COA — Usina Santa Adélia (exemplo)",
+      "api_key": "sajb-dev-key-troque-em-producao",
+      "diesel_price": 6.0,
+      "osrm_base_url": "https://router.project-osrm.org",
+      "graphhopper_url": "http://localhost:8989",
+      "avoid_zones": [
+        {"name": "Pradópolis", "lat": -21.3630, "lon": -48.0660, "radius_km": 1.5},
+        {"name": "Guariba", "lat": -21.3570, "lon": -48.2290, "radius_km": 2.0},
+        {"name": "Jaboticabal", "lat": -21.2550, "lon": -48.3220, "radius_km": 3.5},
+        {"name": "Bebedouro", "lat": -20.9490, "lon": -48.4790, "radius_km": 3.0},
+        {"name": "Taquaritinga", "lat": -21.4050, "lon": -48.5080, "radius_km": 2.5},
+        {"name": "Sertãozinho", "lat": -21.1380, "lon": -47.9900, "radius_km": 4.0},
+        {"name": "Matão", "lat": -21.6030, "lon": -48.3660, "radius_km": 3.0},
+        {"name": "Araraquara", "lat": -21.7940, "lon": -48.1750, "radius_km": 6.0},
+        {"name": "Barrinha", "lat": -21.1930, "lon": -48.1640, "radius_km": 1.5},
+        {"name": "Pitangueiras", "lat": -20.9440, "lon": -48.2210, "radius_km": 2.0},
+        {"name": "Monte Azul Paulista", "lat": -20.9060, "lon": -48.6410, "radius_km": 1.5},
+        {"name": "Taquaral", "lat": -21.0740, "lon": -48.4140, "radius_km": 0.8}
+      ],
+      "toll_plazas": [
+        {"name": "Pedágio SP-322 (Guariba)", "lat": -21.3280, "lon": -48.1850, "tariff_per_axle": 1.78, "highway": "SP-322"},
+        {"name": "Pedágio SP-322 (Bebedouro)", "lat": -20.9720, "lon": -48.4350, "tariff_per_axle": 1.78, "highway": "SP-322"},
+        {"name": "Pedágio SP-333 (Jaboticabal)", "lat": -21.2890, "lon": -48.3450, "tariff_per_axle": 1.48, "highway": "SP-333"},
+        {"name": "Pedágio SP-318 (Matão)", "lat": -21.5820, "lon": -48.3980, "tariff_per_axle": 1.56, "highway": "SP-318"},
+        {"name": "Pedágio SP-326 (Taquaritinga)", "lat": -21.4150, "lon": -48.5250, "tariff_per_axle": 1.70, "highway": "SP-326"},
+        {"name": "Pedágio SP-255 (Araraquara)", "lat": -21.7650, "lon": -48.2100, "tariff_per_axle": 1.91, "highway": "SP-255"},
+        {"name": "Pedágio SP-310 (Araraquara)", "lat": -21.7200, "lon": -48.1500, "tariff_per_axle": 2.05, "highway": "SP-310"},
+        {"name": "Pedágio SP-333 (Pitangueiras)", "lat": -20.9800, "lon": -48.2500, "tariff_per_axle": 1.48, "highway": "SP-333"}
+      ]
+    },
+    {
+      "tenant_id": "demo",
+      "name": "NOKAHI Demo",
+      "api_key": "demo-key",
+      "diesel_price": 6.2
+    },
+    {
+      "tenant_id": "demo-mg",
+      "name": "NOKAHI Demo — Triângulo Mineiro (MG)",
+      "api_key": "demo-mg-2026",
+      "diesel_price": 6.1,
+      "osrm_base_url": "https://router.project-osrm.org",
+      "is_demo": true,
+      "avoid_zones": [
+        {"name": "Uberaba", "lat": -19.7480, "lon": -47.9320, "radius_km": 3.5},
+        {"name": "Uberlândia", "lat": -18.9180, "lon": -48.2770, "radius_km": 5.0},
+        {"name": "Frutal", "lat": -20.0250, "lon": -48.9400, "radius_km": 3.0},
+        {"name": "Iturama", "lat": -19.7270, "lon": -50.1960, "radius_km": 2.5},
+        {"name": "Conceição das Alagoas", "lat": -19.9140, "lon": -48.3880, "radius_km": 2.5},
+        {"name": "Campo Florido", "lat": -19.7670, "lon": -48.5670, "radius_km": 2.0},
+        {"name": "Planura", "lat": -20.1400, "lon": -48.7230, "radius_km": 1.8},
+        {"name": "Itapagipe", "lat": -19.9100, "lon": -49.3790, "radius_km": 2.0},
+        {"name": "Prata", "lat": -19.3090, "lon": -48.9250, "radius_km": 2.5}
+      ],
+      "toll_plazas": [
+        {"name": "Pedágio BR-050 (Uberaba)", "lat": -19.6020, "lon": -47.9900, "tariff_per_axle": 2.20, "highway": "BR-050"},
+        {"name": "Pedágio BR-050 (Uberlândia)", "lat": -18.9800, "lon": -48.1000, "tariff_per_axle": 2.20, "highway": "BR-050"},
+        {"name": "Pedágio BR-262 (Nova Ponte)", "lat": -19.5500, "lon": -47.6800, "tariff_per_axle": 2.05, "highway": "BR-262"},
+        {"name": "Pedágio BR-153 (Prata)", "lat": -19.2200, "lon": -48.9900, "tariff_per_axle": 1.98, "highway": "BR-153"}
+      ]
+    }
+  ]
+}

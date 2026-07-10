@@ -1,0 +1,36 @@
+# GraphHopper self-hosted — NOKAHI AgroRoute
+# Perfil "truck" para CVCs canavieiros, modo flexível (sem CH) para permitir
+# custom_model por requisição (peso do veículo + zonas urbanas do tenant).
+graphhopper:
+  datareader.file: /data/sao-paulo-latest.osm.pbf
+  graph.location: /data/graph-cache
+
+  # vias irrelevantes para caminhão ficam fora do grafo
+  import.osm.ignored_highways: footway,cycleway,path,pedestrian,steps
+
+  # encoded values usados pelo custom model e pelos details da resposta
+  graph.encoded_values: car_access, car_average_speed, road_class, road_environment, max_speed, surface, toll, track_type, max_weight, max_height, max_width, hazmat
+
+  # altimetria embutida no grafo (SRTM) -> resposta já vem com elevação 3D
+  graph.elevation.provider: srtm
+  graph.elevation.cache_dir: /data/srtm
+
+  custom_models.directory: /data/custom_models
+  profiles:
+    - name: truck
+      custom_model_files: [nokahi_truck.json]
+
+  # sem CH: roteamento flexível aceita custom_model na requisição
+  profiles_ch: []
+  prepare.min_network_size: 200
+  routing.non_ch.max_waypoint_distance: 2000000
+  routing.max_visited_nodes: 5000000
+
+server:
+  application_connectors:
+    - type: http
+      port: 8989
+      bind_host: 0.0.0.0
+  admin_connectors:
+    - type: http
+      port: 8990

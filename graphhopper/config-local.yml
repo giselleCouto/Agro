@@ -1,0 +1,31 @@
+# GraphHopper self-hosted (execução local via JRE portátil, sem Docker)
+# Uso:  jre\bin\java -Xmx6g -jar graphhopper-web-11.0.jar server config-local.yml
+graphhopper:
+  datareader.file: data/sao-paulo-latest.osm.pbf
+  graph.location: data/graph-cache
+
+  import.osm.ignored_highways: footway,cycleway,path,pedestrian,steps
+
+  graph.encoded_values: car_access, car_average_speed, road_class, road_environment, max_speed, surface, toll, track_type, max_weight, max_height, max_width
+
+  graph.elevation.provider: srtm
+  graph.elevation.cache_dir: data/srtm
+
+  custom_models.directory: data/custom_models
+  profiles:
+    - name: truck
+      custom_model_files: [nokahi_truck.json]
+
+  profiles_ch: []
+  prepare.min_network_size: 200
+  routing.non_ch.max_waypoint_distance: 2000000
+  routing.max_visited_nodes: 5000000
+
+server:
+  application_connectors:
+    - type: http
+      port: 8989
+      bind_host: 0.0.0.0
+  admin_connectors:
+    - type: http
+      port: 8990

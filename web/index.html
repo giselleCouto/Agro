@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOKAHI · Fleet Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@0.454.0/dist/umd/lucide.min.js"></script>
+<style>
+body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
+.icon-xs{width:14px;height:14px}.icon-sm{width:16px;height:16px}.icon-md{width:20px;height:20px}
+.lbl{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:9999px;font-size:.76rem;font-weight:500;border:1px solid #e5e7eb;background:#fff;color:#6b7280;cursor:pointer;transition:all .15s}
+.pill:hover{border-color:#9ca3af}.pill.active{color:#fff;box-shadow:0 4px 10px rgba(0,0,0,.12)}
+.step-dot{width:20px;height:20px;border-radius:9999px;background:#10b981;color:#fff;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:.82rem;font-weight:600;color:#4b5563;cursor:pointer;transition:all .15s}
+.nav-item:hover{background:#f0fdf4;color:#065f46}
+.nav-item.active{background:#059669;color:#fff}
+.leaflet-container{border-radius:.75rem}
+.bar{height:6px;border-radius:9999px;background:#e5e7eb;overflow:hidden}
+.bar>div{height:100%;border-radius:9999px}
+</style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+<div class="min-h-screen flex flex-col">
+
+  <!-- ===================== TOP BAR ===================== -->
+  <header class="border-b bg-white sticky top-0 z-[1100]">
+    <div class="px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+      <a href="/" class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
+          <i data-lucide="leaf" class="icon-md text-white"></i></div>
+        <div><div class="text-base font-bold leading-none">NOKAHI</div>
+          <div class="text-[10px] text-gray-500 tracking-wider uppercase">Fleet Intelligence</div></div>
+      </a>
+      <div class="flex items-center gap-2">
+        <button id="plan-chip" onclick="openBilling()" class="hidden items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+          <i data-lucide="credit-card" class="icon-xs"></i><span id="plan-chip-text"></span></button>
+        <input type="password" id="apikey" placeholder="Chave de acesso" class="px-3 py-1.5 rounded-lg border text-xs w-40 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <button id="connect-btn" onclick="connect()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold">Entrar</button>
+        <span id="tenant-badge" class="hidden text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800"></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex-1 flex">
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="w-52 shrink-0 border-r bg-white p-3 hidden md:flex flex-col gap-1">
+      <div class="nav-item active" data-view="dashboard" onclick="showView('dashboard')"><i data-lucide="layout-dashboard" class="icon-sm"></i> Dashboard</div>
+      <div class="nav-item" data-view="rotas" onclick="showView('rotas')"><i data-lucide="route" class="icon-sm"></i> Rotas</div>
+      <div class="nav-item" data-view="manutencao" onclick="showView('manutencao')"><i data-lucide="wrench" class="icon-sm"></i> Manutenção</div>
+      <div class="mt-auto text-[10px] text-gray-400 px-2">
+        <a href="/#contato" class="hover:text-emerald-600">Falar com a NOKAHI</a><br>contato@nokahi.com
+      </div>
+    </aside>
+    <!-- nav mobile -->
+    <div class="md:hidden fixed bottom-0 inset-x-0 bg-white border-t z-[1100] flex">
+      <button class="flex-1 py-2 text-xs font-semibold text-gray-500" data-view="dashboard" onclick="showView('dashboard')">Dashboard</button>
+      <button class="flex-1 py-2 text-xs font-semibold text-gray-500" data-view="rotas" onclick="showView('rotas')">Rotas</button>
+      <button class="flex-1 py-2 text-xs font-semibold text-gray-500" data-view="manutencao" onclick="showView('manutencao')">Manutenção</button>
+    </div>
+
+    <!-- ===================== MAIN ===================== -->
+    <main class="flex-1 min-w-0 p-4 sm:p-6 pb-16">
+
+      <!-- banner demo -->
+      <div id="demo-banner" class="hidden mb-4 rounded-xl border-2 border-emerald-300 bg-emerald-50 p-4 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-sm text-emerald-800">
+          <i data-lucide="play-circle" class="icon-sm"></i>
+          <span><b>Modo demonstração</b> — <span id="demo-region"></span>. Explore o Dashboard, calcule rotas e veja a manutenção. Para usar sua operação, <a href="/#contato" class="underline">fale com a NOKAHI</a>.</span>
+        </div>
+        <a href="/#contato" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold whitespace-nowrap">Assinar</a>
+      </div>
+      <!-- aviso billing -->
+      <div id="billing-alert" class="hidden mb-4 rounded-xl border-2 border-amber-400 bg-amber-50 p-4 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-sm text-amber-800"><i data-lucide="alert-triangle" class="icon-sm"></i><span id="billing-alert-text"></span></div>
+        <button onclick="openBilling()" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold whitespace-nowrap">Ver planos</button>
+      </div>
+      <!-- estado desconectado -->
+      <div id="disconnected" class="rounded-xl border border-dashed bg-white p-10 text-center">
+        <div class="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-3"><i data-lucide="lock" class="w-7 h-7 text-emerald-600"></i></div>
+        <h3 class="font-semibold text-lg mb-1">Entre para acessar a plataforma</h3>
+        <p class="text-sm text-gray-500">Use sua chave de acesso, ou <a href="/app?demo=1" class="text-emerald-700 underline">experimente a demo do Triângulo Mineiro (MG)</a>.</p>
+      </div>
+
+      <!-- ============ VIEW: DASHBOARD ============ -->
+      <section id="view-dashboard" class="hidden space-y-5">
+        <div class="flex items-center justify-between">
+          <h1 class="text-lg font-bold">Dashboard da Frota</h1>
+          <span id="dash-tenant" class="text-xs text-gray-500"></span>
+        </div>
+        <div id="dash-kpis" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
+        <div class="grid lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-2 bg-white rounded-xl border p-5">
+            <h3 class="lbl mb-3">Rotas calculadas — custo por viagem</h3>
+            <div style="height:220px"><canvas id="dash-routes-chart"></canvas></div>
+          </div>
+          <div class="bg-white rounded-xl border p-5">
+            <h3 class="lbl mb-3">Situação da frota</h3>
+            <div style="height:180px"><canvas id="dash-status-chart"></canvas></div>
+            <div id="dash-status-legend" class="mt-3 space-y-1 text-xs"></div>
+          </div>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-4">
+          <div class="bg-white rounded-xl border p-5">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="lbl">Alertas de manutenção</h3>
+              <button onclick="showView('manutencao')" class="text-xs text-emerald-700 font-semibold">ver todos →</button>
+            </div>
+            <div id="dash-alerts" class="space-y-2"></div>
+          </div>
+          <div class="bg-white rounded-xl border p-5">
+            <h3 class="lbl mb-3">Rotas recentes</h3>
+            <div id="dash-recent" class="space-y-1.5"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ VIEW: ROTAS ============ -->
+      <section id="view-rotas" class="hidden space-y-5">
+        <div class="bg-white rounded-xl border p-5 space-y-5">
+          <div class="flex items-center gap-2"><i data-lucide="navigation" class="icon-sm text-emerald-600"></i>
+            <h2 class="text-sm font-bold">Planejar Rota</h2><span class="text-[10px] text-gray-500 ml-auto">4 rotas possíveis · 3 etapas</span></div>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2"><span class="step-dot">1</span><span class="lbl">Origem &amp; Destino</span></div>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <div class="flex-1"><label class="lbl mb-1 flex items-center gap-1"><i data-lucide="map-pin" class="icon-xs text-amber-600"></i> Origem (Talhão / Fazenda)</label>
+                <div class="flex gap-2"><input id="origin-q" placeholder="Ex: Campo Florido, MG" class="flex-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" onkeydown="if(event.key==='Enter')geocode('origin')">
+                  <button onclick="geocode('origin')" class="px-3 py-2 rounded-lg border hover:bg-gray-50"><i data-lucide="search" class="icon-sm text-gray-500"></i></button></div>
+                <span id="origin-coords" class="text-[10px] text-gray-500 mt-0.5 block h-4"></span></div>
+              <div class="flex-1"><label class="lbl mb-1 flex items-center gap-1"><i data-lucide="map-pin" class="icon-xs text-violet-600"></i> Destino (Usina)</label>
+                <div class="flex gap-2"><input id="dest-q" placeholder="Ex: Usina Delta, MG" class="flex-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" onkeydown="if(event.key==='Enter')geocode('dest')">
+                  <button onclick="geocode('dest')" class="px-3 py-2 rounded-lg border hover:bg-gray-50"><i data-lucide="search" class="icon-sm text-gray-500"></i></button></div>
+                <span id="dest-coords" class="text-[10px] text-gray-500 mt-0.5 block h-4"></span></div>
+            </div>
+            <p class="text-[11px] text-gray-500">Busque pelo nome ou <b>clique no mapa</b>: 1º clique = origem, 2º = destino. <button onclick="clearPoints()" class="underline text-emerald-700">limpar</button></p>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center gap-2"><span class="step-dot">2</span><span class="lbl">Veículo &amp; Sentido</span></div>
+            <div id="vehicle-pills" class="flex flex-wrap gap-2"></div>
+            <div class="flex gap-2">
+              <button id="rt-on" class="pill active" style="background:#111827;border-color:#111827" onclick="setRoundTrip(true)">Ida (carregado) + Volta (vazio)</button>
+              <button id="rt-off" class="pill" onclick="setRoundTrip(false)">Só ida (carregado)</button></div>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center gap-2"><span class="step-dot">3</span><span class="lbl">Condições da Operação</span></div>
+            <div><label class="lbl mb-2 block">Cenário Climático</label><div id="climate-pills" class="flex flex-wrap gap-2"></div></div>
+            <div class="bg-gray-50 rounded-lg p-3 border">
+              <div id="truck-info" class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs mb-3"></div>
+              <div class="flex items-center gap-4"><span class="lbl whitespace-nowrap">Ocupação</span>
+                <input type="range" id="occ" min="0" max="100" value="100" step="5" class="flex-1 accent-emerald-600" oninput="renderTruckInfo()">
+                <div class="text-xs font-semibold whitespace-nowrap min-w-[100px] text-right"><span class="text-blue-600" id="occ-val">100%</span> · <span id="occ-tons"></span></div></div>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 items-center">
+            <button id="calc-btn" onclick="computeSingle()" disabled class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="navigation" class="icon-sm"></i><span id="calc-label">Calcular 4 Rotas</span></button>
+            <button id="queue-btn" onclick="addToQueue()" disabled class="px-4 py-2.5 rounded-lg border text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40">+ Fila (lote)</button>
+            <div id="jobs-list" class="flex flex-wrap gap-1.5"></div>
+            <button id="batch-btn" onclick="computeBatch()" style="display:none" class="px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold">Calcular lote (<span id="batch-n">0</span>)</button>
+          </div>
+        </div>
+        <div id="map" class="rounded-xl border" style="height:460px"></div>
+        <div id="rotas-empty" class="bg-white rounded-xl border border-dashed p-8 text-center">
+          <div class="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-2"><i data-lucide="navigation" class="w-6 h-6 text-emerald-600"></i></div>
+          <h3 class="font-semibold mb-1">Calcule sua primeira rota</h3>
+          <p class="text-sm text-gray-500">Informe origem e destino e receba <b>4 rotas possíveis</b> com custo real.</p>
+        </div>
+        <div id="results" class="space-y-5 hidden">
+          <div id="best-banner"></div>
+          <div class="bg-white rounded-xl border p-5"><h3 class="lbl mb-3">Perfil de Elevação — <span id="elev-route-name" class="text-gray-900"></span></h3><div style="height:160px"><canvas id="elev-chart"></canvas></div></div>
+          <div id="route-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+          <div class="bg-white rounded-xl border p-5"><h3 class="lbl mb-2">Composição do custo por rota</h3>
+            <div class="flex gap-4 text-[11px] text-gray-500 mb-2">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background:#0284c7"></span>Combustível</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background:#d97706"></span>Pedágio</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background:#8b5cf6"></span>Manutenção</span></div>
+            <div id="cost-chart-box" style="height:150px"><canvas id="cost-chart"></canvas></div></div>
+          <div class="bg-white rounded-xl border p-5"><h3 class="lbl mb-4">Projeção de Safra — economia anual escolhendo a melhor rota</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+              <div class="bg-gray-50 rounded-lg p-3 border"><label class="lbl mb-1 block">Caminhões</label><input type="number" id="sf-trucks" value="1" min="1" max="100" class="w-full bg-transparent font-semibold text-sm outline-none" oninput="renderSafra()"></div>
+              <div class="bg-gray-50 rounded-lg p-3 border"><label class="lbl mb-1 block">Viagens/dia</label><input type="number" id="sf-trips" value="5" min="1" max="20" class="w-full bg-transparent font-semibold text-sm outline-none" oninput="renderSafra()"></div>
+              <div class="bg-gray-50 rounded-lg p-3 border"><label class="lbl mb-1 block">Dias safra</label><input type="number" id="sf-days" value="220" min="60" max="365" class="w-full bg-transparent font-semibold text-sm outline-none" oninput="renderSafra()"></div>
+              <div class="bg-gray-50 rounded-lg p-3 border"><label class="lbl mb-1 block">Disponib. %</label><input type="number" id="sf-avail" value="85" min="50" max="100" class="w-full bg-transparent font-semibold text-sm outline-none" oninput="renderSafra()"></div>
+              <div class="bg-violet-50 rounded-lg p-3 border border-violet-200"><label class="lbl mb-1 block" style="color:#7c3aed">Dias efetivos</label><span id="sf-eff" class="font-bold text-violet-700"></span></div></div>
+            <div id="safra-result" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div></div>
+        </div>
+      </section>
+
+      <!-- ============ VIEW: MANUTENÇÃO ============ -->
+      <section id="view-manutencao" class="hidden space-y-5">
+        <h1 class="text-lg font-bold">Manutenção Preditiva</h1>
+        <div id="maint-kpis" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+        <div><h3 class="lbl mb-2">Alertas de manutenção (<span id="maint-alert-count">0</span>)</h3><div id="maint-alerts" class="space-y-2"></div></div>
+        <div><h3 class="lbl mb-2">Detalhamento por veículo</h3><div id="maint-vehicles" class="space-y-3"></div></div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===================== MODAL PLANOS ===================== -->
+<div id="billing-modal" class="hidden fixed inset-0 z-[1200] bg-black/40 flex items-center justify-center p-4" onclick="if(event.target===this)closeBilling()">
+  <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between"><h2 class="text-lg font-bold flex items-center gap-2"><i data-lucide="credit-card" class="icon-md text-emerald-600"></i> Assinatura NOKAHI</h2>
+      <button onclick="closeBilling()" class="text-gray-400 hover:text-gray-700"><i data-lucide="x" class="icon-md"></i></button></div>
+    <div id="billing-sandbox" class="hidden text-xs bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-2">Modo de teste: nenhuma cobrança real é feita — a assinatura é ativada apenas para demonstração.</div>
+    <div id="billing-current" class="text-sm text-gray-600"></div>
+    <div id="billing-plans" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+    <p class="text-[11px] text-gray-400">Cobrança recorrente mensal via Stripe. Cancele quando quiser.</p>
+  </div>
+</div>
+
+<script>
+const state = { key:null, config:null, fleet:{}, vehicle:'treminhao', climate:'auto', roundTrip:true,
+  origin:null, dest:null, jobs:[], result:null, billing:null, view:'dashboard', mapReady:false, dashboard:null };
+let map, originMarker=null, destMarker=null, routeLayers=[], staticLayers=[];
+let costChart=null, elevChart=null, dashRoutesChart=null, dashStatusChart=null;
+
+const VEHICLE_COLORS = { treminhao:'#16a34a', rodotrem:'#2563eb', pentatrem:'#7c3aed' };
+const ROUTE_COLORS = ['#16a34a','#2563eb','#f97316','#7c3aed'];
+const CLIMATES = [
+  {key:'auto',label:'Automático (chuva real)',icon:'satellite-dish',color:'#059669'},
+  {key:'seco',label:'Seco',icon:'sun',color:'#f59e0b'},{key:'umido',label:'Úmido',icon:'cloud-drizzle',color:'#3b82f6'},
+  {key:'molhado',label:'Molhado',icon:'cloud-rain',color:'#6366f1'},{key:'enlameado',label:'Enlameado',icon:'droplets',color:'#92400e'},
+  {key:'safra_mix',label:'SAFRA (mix)',icon:'leaf',color:'#7c3aed'}];
+const SURF_LABEL={asphalt:'asfalto',concrete:'concreto',gravel:'cascalho',dirt:'terra',sand:'areia',unknown:'—'};
+const SURF_COLOR={asphalt:'#94a3b8',concrete:'#cbd5e1',gravel:'#d97706',dirt:'#92400e',sand:'#eab308',unknown:'#e5e7eb'};
+const SEV = {critical:{c:'#dc2626',bg:'bg-red-50',bd:'border-red-200',t:'text-red-700',lbl:'CRÍTICO'},
+  high:{c:'#f97316',bg:'bg-orange-50',bd:'border-orange-200',t:'text-orange-700',lbl:'ALERTA'},
+  medium:{c:'#f59e0b',bg:'bg-amber-50',bd:'border-amber-200',t:'text-amber-700',lbl:'ATENÇÃO'},
+  low:{c:'#16a34a',bg:'bg-emerald-50',bd:'border-emerald-200',t:'text-emerald-700',lbl:'OK'}};
+const fN=(v,d=1)=>(v??0).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fR=v=>'R$ '+fN(v,2);
+const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- API ---------- */
+async function api(path, opts={}) {
+  const r = await fetch(path, {...opts, headers:{'X-API-Key':state.key,'Content-Type':'application/json',...(opts.headers||{})}});
+  let body = {}; try { body = await r.json(); } catch {}
+  if (!r.ok) { const e = new Error(body.detail || r.statusText || ('HTTP '+r.status)); e.status = r.status; throw e; }
+  return body;
+}
+
+/* ---------- conexão ---------- */
+async function connect() {
+  state.key = document.getElementById('apikey').value.trim();
+  if (!state.key) { alert('Informe a chave de acesso.'); return; }
+  try {
+    state.config = await api('/v1/tenant/config');
+    state.fleet = await api('/v1/vehicles');
+    const badge = document.getElementById('tenant-badge');
+    badge.textContent = '✓ ' + state.config.name.split('—')[0].trim();
+    badge.classList.remove('hidden');
+    document.getElementById('apikey').classList.add('hidden');
+    document.getElementById('connect-btn').classList.add('hidden');
+    document.getElementById('disconnected').classList.add('hidden');
+    renderVehiclePills(); renderClimatePills(); renderTruckInfo();
+    ensureMap(); drawTenantLayers();
+    await refreshBilling();
+    await loadDashboard();
+    showView(state.view);
+  } catch (e) { alert('Falha ao conectar: ' + e.message); }
+}
+
+/* ---------- navegação ---------- */
+function showView(name) {
+  if (!state.config) return;
+  state.view = name;
+  ['dashboard','rotas','manutencao'].forEach(v => {
+    document.getElementById('view-'+v).classList.toggle('hidden', v!==name);
+  });
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view===name));
+  if (name==='rotas') { ensureMap(); setTimeout(()=>map && map.invalidateSize(), 60); }
+  if (name==='manutencao') loadMaintenance();
+  if (name==='dashboard') loadDashboard();
+  lucide.createIcons();
+}
+
+/* ---------- mapa ---------- */
+function ensureMap() {
+  if (state.mapReady) return;
+  const streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap'});
+  const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution:'© Esri'});
+  map = L.map('map', {layers:[streets]}).setView([-19.9,-48.2], 9);
+  L.control.layers({'Mapa':streets,'Satélite':sat}, null, {position:'topright'}).addTo(map);
+  map.on('click', e => {
+    if (!state.origin) setPoint('origin', e.latlng.lat, e.latlng.lng, 'clicado no mapa');
+    else if (!state.dest) setPoint('dest', e.latlng.lat, e.latlng.lng, 'clicado no mapa');
+  });
+  state.mapReady = true;
+}
+function drawTenantLayers() {
+  if (!map) return;
+  staticLayers.forEach(l=>map.removeLayer(l)); staticLayers=[];
+  (state.config.avoid_zones||[]).forEach(z => staticLayers.push(
+    L.circle([z.lat,z.lon],{radius:z.radius_km*1000,color:'#ef4444',fillColor:'#fca5a5',fillOpacity:0.06,weight:1.5,dashArray:'8 4'}).addTo(map).bindTooltip('⚠️ '+z.name)));
+  (state.config.toll_plazas||[]).forEach(p => staticLayers.push(
+    L.circleMarker([p.lat,p.lon],{radius:6,color:'#f59e0b',fillColor:'#fef3c7',fillOpacity:0.9,weight:2}).addTo(map).bindTooltip('💰 '+p.name+' — '+fR(p.tariff_per_axle)+'/eixo')));
+  if (state.config.avoid_zones?.length) map.fitBounds(L.latLngBounds(state.config.avoid_zones.map(z=>[z.lat,z.lon])).pad(0.3));
+}
+function setPoint(which,lat,lon,name){
+  state[which]=[lat,lon];
+  const mk=L.marker([lat,lon]).addTo(map).bindTooltip(which==='origin'?'🌾 Origem':'🏭 Destino',{permanent:true,direction:'top'});
+  if(which==='origin'){if(originMarker)map.removeLayer(originMarker);originMarker=mk;}else{if(destMarker)map.removeLayer(destMarker);destMarker=mk;}
+  document.getElementById(which+'-coords').textContent=`${lat.toFixed(5)}, ${lon.toFixed(5)} · ${name}`;
+  updateButtons();
+}
+function clearPoints(){
+  if(originMarker)map.removeLayer(originMarker); if(destMarker)map.removeLayer(destMarker);
+  originMarker=destMarker=null; state.origin=state.dest=null;
+  document.getElementById('origin-coords').textContent=''; document.getElementById('dest-coords').textContent='';
+  clearRoutes(); updateButtons();
+}
+function clearRoutes(){ routeLayers.forEach(l=>map.removeLayer(l)); routeLayers=[]; }
+async function geocode(which){
+  const q=document.getElementById(which+'-q').value.trim(); if(!q)return;
+  document.getElementById(which+'-coords').textContent='buscando…';
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&countrycodes=br&limit=1`);
+    const data=await r.json();
+    if(data.length){const name=data[0].display_name.split(',').slice(0,3).join(',');
+      setPoint(which,parseFloat(data[0].lat),parseFloat(data[0].lon),name); map.setView([parseFloat(data[0].lat),parseFloat(data[0].lon)],11);}
+    else document.getElementById(which+'-coords').textContent='não encontrado — clique no mapa';
+  }catch{document.getElementById(which+'-coords').textContent='erro na busca';}
+}
+
+/* ---------- seletores ---------- */
+function renderVehiclePills(){
+  document.getElementById('vehicle-pills').innerHTML=Object.values(state.fleet).map(v=>{
+    const c=VEHICLE_COLORS[v.id]||'#16a34a', active=state.vehicle===v.id;
+    return `<button class="pill ${active?'active':''}" style="${active?`background:${c};border-color:${c}`:''}" onclick="state.vehicle='${v.id}';renderVehiclePills();renderTruckInfo()"><i data-lucide="truck" class="icon-sm"></i>${v.name} <span class="opacity-80 text-xs">· ${v.payload_t}t</span></button>`;
+  }).join(''); lucide.createIcons();
+}
+function renderClimatePills(){
+  document.getElementById('climate-pills').innerHTML=CLIMATES.map(c=>{const active=state.climate===c.key;
+    return `<button class="pill ${active?'active':''}" style="${active?`background:${c.color};border-color:${c.color}`:''}" onclick="state.climate='${c.key}';renderClimatePills()"><i data-lucide="${c.icon}" class="icon-xs"></i>${c.label}</button>`;
+  }).join(''); lucide.createIcons();
+}
+function setRoundTrip(v){state.roundTrip=v;const on=document.getElementById('rt-on'),off=document.getElementById('rt-off');
+  on.classList.toggle('active',v);off.classList.toggle('active',!v);on.style.cssText=v?'background:#111827;border-color:#111827':'';off.style.cssText=!v?'background:#111827;border-color:#111827':'';}
+function renderTruckInfo(){
+  const v=state.fleet[state.vehicle]; if(!v)return;
+  const occ=parseInt(document.getElementById('occ').value);
+  document.getElementById('occ-val').textContent=occ+'%'; document.getElementById('occ-tons').textContent=fN(v.payload_t*occ/100,0)+' t';
+  const pbt=v.tare_t+v.payload_t*occ/100;
+  document.getElementById('truck-info').innerHTML=`
+    <div><span class="lbl block">Caminhão</span><span class="font-semibold" style="color:${VEHICLE_COLORS[v.id]}">${v.name}</span></div>
+    <div><span class="lbl block">Carga Máx</span><span class="font-semibold">${v.payload_t} t</span></div>
+    <div><span class="lbl block">PBT Atual</span><span class="font-semibold">${fN(pbt,1)} t</span></div>
+    <div><span class="lbl block">Eixos</span><span class="font-semibold">${v.axles}</span></div>
+    <div><span class="lbl block">Diesel</span><span class="font-semibold">${fR(state.config?.diesel_price||6)}/L</span></div>`;
+}
+function updateButtons(){const ready=!!(state.config&&state.origin&&state.dest);
+  document.getElementById('calc-btn').disabled=!ready; document.getElementById('queue-btn').disabled=!ready;}
+function currentJob(id){return{job_id:id,origin_lat:state.origin[0],origin_lon:state.origin[1],dest_lat:state.dest[0],dest_lon:state.dest[1],
+  vehicle_id:state.vehicle,occupancy:parseInt(document.getElementById('occ').value)/100,round_trip:state.roundTrip,climate:state.climate,max_alternatives:4};}
+
+/* ---------- cálculo ---------- */
+async function computeSingle(){
+  const lbl=document.getElementById('calc-label'); lbl.textContent='Calculando…'; document.getElementById('calc-btn').disabled=true;
+  try{const result=await api('/v1/routes/compute',{method:'POST',body:JSON.stringify(currentJob('rota-1'))}); renderResult(result); await refreshBilling();}
+  catch(e){handleComputeError(e);}
+  lbl.textContent='Calcular 4 Rotas'; updateButtons();
+}
+function handleComputeError(e){
+  if(e.status===402){showBillingAlert(e.message);openBilling();}
+  else if(e.status===401){alert('Sessão inválida. Reconecte com sua chave de acesso.');}
+  else if(e.status===429){alert('Muitas solicitações em sequência. Tente novamente em instantes.');}
+  else alert('Não foi possível calcular a rota: '+e.message);
+}
+function addToQueue(){state.jobs.push(currentJob('rota-'+(state.jobs.length+1)));renderQueue();clearPoints();}
+function renderQueue(){
+  document.getElementById('jobs-list').innerHTML=state.jobs.map((j,i)=>`<span class="text-[11px] px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1">${j.job_id} · ${j.vehicle_id}<button onclick="state.jobs.splice(${i},1);renderQueue()" class="text-red-500 font-bold ml-1">×</button></span>`).join('');
+  const bb=document.getElementById('batch-btn'); bb.style.display=state.jobs.length?'inline-block':'none'; document.getElementById('batch-n').textContent=state.jobs.length;
+}
+async function computeBatch(){
+  try{const body=await api('/v1/routes/batch',{method:'POST',body:JSON.stringify({jobs:state.jobs})}); window._batch=body.results;
+    document.getElementById('jobs-list').innerHTML=body.results.map((r,i)=>`<button onclick="renderResult(window._batch[${i}])" class="text-[11px] px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">${r.job_id}: ${r.error?'⚠':'R$ '+fN(r.options[0]?.cost.total_cost,0)}</button>`).join('');
+    if(body.results.length)renderResult(body.results[0]); await refreshBilling();
+  }catch(e){handleComputeError(e);}
+}
+function routeColor(o,i){return !o.is_safe?'#dc2626':ROUTE_COLORS[i%ROUTE_COLORS.length];}
+function renderResult(result){
+  clearRoutes(); state.result=result;
+  if(result.error){alert(result.job_id+': '+result.error);return;}
+  const opts=result.options;
+  document.getElementById('rotas-empty').classList.add('hidden');
+  document.getElementById('results').classList.remove('hidden');
+  opts.forEach((o,i)=>{const line=L.polyline(o.geometry,{color:routeColor(o,i),weight:i===0?6:4,opacity:i===0?0.9:0.6}).addTo(map).bindTooltip(`${o.name} — ${fN(o.distance_km)} km — ${fR(o.cost.total_cost)}`,{sticky:true});
+    line.on('click',()=>selectOption(i)); routeLayers.push(line);});
+  if(opts.length)map.fitBounds(L.latLngBounds(opts.flatMap(o=>o.geometry)).pad(0.08));
+  renderBestBanner(result); renderRouteCards(opts); drawCostChart(opts); selectOption(0); renderSafra();
+}
+function renderBestBanner(result){
+  const best=result.options[0]; if(!best?.cost)return;
+  document.getElementById('best-banner').innerHTML=`
+  <div class="rounded-xl border-2 border-emerald-500 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/40 p-5">
+    <div class="flex items-center gap-2 mb-3"><div class="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center"><i data-lucide="trophy" class="icon-sm text-white"></i></div>
+      <span class="text-sm font-bold text-emerald-700">Rota Mais Econômica</span><span class="text-sm font-semibold ml-auto">${esc(best.name)}</span>
+      <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">${result.options.length} rotas comparadas</span></div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div class="bg-white/70 rounded-lg p-3 border border-emerald-100"><span class="lbl">Distância</span><div class="text-lg font-bold">${fN(best.distance_km)} km</div><span class="text-[10px] text-gray-500">${fN(best.duration_min,0)} min · ${esc(best.provider)}</span></div>
+      <div class="bg-white/70 rounded-lg p-3 border border-emerald-100"><span class="lbl">Consumo</span><div class="text-lg font-bold">${fN(best.cost.fuel_liters)} L</div><span class="text-[10px] text-gray-500">clima ${esc(best.cost.climate_state)} (k=${best.cost.climate_k_applied})</span></div>
+      <div class="bg-white/70 rounded-lg p-3 border border-emerald-100"><span class="lbl">Altimetria</span><div class="text-lg font-bold">+${fN(best.ascent_m,0)} m</div><span class="text-[10px] text-gray-500">−${fN(best.descent_m,0)} m</span></div>
+      <div class="bg-emerald-500 text-white rounded-lg p-3"><span class="text-[10px] uppercase font-semibold opacity-90">Custo/viagem</span><div class="text-lg font-bold">${fR(best.cost.total_cost)}</div>${result.savings_vs_worst>0?`<span class="text-[10px] opacity-90">economiza ${fR(result.savings_vs_worst)} vs pior</span>`:''}</div>
+    </div></div>`;
+  lucide.createIcons();
+}
+function renderRouteCards(opts){
+  document.getElementById('route-cards').innerHTML=opts.map((o,i)=>{
+    const c=o.cost,color=routeColor(o,i),isBest=i===0&&o.is_safe;
+    const totalKm=Object.values(o.surfaces_km).reduce((a,b)=>a+b,0)||1;
+    const surfBar=Object.entries(o.surfaces_km).map(([k,v])=>`<div style="width:${(v/totalKm*100).toFixed(1)}%;background:${SURF_COLOR[k]}" title="${SURF_LABEL[k]}: ${fN(v)} km"></div>`).join('');
+    const surfTxt=Object.entries(o.surfaces_km).map(([k,v])=>`${SURF_LABEL[k]} ${fN(v)}`).join(' · ');
+    return `<div id="rcard-${i}" onclick="selectOption(${i})" class="rounded-xl border p-4 cursor-pointer transition-all hover:shadow-md bg-gradient-to-b ${isBest?'from-emerald-50/60':o.is_safe?'from-gray-50/40':'from-red-50/60'} to-white" style="border-left-width:4px;border-left-color:${color}">
+      <div class="flex items-center gap-2 mb-2"><span class="w-3.5 h-3.5 rounded-full ring-2 ring-white shadow-sm" style="background:${color}"></span><span class="font-semibold text-sm">${esc(o.name)}</span>
+        ${isBest?'<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">MAIS ECONÔMICA</span>':''}
+        ${!o.is_safe?`<span class="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-semibold">⚠ ${esc(o.urban_violations.join(', '))}</span>`:''}</div>
+      <div class="space-y-1.5 text-xs">
+        <div class="flex justify-between"><span class="text-gray-500">Distância / tempo</span><span class="font-semibold">${fN(o.distance_km)} km · ${fN(o.duration_min,0)} min</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Consumo</span><span class="font-semibold">${fN(c.fuel_liters)} L · ${fR(c.fuel_cost)}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Pedágios (${o.tolls.length})</span><span class="font-semibold">${fR(c.toll_cost)}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Manutenção</span><span class="font-semibold">${fR(c.maintenance_cost)}</span></div>
+        <div class="flex h-1.5 rounded overflow-hidden gap-0.5 my-1">${surfBar}</div><div class="text-[10px] text-gray-400">${surfTxt}</div>
+        <div class="flex justify-between pt-2 mt-1 border-t"><span class="text-gray-500 font-semibold">CUSTO TOTAL</span><span class="font-bold ${isBest?'text-emerald-600':''}">${fR(c.total_cost)}</span></div>
+      </div></div>`;
+  }).join(''); lucide.createIcons();
+}
+function selectOption(i){
+  const opts=state.result.options;
+  routeLayers.forEach((l,j)=>l.setStyle({weight:j===i?6:3.5,opacity:j===i?0.95:0.45}));
+  opts.forEach((_,j)=>{const el=document.getElementById('rcard-'+j);if(el)el.classList.toggle('ring-2',j===i);});
+  document.getElementById('elev-route-name').textContent=opts[i].name; drawElevChart(opts[i],routeColor(opts[i],i));
+}
+const GRID='#e5e7eb',TICK='#6b7280';
+function drawCostChart(opts){
+  if(costChart)costChart.destroy(); document.getElementById('cost-chart-box').style.height=(34*opts.length+40)+'px';
+  costChart=new Chart(document.getElementById('cost-chart'),{type:'bar',
+    data:{labels:opts.map((o,i)=>(i===0?'★ ':'')+o.name),datasets:[
+      {label:'Combustível',data:opts.map(o=>o.cost.fuel_cost),backgroundColor:'#0284c7',borderRadius:3,borderSkipped:false},
+      {label:'Pedágio',data:opts.map(o=>o.cost.toll_cost),backgroundColor:'#d97706',borderRadius:3,borderSkipped:false},
+      {label:'Manutenção',data:opts.map(o=>o.cost.maintenance_cost),backgroundColor:'#8b5cf6',borderRadius:3,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fR(c.raw)}`}}},
+      scales:{x:{stacked:true,grid:{color:GRID},ticks:{color:TICK,font:{size:10},callback:v=>'R$ '+v}},y:{stacked:true,grid:{display:false},ticks:{color:TICK,font:{size:10}}}},datasets:{bar:{barThickness:18}}}});
+}
+function drawElevChart(opt,color){
+  if(elevChart)elevChart.destroy();
+  elevChart=new Chart(document.getElementById('elev-chart'),{type:'line',
+    data:{datasets:[{data:(opt.elev_profile||[]).map(p=>({x:p[0],y:p[1]})),borderColor:color||'#059669',backgroundColor:(color||'#059669')+'20',borderWidth:2,pointRadius:0,fill:true,tension:0.25}]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>`km ${fN(c[0].parsed.x)}`,label:c=>` ${fN(c.parsed.y,0)} m`}}},
+      scales:{x:{type:'linear',grid:{color:GRID},ticks:{color:TICK,font:{size:10},callback:v=>v+' km'}},y:{grid:{color:GRID},ticks:{color:TICK,font:{size:10},callback:v=>v+' m'}}}}});
+}
+function renderSafra(){
+  const r=state.result; if(!r||!r.options.length)return;
+  const best=r.options[0],worst=r.options[r.options.length-1];
+  const trucks=+document.getElementById('sf-trucks').value||1,trips=+document.getElementById('sf-trips').value||5,days=+document.getElementById('sf-days').value||220,avail=+document.getElementById('sf-avail').value||85;
+  const effDays=Math.round(days*avail/100); document.getElementById('sf-eff').textContent=effDays;
+  const nTrips=trucks*trips*effDays,bestSafra=best.cost.total_cost*nTrips,worstSafra=worst.cost.total_cost*nTrips,eco=worstSafra-bestSafra;
+  const v=state.fleet[state.vehicle];
+  document.getElementById('safra-result').innerHTML=`
+    <div class="bg-gray-50 rounded-lg p-3 text-center border"><div class="text-lg font-bold">${fN(nTrips,0)}</div><div class="text-[10px] text-gray-500">viagens na safra</div></div>
+    <div class="bg-gray-50 rounded-lg p-3 text-center border"><div class="text-lg font-bold">${fN((v?.payload_t||35)*trips*trucks,0)} t</div><div class="text-[10px] text-gray-500">cana/dia (frota)</div></div>
+    <div class="bg-gray-50 rounded-lg p-3 text-center border"><div class="text-lg font-bold">${fR(bestSafra)}</div><div class="text-[10px] text-gray-500">custo safra (melhor)</div></div>
+    <div class="bg-emerald-50 rounded-lg p-3 text-center border border-emerald-200"><div class="text-lg font-bold text-emerald-700">${eco>0?fR(eco):'—'}</div><div class="text-[10px] text-emerald-600 font-semibold">ECONOMIA vs pior rota</div></div>`;
+}
+
+/* ---------- DASHBOARD ---------- */
+async function loadDashboard(){
+  try{ state.dashboard = await api('/v1/dashboard'); renderDashboard(state.dashboard); }
+  catch(e){ document.getElementById('dash-kpis').innerHTML=`<div class="col-span-full text-sm text-red-600">Erro ao carregar dashboard: ${esc(e.message)}</div>`; }
+}
+function kpi(value,label,color,icon){return `<div class="bg-white rounded-xl border p-4"><div class="flex items-center gap-1.5 mb-1"><i data-lucide="${icon}" class="icon-xs" style="color:${color}"></i><span class="lbl">${label}</span></div><div class="text-2xl font-black" style="color:${color}">${value}</div></div>`;}
+function renderDashboard(d){
+  document.getElementById('dash-tenant').textContent=d.tenant.name+(d.tenant.is_demo?' · DEMO':'');
+  const f=d.fleet, alertsN=f.severity_counts.critical+f.severity_counts.high;
+  document.getElementById('dash-kpis').innerHTML=[
+    kpi(f.total,'Frota total','#111827','truck'),
+    kpi(f.by_status.active||0,'Operantes','#059669','check-circle'),
+    kpi(f.needs_maintenance,'Manutenção imediata', f.needs_maintenance>0?'#dc2626':'#059669','wrench'),
+    kpi(d.routes.routes,'Rotas calculadas','#2563eb','route'),
+  ].join('');
+  // chart rotas recentes (custo)
+  const rec=(d.recent_routes||[]).slice().reverse();
+  if(dashRoutesChart)dashRoutesChart.destroy();
+  dashRoutesChart=new Chart(document.getElementById('dash-routes-chart'),{type:'bar',
+    data:{labels:rec.map((r,i)=>'#'+(i+1)),datasets:[{label:'Custo/viagem',data:rec.map(r=>r.total_cost),backgroundColor:'#059669',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fR(c.raw)+' · '+fN(rec[c.dataIndex].distance_km)+' km'}}},
+      scales:{x:{grid:{display:false},ticks:{color:TICK,font:{size:10}}},y:{grid:{color:GRID},ticks:{color:TICK,font:{size:10},callback:v=>'R$'+v}}}}});
+  if(!rec.length)document.getElementById('dash-routes-chart').parentElement.innerHTML='<div class="h-full flex items-center justify-center text-sm text-gray-400">Calcule rotas para ver o histórico</div>';
+  // donut status
+  const st=f.by_status;
+  if(dashStatusChart)dashStatusChart.destroy();
+  dashStatusChart=new Chart(document.getElementById('dash-status-chart'),{type:'doughnut',
+    data:{labels:['Operante','Em manutenção','Inativo'],datasets:[{data:[st.active||0,st.maintenance||0,st.inactive||0],backgroundColor:['#059669','#f59e0b','#9ca3af'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}}}});
+  document.getElementById('dash-status-legend').innerHTML=[['Operante',st.active||0,'#059669'],['Em manutenção',st.maintenance||0,'#f59e0b'],['Inativo',st.inactive||0,'#9ca3af']]
+    .map(([l,v,c])=>`<div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:${c}"></span>${l}</span><b>${v}</b></div>`).join('');
+  // alertas
+  document.getElementById('dash-alerts').innerHTML=(f.alerts.slice(0,5).map(a=>{const s=SEV[a.severity];
+    return `<div class="flex items-center gap-2 ${s.bg} ${s.bd} border rounded-lg p-2.5"><span class="w-2 h-2 rounded-full" style="background:${s.c}"></span>
+      <span class="text-sm font-semibold">${esc(a.plate)}</span><span class="text-xs text-gray-500">${a.label}</span>
+      <span class="ml-auto text-xs font-bold" style="color:${s.c}">${fN(a.wear_pct,0)}%</span></div>`;}).join(''))||'<div class="text-sm text-emerald-700 flex items-center gap-1"><i data-lucide="check-circle" class="icon-sm"></i> Frota em ordem</div>';
+  // rotas recentes
+  document.getElementById('dash-recent').innerHTML=(d.recent_routes||[]).map(r=>`<div class="flex items-center justify-between text-xs border-b last:border-0 py-1.5">
+    <span class="text-gray-500">${(r.created_at||'').replace('T',' ').slice(5,16)}</span><span class="font-medium">${esc(r.vehicle_id||'')}</span>
+    <span>${fN(r.distance_km)} km</span><span class="font-semibold text-emerald-700">${fR(r.total_cost)}</span></div>`).join('')||'<div class="text-sm text-gray-400">Nenhuma rota calculada ainda.</div>';
+  lucide.createIcons();
+}
+
+/* ---------- MANUTENÇÃO ---------- */
+async function loadMaintenance(){
+  try{const data=await api('/v1/fleet'); renderMaintenance(data);}
+  catch(e){document.getElementById('maint-alerts').innerHTML=`<div class="text-sm text-red-600">Erro: ${esc(e.message)}</div>`;}
+}
+function renderMaintenance(data){
+  const f=data.summary, sc=f.severity_counts;
+  document.getElementById('maint-kpis').innerHTML=[
+    kpi(f.total,'Total veículos','#111827','truck'),
+    kpi(sc.critical,'Críticos','#dc2626','alert-triangle'),
+    kpi(sc.high,'Alertas','#f97316','alert-circle'),
+    kpi(sc.medium,'Atenção','#f59e0b','clock')].join('');
+  const alerts=f.alerts; document.getElementById('maint-alert-count').textContent=alerts.length;
+  document.getElementById('maint-alerts').innerHTML=alerts.length?alerts.map(a=>{const s=SEV[a.severity];
+    return `<div class="${s.bg} ${s.bd} border rounded-xl p-3">
+      <div class="flex items-center justify-between mb-1.5"><div class="flex items-center gap-2"><i data-lucide="wrench" class="icon-sm" style="color:${s.c}"></i>
+        <span class="font-semibold text-sm">${esc(a.plate)}</span><span class="text-xs text-gray-500">${a.label} · ${esc(a.display_name||a.type)}</span></div>
+        <span class="text-xs font-bold uppercase" style="color:${s.c}">${s.lbl}</span></div>
+      <div class="bar"><div style="width:${a.wear_pct}%;background:${s.c}"></div></div>
+      <div class="flex justify-between text-[10px] mt-1"><span class="text-gray-500">${fN(a.current,0)} / ${fN(a.limit,0)} ${a.unit}</span>
+        <span style="color:${s.c}" class="font-semibold">${fN(a.wear_pct,0)}% — restam ${fN(a.remaining,0)} ${a.unit}</span></div></div>`;
+  }).join(''):'<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-6 text-center text-emerald-700"><i data-lucide="check-circle" class="w-8 h-8 mx-auto mb-2"></i>Tudo em ordem — nenhuma manutenção imediata.</div>';
+  document.getElementById('maint-vehicles').innerHTML=data.vehicles.map(v=>`
+    <div class="bg-white rounded-xl border p-4"><div class="flex items-center gap-2 mb-3"><i data-lucide="truck" class="icon-sm" style="color:${VEHICLE_COLORS[v.type]||'#666'}"></i>
+      <span class="font-semibold text-sm">${esc(v.display_name||v.plate)}</span><span class="text-[10px] text-gray-500">${esc(v.plate)} · ${esc(v.type)}</span>
+      <span class="ml-auto text-[10px] px-2 py-0.5 rounded-full ${v.status==='active'?'bg-emerald-100 text-emerald-700':v.status==='maintenance'?'bg-amber-100 text-amber-700':'bg-gray-100 text-gray-600'}">${v.status}</span></div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">${v.maintenance.map(p=>{const s=SEV[p.severity];
+        return `<div class="${s.bg} ${s.bd} border rounded-lg p-3"><div class="flex items-center justify-between mb-1"><span class="text-xs font-semibold">${p.label}</span><span class="text-[10px] font-semibold" style="color:${s.c}">${fN(p.wear_pct,0)}%</span></div><div class="bar"><div style="width:${p.wear_pct}%;background:${s.c}"></div></div></div>`;
+      }).join('')}</div></div>`).join('');
+  lucide.createIcons();
+}
+
+/* ---------- BILLING ---------- */
+async function refreshBilling(){
+  try{state.billing=await api('/v1/billing/status');
+    const chip=document.getElementById('plan-chip'); chip.classList.remove('hidden'); chip.classList.add('flex');
+    const b=state.billing, stTxt={trialing:'Trial',active:'Ativo',past_due:'Expirado',canceled:'Cancelado'}[b.status]||b.status;
+    document.getElementById('plan-chip-text').textContent=`${b.plan_name} · ${stTxt} · ${b.routes_used_month}/${b.routes_per_month>1e8?'∞':b.routes_per_month}`;
+    if(b.status==='past_due'||b.status==='canceled')showBillingAlert('Sua assinatura precisa de atenção para continuar calculando rotas.');
+    else document.getElementById('billing-alert').classList.add('hidden');
+    lucide.createIcons();
+  }catch{}
+}
+function showBillingAlert(msg){document.getElementById('billing-alert-text').textContent=msg;document.getElementById('billing-alert').classList.remove('hidden');lucide.createIcons();}
+async function openBilling(){
+  document.getElementById('billing-modal').classList.remove('hidden');
+  try{
+    const plans=await api('/v1/billing/plans'); const b=state.billing;
+    document.getElementById('billing-current').innerHTML=b?`Plano atual: <b>${esc(b.plan_name)}</b> (${esc(b.status)}) · uso: <b>${b.routes_used_month}</b> rotas`:'';
+    document.getElementById('billing-plans').innerHTML=Object.values(plans).map(p=>`
+      <div class="rounded-xl border p-4 flex flex-col gap-2 ${b?.plan_id===p.id?'border-emerald-500 ring-1 ring-emerald-500':''}">
+        <div class="font-bold text-sm">${esc(p.name)}</div>
+        <div class="text-2xl font-extrabold">${p.price_month_brl>0?fR(p.price_month_brl):'Sob consulta'}<span class="text-xs font-medium text-gray-400">${p.price_month_brl>0?'/mês':''}</span></div>
+        <p class="text-[11px] text-gray-500 flex-1">${esc(p.description)}</p>
+        ${p.id==='enterprise'?`<a href="/#contato" class="text-center px-3 py-2 rounded-lg border text-xs font-bold text-gray-700 hover:bg-gray-50">Falar com vendas</a>`
+          :`<button onclick="subscribe('${p.id}')" class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">${b?.plan_id===p.id&&b?.status==='active'?'Renovar':'Assinar'}</button>`}
+      </div>`).join('');
+  }catch(e){ document.getElementById('billing-plans').innerHTML=`<div class="col-span-full text-sm text-red-600">Não foi possível carregar os planos: ${esc(e.message)}</div>`; }
+}
+function closeBilling(){document.getElementById('billing-modal').classList.add('hidden');}
+async function subscribe(planId){
+  try{const r=await api('/v1/billing/checkout',{method:'POST',body:JSON.stringify({plan_id:planId})});
+    if(r.sandbox){
+      document.getElementById('billing-sandbox').classList.remove('hidden');
+      if(!confirm('Modo de teste: nenhuma cobrança real será feita. Ativar a assinatura para demonstração?'))return;
+      await api(r.checkout_url.replace(location.origin,'')); await refreshBilling(); openBilling();
+    } else location.href=r.checkout_url;
+  }catch(e){alert('Não foi possível iniciar a assinatura: '+e.message);}
+}
+
+/* ---------- modo demo ---------- */
+async function initDemo(){
+  const params=new URLSearchParams(location.search); if(!params.get('demo'))return;
+  try{
+    const cfg=await (await fetch('/v1/demo/config')).json();
+    document.getElementById('apikey').value=cfg.api_key;
+    await connect();
+    document.getElementById('demo-region').textContent=cfg.region;
+    document.getElementById('demo-banner').classList.remove('hidden'); lucide.createIcons();
+    if(cfg.sample){
+      state.vehicle=cfg.sample.vehicle_id||state.vehicle; renderVehiclePills(); renderTruckInfo();
+      showView('rotas');
+      setPoint('origin',cfg.sample.origin.lat,cfg.sample.origin.lon,cfg.sample.origin.name);
+      setPoint('dest',cfg.sample.dest.lat,cfg.sample.dest.lon,cfg.sample.dest.name);
+      map.setView([(cfg.sample.origin.lat+cfg.sample.dest.lat)/2,(cfg.sample.origin.lon+cfg.sample.dest.lon)/2],9);
+    }
+  }catch(e){
+    document.getElementById('disconnected').innerHTML=`<div class="text-sm text-red-600">Não foi possível carregar a demo (${esc(e.message)}). Recarregue a página ou <a href="/#contato" class="underline">fale com a NOKAHI</a>.</div>`;
+  }
+}
+
+/* ---------- init ---------- */
+lucide.createIcons();
+initDemo();
+</script>
+</body>
+</html>
