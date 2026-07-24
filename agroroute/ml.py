@@ -1,4 +1,4 @@
-"""Modelos de Machine Learning do NOKAHI AgroRoute.
+"""Modelos de Machine Learning do Peabiru Agro.
 
 Três modelos práticos, treináveis com os dados que a operação já gera:
 

@@ -1,4 +1,4 @@
-# NOKAHI AgroRoute
+# Peabiru Agro
 
 **O "Waze do agro": roteirização econômica multi-tenant para CVCs canavieiros (Treminhão, Rodotrem, Pentatrem) em todo o Brasil.**
 
@@ -174,7 +174,7 @@ O OSRM público usa perfil de **carro**; o GraphHopper self-hosted em [graphhopp
 - **Perfil `truck`** ([nokahi_truck.json](graphhopper/data/custom_models/nokahi_truck.json)): bloqueia vias com limite legal de peso/altura/largura abaixo do CVC, evita ruas residenciais, reduz velocidade em cascalho/terra.
 - **Elevação SRTM embutida no grafo** — a resposta já vem 3D (sem chamadas externas por rota).
 - **Superfície por trecho** (`details=[surface]`, tags OSM) — o custo diferencia asfalto/cascalho/terra de verdade.
-- **Custom model por requisição** (modo flexível, sem CH): o AgroRoute injeta o PBT do veículo (`max_weight < PBT → bloqueado`) e as zonas urbanas do tenant como `areas` com prioridade ~0 — as alternativas retornadas **já desviam** das cidades.
+- **Custom model por requisição** (modo flexível, sem CH): o Peabiru Agro injeta o PBT do veículo (`max_weight < PBT → bloqueado`) e as zonas urbanas do tenant como `areas` com prioridade ~0 — as alternativas retornadas **já desviam** das cidades.
 
 ### Rodar localmente (sem Docker, JRE portátil incluído)
 

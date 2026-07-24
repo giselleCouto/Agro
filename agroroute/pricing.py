@@ -1,4 +1,4 @@
-"""Precificação por uso do NOKAHI AgroRoute.
+"""Precificação por uso do Peabiru Agro.
 
 O custo para o cliente é dimensionado pelos DRIVERS que realmente geram custo de
 infraestrutura e operação:

@@ -1,4 +1,4 @@
-"""NOKAHI AgroRoute — roteirização econômica multi-tenant para frotas agrícolas pesadas.
+"""Peabiru Agro — roteirização econômica multi-tenant para frotas agrícolas pesadas.
 
 Generaliza o modelo SAJB (v3/v5/v6) para todo o Brasil:
   L = (R0 + alpha * max(0, slope%)) * mult_superficie * PBT * dKm * k_clima(segmento)

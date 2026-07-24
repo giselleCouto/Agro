@@ -1,4 +1,4 @@
-"""API HTTP do NOKAHI AgroRoute (FastAPI).
+"""API HTTP do Peabiru Agro (FastAPI).
 
 Multi-tenant via header `X-API-Key`, com banco de dados (SQLAlchemy), assinatura
 mensal recorrente (Stripe), modo demo público (Triângulo Mineiro / MG) e captura
@@ -103,7 +103,7 @@ ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",
 CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
 
 app = FastAPI(
-    title="NOKAHI AgroRoute",
+    title="Peabiru Agro",
     version=__version__,
     description="Roteirização econômica multi-tenant para frotas agrícolas pesadas",
 )

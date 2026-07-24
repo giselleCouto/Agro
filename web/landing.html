@@ -3,306 +3,413 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NOKAHI AgroRoute · O Waze do Agro — reduza cerca de 16% do diesel da sua safra</title>
-<meta name="description" content="AgroRoute, da NOKAHI: roteirização econômica para o transporte de cana-de-açúcar. Reduz cerca de 16% do consumo de diesel. Planos a partir de R$ 2.900/mês.">
+<title>Peabiru Agro · NOKAHI — reduza cerca de 16% do diesel no transporte de cana</title>
+<meta name="description" content="Peabiru Agro, da NOKAHI: roteirização econômica para o transporte de cana. Para cada viagem talhão→usina, a rota de menor custo real de diesel. Desdobramento agro da otimização náutica Pharos. Planos a partir de R$ 2.900/mês.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@0.454.0/dist/umd/lucide.min.js"></script>
+<script>
+tailwind.config = { theme: { extend: {
+  colors: {
+    ink:'#080C16', panel:'#0E1626', panel2:'#131E33', line:'rgba(148,163,184,0.14)',
+    brand:'#3B82F6', brand2:'#60A5FA', cyan:'#06B6D4', eme:'#34D399',
+    amber:'#F59E0B', violet:'#8B5CF6', pink:'#EC4899', mut:'#94A3B8'
+  },
+  fontFamily:{ sans:['Inter','ui-sans-serif','system-ui','sans-serif'],
+               mono:['"JetBrains Mono"','ui-monospace','Consolas','monospace'] }
+}}}
+</script>
 <style>
-body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
-.icon-xs{width:14px;height:14px}.icon-sm{width:18px;height:18px}.icon-md{width:22px;height:22px}.icon-lg{width:26px;height:26px}
+body{font-family:'Inter',ui-sans-serif,system-ui,sans-serif;background:#080C16;color:#E2E8F0}
+.mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace}
+.icon-xs{width:14px;height:14px}.icon-sm{width:18px;height:18px}.icon-md{width:22px;height:22px}
+.hero-glow{background:
+  radial-gradient(60% 50% at 78% 8%, rgba(59,130,246,0.20), transparent 60%),
+  radial-gradient(50% 40% at 12% 30%, rgba(6,182,212,0.10), transparent 60%);}
+.grid-lines{background-image:linear-gradient(rgba(148,163,184,0.05) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(148,163,184,0.05) 1px,transparent 1px);background-size:48px 48px;
+  mask-image:linear-gradient(180deg,#000,transparent 85%)}
+.tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 8px;border-radius:6px;background:rgba(148,163,184,0.08);color:#94A3B8;border:1px solid rgba(148,163,184,0.12)}
+.card{background:#0E1626;border:1px solid rgba(148,163,184,0.14);border-radius:16px}
+.card-hover{transition:border-color .2s,transform .2s}.card-hover:hover{border-color:rgba(59,130,246,0.5);transform:translateY(-2px)}
+.bar-track{background:rgba(148,163,184,0.10);border-radius:999px;height:8px;overflow:hidden}
+.bar-fill{height:100%;border-radius:999px}
+input,select,textarea{color:#E2E8F0}
+input::placeholder,textarea::placeholder{color:#64748B}
+.link-underline{position:relative}.link-underline:hover{color:#fff}
 </style>
 </head>
-<body class="bg-white text-gray-900">
+<body class="bg-ink text-slate-200">
 
 <!-- ===================== NAV ===================== -->
-<header class="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
-        <i data-lucide="leaf" class="icon-md text-white"></i>
-      </div>
-      <div>
-        <span class="text-base font-bold tracking-tight">NOKAHI</span>
-        <p class="text-[10px] text-gray-500 tracking-wider uppercase leading-none">AgroRoute · Waze do Agro</p>
-      </div>
-    </div>
-    <nav class="hidden sm:flex items-center gap-6 text-sm text-gray-600">
-      <a href="#como" class="hover:text-gray-900">Como funciona</a>
-      <a href="#recursos" class="hover:text-gray-900">Recursos</a>
-      <a href="#integracoes" class="hover:text-gray-900">Integrações</a>
-      <a href="#planos" class="hover:text-gray-900">Planos</a>
-      <a href="#contato" class="hover:text-gray-900">Contato</a>
+<header class="sticky top-0 z-50 border-b border-line bg-ink/80 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-2.5">
+      <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-brand/10 border border-brand/30">
+        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 20c3-1 3.5-9 7-9s3.5 6 6 6 3-3 3-3" stroke-dasharray="0.1 3.2"/>
+          <circle cx="4" cy="20" r="1.4" fill="#60A5FA" stroke="none"/><circle cx="20" cy="14" r="1.4" fill="#34D399" stroke="none"/>
+        </svg>
+      </span>
+      <span class="flex items-baseline gap-1.5">
+        <span class="text-[17px] font-extrabold tracking-tight text-white">Peabiru</span>
+        <span class="mono text-[10px] px-1.5 py-0.5 rounded bg-eme/10 text-eme border border-eme/25">AGRO</span>
+      </span>
+    </a>
+    <nav class="hidden md:flex items-center gap-7 text-sm text-mut">
+      <a href="#funcionalidades" class="link-underline hover:text-white">Funcionalidades</a>
+      <a href="#resultados" class="link-underline hover:text-white">Resultados</a>
+      <a href="#tecnologia" class="link-underline hover:text-white">Tecnologia</a>
+      <a href="#planos" class="link-underline hover:text-white">Planos</a>
+      <a href="#contato" class="link-underline hover:text-white">Contato</a>
     </nav>
     <div class="flex items-center gap-2">
-      <a href="/app" class="px-4 py-2 rounded-lg border text-sm font-semibold text-gray-700 hover:bg-gray-50">Entrar</a>
-      <a href="/app?demo=1" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold">Testar demo</a>
+      <a href="/app" class="hidden sm:inline text-sm text-mut hover:text-white px-3 py-2">Entrar</a>
+      <a href="/app?demo=1" class="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-brand hover:bg-brand2 text-white transition-colors">
+        Testar demo <i data-lucide="arrow-right" class="icon-xs"></i>
+      </a>
     </div>
   </div>
 </header>
 
 <!-- ===================== HERO ===================== -->
-<section class="relative overflow-hidden">
-  <div class="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30"></div>
-  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28 text-center">
-    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-6">
-      <i data-lucide="trending-down" class="icon-xs"></i> Resultado medido em usinas de cana-de-açúcar
+<section id="top" class="relative overflow-hidden border-b border-line">
+  <div class="absolute inset-0 hero-glow"></div>
+  <div class="absolute inset-0 grid-lines"></div>
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 lg:py-24 grid lg:grid-cols-2 gap-12 items-center">
+    <!-- left -->
+    <div>
+      <div class="flex flex-wrap items-center gap-2 mb-6">
+        <span class="inline-flex items-center gap-1.5 mono text-[11px] px-2.5 py-1 rounded-full bg-brand/10 text-brand2 border border-brand/25">
+          <i data-lucide="activity" class="icon-xs"></i> v1 · Produção
+        </span>
+        <span class="inline-flex items-center gap-1.5 mono text-[11px] px-2.5 py-1 rounded-full bg-eme/10 text-eme border border-eme/25">
+          <i data-lucide="shield-check" class="icon-xs"></i> Multitenant
+        </span>
+        <span class="inline-flex items-center gap-1.5 mono text-[11px] px-2.5 py-1 rounded-full bg-cyan/10 text-cyan border border-cyan/25">
+          <i data-lucide="anchor" class="icon-xs"></i> Herança náutica Pharos
+        </span>
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-[3.4rem] font-extrabold tracking-tight leading-[1.05] text-white">
+        Reduza <span class="text-brand2">16% do diesel</span> no transporte de cana
+      </h1>
+      <p class="mt-6 text-lg text-mut max-w-xl leading-relaxed">
+        O <b class="text-slate-100">Peabiru Agro</b> encontra, para cada viagem do talhão à usina, a rota de
+        <b class="text-slate-100">menor custo real</b> — combustível, pedágio e desgaste — respeitando as restrições
+        dos seus caminhões e as condições de cada dia. O mesmo motor que otimiza a cabotagem no
+        <b class="text-slate-100">Pharos</b>, agora no campo.
+      </p>
+      <!-- stat cards -->
+      <div class="mt-8 grid grid-cols-3 gap-3 max-w-lg">
+        <div class="card p-4">
+          <div class="flex items-center gap-1.5 text-eme mb-1"><i data-lucide="fuel" class="icon-sm"></i></div>
+          <div class="text-2xl font-extrabold text-white">~16%</div>
+          <div class="mono text-[10px] text-mut mt-0.5">economia de diesel</div>
+        </div>
+        <div class="card p-4">
+          <div class="flex items-center gap-1.5 text-brand2 mb-1"><i data-lucide="route" class="icon-sm"></i></div>
+          <div class="text-2xl font-extrabold text-white">4</div>
+          <div class="mono text-[10px] text-mut mt-0.5">rotas por viagem</div>
+        </div>
+        <div class="card p-4">
+          <div class="flex items-center gap-1.5 text-cyan mb-1"><i data-lucide="map" class="icon-sm"></i></div>
+          <div class="text-2xl font-extrabold text-white">Brasil</div>
+          <div class="mono text-[10px] text-mut mt-0.5">cobertura nacional</div>
+        </div>
+      </div>
+      <div class="mt-8 flex flex-col sm:flex-row gap-3">
+        <a href="/app?demo=1" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand hover:bg-brand2 text-white font-bold shadow-lg shadow-brand/25 transition-colors">
+          <i data-lucide="play-circle" class="icon-sm"></i> Testar a demo
+        </a>
+        <a href="#contato" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-line hover:border-brand/50 text-slate-200 font-bold transition-colors">
+          <i data-lucide="phone" class="icon-sm"></i> Falar com o comercial
+        </a>
+      </div>
+      <p class="mt-4 mono text-[11px] text-mut">Demo aberta no Triângulo Mineiro (MG) · sem cadastro · isolamento total por empresa</p>
     </div>
-    <h1 class="text-4xl sm:text-6xl font-black tracking-tight leading-tight max-w-4xl mx-auto">
-      Reduza cerca de <span class="text-emerald-600">16% do diesel</span> da sua safra com rotas inteligentes
-    </h1>
-    <p class="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
-      O <b>AgroRoute</b>, da NOKAHI, é o Waze do agro: encontra, para cada viagem do seu canavial à usina,
-      a rota de <b>menor custo real</b> — combustível, pedágio e desgaste — respeitando
-      as restrições dos seus caminhões e as condições de cada dia.
-    </p>
-    <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-      <a href="/app?demo=1" class="px-8 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2">
-        <i data-lucide="play-circle" class="icon-sm"></i> Testar a demo grátis
-      </a>
-      <a href="#contato" class="px-8 py-3.5 rounded-xl border-2 font-bold text-base text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2">
-        <i data-lucide="calendar" class="icon-sm"></i> Falar com um especialista
-      </a>
-    </div>
-    <p class="mt-4 text-sm text-gray-500">
-      Demonstração aberta na região do <b>Triângulo Mineiro (MG)</b> — sem cadastro. Experimente agora.
-    </p>
 
-    <!-- stats -->
-    <div class="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-      <div class="bg-white rounded-2xl border p-6 shadow-sm">
-        <div class="text-4xl font-black text-emerald-600">~16%</div>
-        <div class="text-sm text-gray-500 mt-1">menos diesel<br>por safra</div>
+    <!-- right: dashboard mockup -->
+    <div class="relative">
+      <div class="card p-4 sm:p-5 shadow-2xl shadow-black/40">
+        <div class="flex items-center justify-between mb-3">
+          <div class="mono text-[11px] text-mut flex items-center gap-2"><i data-lucide="calendar-clock" class="icon-xs text-brand2"></i> CRONOGRAMA DE ROTAS — FRENTE 03 · SAFRA 2026</div>
+          <div class="flex items-center gap-2 mono text-[10px]">
+            <span class="flex items-center gap-1 text-brand2"><span class="w-2 h-2 rounded-full bg-brand"></span>CHEIO</span>
+            <span class="flex items-center gap-1 text-amber"><span class="w-2 h-2 rounded-full bg-amber"></span>VAZIO</span>
+          </div>
+        </div>
+        <!-- gantt -->
+        <div class="space-y-2">
+          <div class="grid grid-cols-[70px_1fr] items-center gap-2">
+            <span class="mono text-[10px] text-mut">RODOTREM</span>
+            <div class="relative h-4"><div class="absolute h-4 rounded bg-brand/80" style="left:6%;width:44%"></div><div class="absolute h-4 rounded bg-amber/70" style="left:52%;width:20%"></div></div>
+          </div>
+          <div class="grid grid-cols-[70px_1fr] items-center gap-2">
+            <span class="mono text-[10px] text-mut">TREMINHÃO</span>
+            <div class="relative h-4"><div class="absolute h-4 rounded bg-brand/80" style="left:22%;width:38%"></div><div class="absolute h-4 rounded bg-amber/70" style="left:62%;width:16%"></div></div>
+          </div>
+          <div class="grid grid-cols-[70px_1fr] items-center gap-2">
+            <span class="mono text-[10px] text-mut">PENTATREM</span>
+            <div class="relative h-4"><div class="absolute h-4 rounded bg-cyan/70" style="left:10%;width:30%"></div><div class="absolute h-4 rounded bg-brand/80" style="left:44%;width:40%"></div></div>
+          </div>
+          <div class="grid grid-cols-[70px_1fr] items-center gap-2">
+            <span class="mono text-[10px] text-mut">RODOTREM 2</span>
+            <div class="relative h-4"><div class="absolute h-4 rounded bg-amber/70" style="left:16%;width:18%"></div><div class="absolute h-4 rounded bg-brand/80" style="left:38%;width:46%"></div></div>
+          </div>
+        </div>
+        <div class="mono text-[9px] text-slate-600 flex justify-between mt-1 px-[70px]"><span>06h</span><span>10h</span><span>14h</span><span>18h</span><span>22h</span></div>
+        <!-- metrics -->
+        <div class="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-line">
+          <div><div class="mono text-[9px] text-mut">DIESEL / DIA</div><div class="text-lg font-bold text-white mono">R$ 41,2k</div><div class="mono text-[10px] text-eme">−16%</div></div>
+          <div><div class="mono text-[9px] text-mut">CVCs ATIVOS</div><div class="text-lg font-bold text-white mono">30</div><div class="mono text-[10px] text-brand2">4 rotas/viagem</div></div>
+          <div><div class="mono text-[9px] text-mut">DESGASTE</div><div class="text-lg font-bold text-white mono">baixo</div><div class="mono text-[10px] text-eme">−12%</div></div>
+        </div>
       </div>
-      <div class="bg-white rounded-2xl border p-6 shadow-sm">
-        <div class="text-4xl font-black text-gray-900">R$ milhões</div>
-        <div class="text-sm text-gray-500 mt-1">de economia potencial<br>por usina/safra</div>
-      </div>
-      <div class="bg-white rounded-2xl border p-6 shadow-sm">
-        <div class="text-4xl font-black text-gray-900">Brasil</div>
-        <div class="text-sm text-gray-500 mt-1">cobertura nacional,<br>incluindo vias internas</div>
+      <!-- route map -->
+      <div class="card p-4 mt-4">
+        <div class="mono text-[11px] text-mut flex items-center gap-2 mb-2"><i data-lucide="map-pin" class="icon-xs text-eme"></i> MAPA — TALHÃO → USINA · 4 ROTAS</div>
+        <svg viewBox="0 0 400 120" class="w-full h-[120px]">
+          <path d="M30 90 C120 30 200 100 280 50 L360 40" fill="none" stroke="#3B82F6" stroke-width="2.5"/>
+          <path d="M30 90 C110 70 210 40 300 70 L360 40" fill="none" stroke="#06B6D4" stroke-width="2" stroke-dasharray="5 4" opacity="0.8"/>
+          <path d="M30 90 C140 95 220 80 300 90 L360 40" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="2 4" opacity="0.6"/>
+          <path d="M30 90 C90 50 180 110 260 80 L360 40" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="2 5" opacity="0.5"/>
+          <circle cx="30" cy="90" r="6" fill="#34D399"/><circle cx="30" cy="90" r="10" fill="none" stroke="#34D399" stroke-width="1" opacity="0.4"/>
+          <circle cx="360" cy="40" r="6" fill="#3B82F6"/><circle cx="360" cy="40" r="10" fill="none" stroke="#3B82F6" stroke-width="1" opacity="0.4"/>
+          <text x="30" y="112" class="mono" fill="#94A3B8" font-size="9" text-anchor="middle">TALHÃO</text>
+          <text x="360" y="62" class="mono" fill="#94A3B8" font-size="9" text-anchor="middle">USINA</text>
+        </svg>
+        <div class="flex items-center justify-between mono text-[10px] text-mut mt-1">
+          <span class="text-brand2">● rota mais barata</span><span>3 alternativas ranqueadas</span>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===================== COMO FUNCIONA ===================== -->
-<section id="como" class="max-w-7xl mx-auto px-4 sm:px-6 py-20">
-  <div class="text-center mb-12">
-    <h2 class="text-3xl font-black tracking-tight">Como funciona</h2>
-    <p class="text-gray-500 mt-2">Três passos, sem hardware novo e sem mudar sua operação.</p>
-  </div>
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-    <div class="rounded-2xl border p-6">
-      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white font-black flex items-center justify-center mb-4">1</div>
-      <h3 class="font-bold mb-2">Informe origem e destino</h3>
-      <p class="text-sm text-gray-500">Talhão, fazenda ou coordenada → usina. Individualmente ou em lote, para a frota inteira de uma vez.</p>
-    </div>
-    <div class="rounded-2xl border p-6">
-      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white font-black flex items-center justify-center mb-4">2</div>
-      <h3 class="font-bold mb-2">Escolha o caminhão e a carga</h3>
-      <p class="text-sm text-gray-500">Treminhão, rodotrem ou pentatrem, cheio ou vazio — cada configuração muda a rota ideal, e o AgroRoute sabe disso.</p>
-    </div>
-    <div class="rounded-2xl border p-6">
-      <div class="w-10 h-10 rounded-full bg-emerald-500 text-white font-black flex items-center justify-center mb-4">3</div>
-      <h3 class="font-bold mb-2">Receba a rota mais econômica</h3>
-      <p class="text-sm text-gray-500">Compare alternativas com o custo real de cada viagem e a projeção de economia na safra inteira.</p>
-    </div>
+<!-- ===================== RESULTADOS (faixa) ===================== -->
+<section id="resultados" class="border-b border-line">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid grid-cols-2 lg:grid-cols-4 gap-6">
+    <div><div class="text-3xl font-extrabold text-eme mono">~R$ 1 mi</div><p class="text-sm text-mut mt-1">economia de diesel por ano numa usina de ~30 CVCs</p></div>
+    <div><div class="text-3xl font-extrabold text-brand2 mono">16%</div><p class="text-sm text-mut mt-1">menos diesel por safra vs. planejamento manual</p></div>
+    <div><div class="text-3xl font-extrabold text-cyan mono">10–15×</div><p class="text-sm text-mut mt-1">economia gerada sobre o custo da plataforma</p></div>
+    <div><div class="text-3xl font-extrabold text-violet mono">minutos</div><p class="text-sm text-mut mt-1">para 4 rotas ranqueadas, em vez de horas no Excel</p></div>
   </div>
 </section>
 
-<!-- ===================== RECURSOS ===================== -->
-<section id="recursos" class="bg-gray-50 border-y">
+<!-- ===================== FUNCIONALIDADES ===================== -->
+<section id="funcionalidades" class="border-b border-line">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 py-20">
-    <div class="text-center mb-12">
-      <h2 class="text-3xl font-black tracking-tight">Feito para o transporte pesado do agro</h2>
-      <p class="text-gray-500 mt-2">Roteirizadores comuns planejam para carros. O AgroRoute planeja para a sua frota canavieira.</p>
+    <div class="max-w-2xl mb-12">
+      <div class="mono text-[11px] text-brand2 tracking-widest uppercase mb-3">Funcionalidades</div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">Tudo que a logística da sua safra precisa, numa plataforma</h2>
+      <p class="text-mut mt-3">Feita para o transporte pesado do agro — não é roteirizador de carro adaptado.</p>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-      <div class="bg-white rounded-2xl border p-6">
-        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="truck" class="icon-md text-emerald-700"></i></div>
-        <h3 class="font-bold mb-1.5">Rotas que respeitam seu caminhão</h3>
-        <p class="text-sm text-gray-500">Peso, dimensões e restrições urbanas de cada composição são considerados antes de sugerir qualquer caminho — nada de rota que o rodotrem não passa.</p>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div class="card card-hover p-6">
+        <div class="w-10 h-10 rounded-lg bg-brand/10 border border-brand/25 flex items-center justify-center mb-4"><i data-lucide="wallet" class="icon-md text-brand2"></i></div>
+        <h3 class="font-bold text-white mb-1.5">Custo real, não distância</h3>
+        <p class="text-sm text-mut">Otimiza pelo diesel que a rota realmente gasta — não pelo trajeto mais curto nem pelo mais rápido.</p>
+        <div class="flex flex-wrap gap-1.5 mt-4"><span class="tag">Custo/rota</span><span class="tag">Ranking</span></div>
       </div>
-      <div class="bg-white rounded-2xl border p-6">
-        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="cloud-rain" class="icon-md text-emerald-700"></i></div>
-        <h3 class="font-bold mb-1.5">Clima do dia, custo do dia</h3>
-        <p class="text-sm text-gray-500">A mesma estrada custa diferente depois de uma semana de chuva. O AgroRoute monitora as condições reais da região e recalcula o custo de cada trecho.</p>
+      <div class="card card-hover p-6">
+        <div class="w-10 h-10 rounded-lg bg-cyan/10 border border-cyan/25 flex items-center justify-center mb-4"><i data-lucide="mountain" class="icon-md text-cyan"></i></div>
+        <h3 class="font-bold text-white mb-1.5">Peso, relevo, piso e clima na conta</h3>
+        <p class="text-sm text-mut">Ida carregado e volta vazio, subidas, asfalto/cascalho/terra e a chuva da região entram no cálculo de cada trecho.</p>
+        <div class="flex flex-wrap gap-1.5 mt-4"><span class="tag">Relevo</span><span class="tag">Superfície</span><span class="tag">Clima</span></div>
       </div>
-      <div class="bg-white rounded-2xl border p-6">
-        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="coins" class="icon-md text-emerald-700"></i></div>
-        <h3 class="font-bold mb-1.5">Pedágio real, por eixo</h3>
-        <p class="text-sm text-gray-500">Cada praça no caminho entra na conta com a tarifa da sua composição — inclusive a diferença de ir carregado e voltar vazio.</p>
+      <div class="card card-hover p-6">
+        <div class="w-10 h-10 rounded-lg bg-violet/10 border border-violet/25 flex items-center justify-center mb-4"><i data-lucide="git-fork" class="icon-md text-violet"></i></div>
+        <h3 class="font-bold text-white mb-1.5">4 rotas ranqueadas por custo</h3>
+        <p class="text-sm text-mut">Você recebe quatro alternativas ordenadas pelo custo real e despacha sabendo quanto cada opção custa.</p>
+        <div class="flex flex-wrap gap-1.5 mt-4"><span class="tag">4 cenários</span><span class="tag">Trade-off</span></div>
       </div>
-      <div class="bg-white rounded-2xl border p-6">
-        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="mountain" class="icon-md text-emerald-700"></i></div>
-        <h3 class="font-bold mb-1.5">Relevo e piso na conta</h3>
-        <p class="text-sm text-gray-500">Subidas, asfalto, cascalho ou terra: o custo de combustível e de manutenção muda com o terreno — e a comparação entre rotas também.</p>
+      <div class="card card-hover p-6">
+        <div class="w-10 h-10 rounded-lg bg-amber/10 border border-amber/25 flex items-center justify-center mb-4"><i data-lucide="truck" class="icon-md text-amber"></i></div>
+        <h3 class="font-bold text-white mb-1.5">Restrições reais de CVC</h3>
+        <p class="text-sm text-mut">Treminhão, rodotrem e pentatrem: peso, dimensões e vias por onde uma composição pesada realmente passa.</p>
+        <div class="flex flex-wrap gap-1.5 mt-4"><span class="tag">Treminhão</span><span class="tag">Rodotrem</span><span class="tag">Pentatrem</span></div>
       </div>
-      <div class="bg-white rounded-2xl border p-6">
-        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="layers" class="icon-md text-emerald-700"></i></div>
-        <h3 class="font-bold mb-1.5">Frota inteira, de uma vez</h3>
-        <p class="text-sm text-gray-500">Calcule centenas de rotas simultaneamente no início da safra e replaneje em minutos quando o cenário muda.</p>
+      <div class="card card-hover p-6">
+        <div class="w-10 h-10 rounded-lg bg-eme/10 border border-eme/25 flex items-center justify-center mb-4"><i data-lucide="coins" class="icon-md text-eme"></i></div>
+        <h3 class="font-bold text-white mb-1.5">Pedágio real, por eixo</h3>
+        <p class="text-sm text-mut">Cada praça entra com a tarifa da sua composição — inclusive a diferença de ir carregado e voltar com eixo suspenso.</p>
+        <div class="flex flex-wrap gap-1.5 mt-4"><span class="tag">Por eixo</span><span class="tag">Ida/volta</span></div>
       </div>
-      <div class="bg-white rounded-2xl border p-6">
-        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="building-2" class="icon-md text-emerald-700"></i></div>
-        <h3 class="font-bold mb-1.5">Cada usina no seu ambiente</h3>
-        <p class="text-sm text-gray-500">Plataforma multiempresa: suas rotas, tarifas, frota e vias internas ficam isoladas e configuradas para a sua operação.</p>
+      <div class="card card-hover p-6">
+        <div class="w-10 h-10 rounded-lg bg-pink/10 border border-pink/25 flex items-center justify-center mb-4"><i data-lucide="plug" class="icon-md text-pink"></i></div>
+        <h3 class="font-bold text-white mb-1.5">Ingestão aberta de telemetria</h3>
+        <p class="text-sm text-mut">Recebe dados brutos ou de qualquer provedor (Solinftec e outros) por mapeamento simples de campos. Soma, não substitui.</p>
+        <div class="flex flex-wrap gap-1.5 mt-4"><span class="tag">Solinftec</span><span class="tag">ERP</span><span class="tag">Qualquer fonte</span></div>
+      </div>
+      <div class="card card-hover p-6">
+        <div class="w-10 h-10 rounded-lg bg-brand/10 border border-brand/25 flex items-center justify-center mb-4"><i data-lucide="wrench" class="icon-md text-brand2"></i></div>
+        <h3 class="font-bold text-white mb-1.5">Inteligência de frota</h3>
+        <p class="text-sm text-mut">Painel de manutenção preditiva que antecipa problemas e paradas, com MTBF/MTTR e alertas por componente.</p>
+        <div class="flex flex-wrap gap-1.5 mt-4"><span class="tag">Preditiva</span><span class="tag">MTBF/MTTR</span></div>
+      </div>
+      <div class="card card-hover p-6">
+        <div class="w-10 h-10 rounded-lg bg-cyan/10 border border-cyan/25 flex items-center justify-center mb-4"><i data-lucide="building-2" class="icon-md text-cyan"></i></div>
+        <h3 class="font-bold text-white mb-1.5">Isolamento total por empresa</h3>
+        <p class="text-sm text-mut">Arquitetura multitenant: suas rotas, tarifas, frota e vias internas ficam isoladas e configuradas para a sua operação.</p>
+        <div class="flex flex-wrap gap-1.5 mt-4"><span class="tag">Multitenant</span><span class="tag">LGPD</span></div>
+      </div>
+      <div class="card card-hover p-6">
+        <div class="w-10 h-10 rounded-lg bg-violet/10 border border-violet/25 flex items-center justify-center mb-4"><i data-lucide="users" class="icon-md text-violet"></i></div>
+        <h3 class="font-bold text-white mb-1.5">Controle de usuários</h3>
+        <p class="text-sm text-mut">Vários usuários com perfis (Admin, Analista, Viewer), cada um com acesso apenas aos dados da sua empresa.</p>
+        <div class="flex flex-wrap gap-1.5 mt-4"><span class="tag">RBAC</span><span class="tag">Auditoria</span></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===================== INTEGRAÇÕES ===================== -->
-<section id="integracoes" class="bg-gray-50 border-y">
+<!-- ===================== ECONOMIA (barras) ===================== -->
+<section class="border-b border-line">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-20 grid lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <div class="mono text-[11px] text-eme tracking-widest uppercase mb-3">Economia de diesel</div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">Menos diesel. Mais eficiência. Rota a rota.</h2>
+      <p class="text-mut mt-4 leading-relaxed">Duas rotas com a mesma quilometragem podem custar valores muito diferentes. Ao pesar peso, relevo,
+        tipo de piso, clima e pedágio de cada trecho, o Peabiru Agro corta o diesel gasto por tonelada transportada.</p>
+      <div class="mt-8 space-y-5">
+        <div><div class="flex justify-between text-sm mb-1.5"><span class="text-slate-300">Escolha da rota mais barata (vs. mais curta)</span><span class="mono text-brand2">92%</span></div><div class="bar-track"><div class="bar-fill bg-brand" style="width:92%"></div></div></div>
+        <div><div class="flex justify-between text-sm mb-1.5"><span class="text-slate-300">Peso e relevo considerados no consumo</span><span class="mono text-cyan">85%</span></div><div class="bar-track"><div class="bar-fill bg-cyan" style="width:85%"></div></div></div>
+        <div><div class="flex justify-between text-sm mb-1.5"><span class="text-slate-300">Clima e tipo de piso no custo</span><span class="mono text-violet">78%</span></div><div class="bar-track"><div class="bar-fill bg-violet" style="width:78%"></div></div></div>
+        <div><div class="flex justify-between text-sm mb-1.5"><span class="text-slate-300">Pedágio por eixo (ida/volta)</span><span class="mono text-amber">87%</span></div><div class="bar-track"><div class="bar-fill bg-amber" style="width:87%"></div></div></div>
+      </div>
+    </div>
+    <div class="card p-6">
+      <div class="mono text-[11px] text-mut mb-4">COMPARATIVO MENSAL — EXEMPLO ILUSTRATIVO (30 CVCs)</div>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between"><span class="text-sm text-mut">Planejamento manual</span><span class="mono text-slate-400">R$ 670k</span></div>
+        <div class="bar-track"><div class="bar-fill bg-slate-600" style="width:100%"></div></div>
+        <div class="flex items-center justify-between"><span class="text-sm text-mut">Rota conservadora</span><span class="mono text-slate-300">R$ 605k</span></div>
+        <div class="bar-track"><div class="bar-fill bg-cyan/70" style="width:90%"></div></div>
+        <div class="flex items-center justify-between"><span class="text-sm text-slate-200">Rota de menor custo (Peabiru Agro)</span><span class="mono text-eme">R$ 563k</span></div>
+        <div class="bar-track"><div class="bar-fill bg-eme" style="width:84%"></div></div>
+      </div>
+      <div class="mt-6 pt-5 border-t border-line flex items-center justify-between">
+        <div><div class="mono text-[10px] text-mut">ECONOMIA / MÊS</div><div class="text-2xl font-extrabold text-eme">~R$ 107k</div></div>
+        <div class="text-right"><div class="mono text-[10px] text-mut">POR SAFRA</div><div class="text-2xl font-extrabold text-white">~R$ 1 mi</div></div>
+      </div>
+      <p class="mono text-[10px] text-slate-600 mt-3">Valores ilustrativos; a economia real é calibrada com os dados da sua operação.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TECNOLOGIA / INTEGRAÇÕES ===================== -->
+<section id="tecnologia" class="border-b border-line">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 py-20">
-    <div class="text-center mb-12">
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-4">
-        <i data-lucide="plug" class="icon-xs"></i> Conecta com qualquer sistema
-      </div>
-      <h2 class="text-3xl font-black tracking-tight">Recebe telemetria de qualquer fonte</h2>
-      <p class="text-gray-500 mt-2 max-w-2xl mx-auto">Dados brutos dos equipamentos ou de plataformas como a <b>Solinftec</b> —
-        o AgroRoute normaliza tudo para um modelo único e alimenta a inteligência automaticamente.</p>
+    <div class="max-w-2xl mb-12">
+      <div class="mono text-[11px] text-cyan tracking-widest uppercase mb-3">Tecnologia</div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">Recebe telemetria de qualquer fonte</h2>
+      <p class="text-mut mt-3">Dados brutos dos equipamentos ou de plataformas como a <b class="text-slate-200">Solinftec</b> — o Peabiru Agro normaliza tudo para um modelo único e alimenta a inteligência automaticamente. Sem lock-in.</p>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      <div class="bg-white rounded-2xl border p-6">
-        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="radio" class="icon-md text-emerald-700"></i></div>
-        <h3 class="font-bold mb-1.5">Telemetria bruta</h3>
-        <p class="text-sm text-gray-500">Envie leituras dos equipamentos por API ou webhook, em tempo real, no seu próprio formato.</p>
-      </div>
-      <div class="bg-white rounded-2xl border p-6">
-        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="satellite" class="icon-md text-emerald-700"></i></div>
-        <h3 class="font-bold mb-1.5">Solinftec &amp; provedores</h3>
-        <p class="text-sm text-gray-500">Conectores prontos para a Flow API da Solinftec (telemetria, horas gerenciais, alarmes) — sem trabalho de mapeamento.</p>
-      </div>
-      <div class="bg-white rounded-2xl border p-6">
-        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="file-spreadsheet" class="icon-md text-emerald-700"></i></div>
-        <h3 class="font-bold mb-1.5">Arquivos e extrações</h3>
-        <p class="text-sm text-gray-500">Suba extrações em CSV ou Excel e a plataforma ingere e organiza os dados na hora.</p>
-      </div>
-      <div class="bg-white rounded-2xl border p-6">
-        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center mb-3"><i data-lucide="shuffle" class="icon-md text-emerald-700"></i></div>
-        <h3 class="font-bold mb-1.5">Qualquer sistema</h3>
-        <p class="text-sm text-gray-500">Um mapeamento simples de campos conecta qualquer ERP, telemetria ou banco de dados — o AgroRoute se adapta ao seu.</p>
-      </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="card p-6"><div class="w-10 h-10 rounded-lg bg-pink/10 border border-pink/25 flex items-center justify-center mb-3"><i data-lucide="radio" class="icon-md text-pink"></i></div><h3 class="font-bold text-white mb-1.5">Telemetria bruta</h3><p class="text-sm text-mut">Leituras dos equipamentos por API ou webhook, em tempo real, no seu próprio formato.</p></div>
+      <div class="card p-6"><div class="w-10 h-10 rounded-lg bg-eme/10 border border-eme/25 flex items-center justify-center mb-3"><i data-lucide="satellite" class="icon-md text-eme"></i></div><h3 class="font-bold text-white mb-1.5">Solinftec &amp; provedores</h3><p class="text-sm text-mut">Conectores para a Flow API da Solinftec (telemetria, horas gerenciais, alarmes).</p></div>
+      <div class="card p-6"><div class="w-10 h-10 rounded-lg bg-amber/10 border border-amber/25 flex items-center justify-center mb-3"><i data-lucide="file-spreadsheet" class="icon-md text-amber"></i></div><h3 class="font-bold text-white mb-1.5">Arquivos e extrações</h3><p class="text-sm text-mut">Suba CSV ou Excel e a plataforma ingere e organiza os dados na hora.</p></div>
+      <div class="card p-6"><div class="w-10 h-10 rounded-lg bg-brand/10 border border-brand/25 flex items-center justify-center mb-3"><i data-lucide="shuffle" class="icon-md text-brand2"></i></div><h3 class="font-bold text-white mb-1.5">Qualquer sistema</h3><p class="text-sm text-mut">Um mapeamento simples de campos conecta qualquer ERP, telemetria ou banco de dados.</p></div>
     </div>
-    <p class="text-center text-xs text-gray-400 mt-8">Dados normalizados alimentam automaticamente os painéis de inteligência, manutenção preditiva e roteirização.</p>
+    <p class="mono text-[11px] text-slate-600 mt-8">Dados normalizados alimentam automaticamente os painéis de inteligência, manutenção preditiva e roteirização.</p>
   </div>
 </section>
 
 <!-- ===================== PLANOS ===================== -->
-<section id="planos" class="max-w-7xl mx-auto px-4 sm:px-6 py-20">
-  <div class="text-center mb-12">
-    <h2 class="text-3xl font-black tracking-tight">Planos por assinatura mensal</h2>
-    <p class="text-gray-500 mt-2">A partir de <b class="text-emerald-700">R$ 2.900/mês</b> — cada plano limita veículos e rotas.
-      Para contratar, fale com nosso comercial: <a href="mailto:contato@nokahi.com" class="text-emerald-700 font-semibold hover:underline">contato@nokahi.com</a>.</p>
-  </div>
-  <div id="plans-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
-    <!-- preenchido via /v1/billing/plans; fallback estático abaixo -->
-  </div>
+<section id="planos" class="border-b border-line">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-20">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <div class="mono text-[11px] text-brand2 tracking-widest uppercase mb-3">Planos</div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">A partir de <span class="text-brand2">R$ 2.900/mês</span></h2>
+      <p class="text-mut mt-3">Cada plano limita veículos e rotas. Para contratar, fale com o comercial:
+        <a href="mailto:contato@nokahi.com" class="text-brand2 font-semibold hover:underline">contato@nokahi.com</a>.</p>
+    </div>
+    <div id="plans-grid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
 
-  <!-- calculadora de preço por uso -->
-  <div class="max-w-4xl mx-auto mt-10 bg-white rounded-2xl border p-6 sm:p-8">
-    <div class="flex items-center gap-2 mb-1">
-      <i data-lucide="calculator" class="icon-sm text-emerald-600"></i>
-      <h3 class="text-lg font-bold">Calcule o preço da sua operação</h3>
-    </div>
-    <p class="text-sm text-gray-500 mb-5">O custo é dimensionado pelo que você usa: veículos, rotas
-      calculadas, origens (talhões) e destinos (usinas).</p>
-    <div class="grid sm:grid-cols-4 gap-4">
-      <label class="block"><span class="text-xs font-semibold text-gray-500">Veículos</span>
-        <input type="number" id="calc-veh" value="30" min="0" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm" oninput="calcQuote()"></label>
-      <label class="block"><span class="text-xs font-semibold text-gray-500">Rotas/mês</span>
-        <input type="number" id="calc-rot" value="4000" min="0" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm" oninput="calcQuote()"></label>
-      <label class="block"><span class="text-xs font-semibold text-gray-500">Origens (talhões)</span>
-        <input type="number" id="calc-ori" value="60" min="0" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm" oninput="calcQuote()"></label>
-      <label class="block"><span class="text-xs font-semibold text-gray-500">Destinos (usinas)</span>
-        <input type="number" id="calc-dest" value="3" min="0" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm" oninput="calcQuote()"></label>
-    </div>
-    <div class="mt-5 grid sm:grid-cols-3 gap-4 items-center">
-      <div class="sm:col-span-2"><div id="calc-items" class="text-xs text-gray-500 space-y-1"></div></div>
-      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
-        <div class="text-[10px] uppercase tracking-wide text-emerald-700 font-semibold">Estimativa mensal</div>
-        <div id="calc-total" class="text-3xl font-black text-emerald-700">—</div>
-        <div id="calc-annual" class="text-[11px] text-emerald-600"></div>
+    <!-- calculadora -->
+    <div class="card p-6 sm:p-8 mt-8 max-w-5xl mx-auto">
+      <div class="flex items-center gap-2 mb-1"><i data-lucide="calculator" class="icon-sm text-brand2"></i><h3 class="font-bold text-white">Calcule o preço da sua operação</h3></div>
+      <p class="text-sm text-mut mb-5">Dimensionado pelo que você usa: veículos, rotas calculadas, origens (talhões) e destinos (usinas).</p>
+      <div class="grid sm:grid-cols-4 gap-4">
+        <label class="block"><span class="mono text-[10px] text-mut uppercase">Veículos</span><input type="number" id="calc-veh" value="30" min="0" class="w-full mt-1 px-3 py-2 rounded-lg bg-panel2 border border-line text-sm" oninput="calcQuote()"></label>
+        <label class="block"><span class="mono text-[10px] text-mut uppercase">Rotas/mês</span><input type="number" id="calc-rot" value="4000" min="0" class="w-full mt-1 px-3 py-2 rounded-lg bg-panel2 border border-line text-sm" oninput="calcQuote()"></label>
+        <label class="block"><span class="mono text-[10px] text-mut uppercase">Origens (talhões)</span><input type="number" id="calc-ori" value="60" min="0" class="w-full mt-1 px-3 py-2 rounded-lg bg-panel2 border border-line text-sm" oninput="calcQuote()"></label>
+        <label class="block"><span class="mono text-[10px] text-mut uppercase">Destinos (usinas)</span><input type="number" id="calc-dest" value="3" min="0" class="w-full mt-1 px-3 py-2 rounded-lg bg-panel2 border border-line text-sm" oninput="calcQuote()"></label>
       </div>
+      <div class="mt-5 grid sm:grid-cols-3 gap-4 items-center">
+        <div class="sm:col-span-2"><div id="calc-items" class="mono text-[11px] text-mut space-y-1"></div></div>
+        <div class="rounded-xl bg-brand/10 border border-brand/25 p-4 text-center">
+          <div class="mono text-[10px] uppercase text-brand2">Estimativa mensal</div>
+          <div id="calc-total" class="text-3xl font-extrabold text-white">—</div>
+          <div id="calc-annual" class="mono text-[11px] text-mut"></div>
+        </div>
+      </div>
+      <p class="mono text-[10px] text-slate-600 mt-3">Estimativa; a proposta final é fechada com o comercial (contato@nokahi.com). Inclui 500 rotas/mês na base.</p>
     </div>
-    <p class="text-[11px] text-gray-400 mt-3">Estimativa; a proposta final é fechada com o comercial (<a href="mailto:contato@nokahi.com" class="text-emerald-700 underline">contato@nokahi.com</a>) e considera volume e SLA.
-      Inclui 500 rotas/mês na base. <a href="/app?demo=1" class="text-emerald-700 underline">Testar a demo</a>.</p>
   </div>
 </section>
 
-<!-- ===================== CTA FINAL ===================== -->
-<!-- ===================== CONTATO / LEAD ===================== -->
-<section id="contato" class="bg-gray-50 border-y">
+<!-- ===================== CONTATO ===================== -->
+<section id="contato" class="border-b border-line">
   <div class="max-w-5xl mx-auto px-4 sm:px-6 py-20 grid md:grid-cols-2 gap-10 items-start">
     <div>
-      <h2 class="text-3xl font-black tracking-tight">Fale com a NOKAHI</h2>
-      <p class="text-gray-600 mt-3">Conte sobre sua operação e nós retornamos com uma estimativa de economia
-        para a sua frota e uma demonstração guiada. Sem compromisso.</p>
-      <ul class="mt-6 space-y-3 text-sm text-gray-600">
-        <li class="flex items-center gap-2"><i data-lucide="check-circle" class="icon-sm text-emerald-600"></i> Resposta em até 1 dia útil</li>
-        <li class="flex items-center gap-2"><i data-lucide="check-circle" class="icon-sm text-emerald-600"></i> Estimativa de economia e proposta sob medida</li>
-        <li class="flex items-center gap-2"><i data-lucide="check-circle" class="icon-sm text-emerald-600"></i> Demo aberta no Triângulo Mineiro (MG)</li>
+      <h2 class="text-3xl font-extrabold tracking-tight text-white">Fale com a NOKAHI</h2>
+      <p class="text-mut mt-3">Conte sobre sua operação e retornamos com uma estimativa de economia para a sua frota e uma demonstração guiada. Sem compromisso.</p>
+      <ul class="mt-6 space-y-3 text-sm text-mut">
+        <li class="flex items-center gap-2"><i data-lucide="check-circle" class="icon-sm text-eme"></i> Resposta em até 1 dia útil</li>
+        <li class="flex items-center gap-2"><i data-lucide="check-circle" class="icon-sm text-eme"></i> Estimativa de economia e proposta sob medida</li>
+        <li class="flex items-center gap-2"><i data-lucide="check-circle" class="icon-sm text-eme"></i> Demo aberta no Triângulo Mineiro (MG)</li>
       </ul>
-      <p class="mt-6 text-sm text-gray-500 flex items-center gap-2">
-        <i data-lucide="mail" class="icon-sm"></i> <a href="mailto:contato@nokahi.com" class="text-emerald-700 hover:underline">contato@nokahi.com</a>
-      </p>
+      <p class="mt-6 text-sm text-mut flex items-center gap-2"><i data-lucide="mail" class="icon-sm"></i> <a href="mailto:contato@nokahi.com" class="text-brand2 hover:underline">contato@nokahi.com</a></p>
     </div>
-    <form id="lead-form" class="bg-white rounded-2xl border p-6 space-y-3 shadow-sm" onsubmit="submitLead(event)">
+    <form id="lead-form" class="card p-6 space-y-3" onsubmit="submitLead(event)">
       <div class="grid sm:grid-cols-2 gap-3">
-        <div><label class="text-xs font-semibold text-gray-500">Nome *</label>
-          <input name="name" required class="w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></div>
-        <div><label class="text-xs font-semibold text-gray-500">Usina / Empresa</label>
-          <input name="company" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></div>
+        <div><label class="mono text-[10px] text-mut uppercase">Nome *</label><input name="name" required class="w-full mt-1 px-3 py-2 rounded-lg bg-panel2 border border-line text-sm focus:outline-none focus:border-brand"></div>
+        <div><label class="mono text-[10px] text-mut uppercase">Usina / Empresa</label><input name="company" class="w-full mt-1 px-3 py-2 rounded-lg bg-panel2 border border-line text-sm focus:outline-none focus:border-brand"></div>
       </div>
       <div class="grid sm:grid-cols-2 gap-3">
-        <div><label class="text-xs font-semibold text-gray-500">E-mail *</label>
-          <input name="email" type="email" required class="w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></div>
-        <div><label class="text-xs font-semibold text-gray-500">Telefone / WhatsApp</label>
-          <input name="phone" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></div>
+        <div><label class="mono text-[10px] text-mut uppercase">E-mail *</label><input name="email" type="email" required class="w-full mt-1 px-3 py-2 rounded-lg bg-panel2 border border-line text-sm focus:outline-none focus:border-brand"></div>
+        <div><label class="mono text-[10px] text-mut uppercase">Telefone / WhatsApp</label><input name="phone" class="w-full mt-1 px-3 py-2 rounded-lg bg-panel2 border border-line text-sm focus:outline-none focus:border-brand"></div>
       </div>
       <div class="grid sm:grid-cols-2 gap-3">
-        <div><label class="text-xs font-semibold text-gray-500">Cargo</label>
-          <input name="role" placeholder="Ex: Gerente de logística" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></div>
-        <div><label class="text-xs font-semibold text-gray-500">Tamanho da frota</label>
-          <select name="fleet_size" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <option value="">Selecione…</option><option>1–10 caminhões</option><option>11–50 caminhões</option>
-            <option>51–200 caminhões</option><option>200+ caminhões</option>
+        <div><label class="mono text-[10px] text-mut uppercase">Cargo</label><input name="role" placeholder="Ex: Gerente de logística" class="w-full mt-1 px-3 py-2 rounded-lg bg-panel2 border border-line text-sm focus:outline-none focus:border-brand"></div>
+        <div><label class="mono text-[10px] text-mut uppercase">Tamanho da frota</label>
+          <select name="fleet_size" class="w-full mt-1 px-3 py-2 rounded-lg bg-panel2 border border-line text-sm focus:outline-none focus:border-brand">
+            <option value="">Selecione…</option><option>1–10 caminhões</option><option>11–50 caminhões</option><option>51–200 caminhões</option><option>200+ caminhões</option>
           </select></div>
       </div>
-      <div><label class="text-xs font-semibold text-gray-500">Mensagem</label>
-        <textarea name="message" rows="3" placeholder="Conte sobre sua operação e sua região" class="w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea></div>
+      <div><label class="mono text-[10px] text-mut uppercase">Mensagem</label><textarea name="message" rows="3" placeholder="Conte sobre sua operação e sua região" class="w-full mt-1 px-3 py-2 rounded-lg bg-panel2 border border-line text-sm focus:outline-none focus:border-brand"></textarea></div>
       <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
-      <button type="submit" id="lead-submit" class="w-full px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm">
-        Quero falar com a NOKAHI
-      </button>
+      <button type="submit" id="lead-submit" class="w-full px-4 py-3 rounded-xl bg-brand hover:bg-brand2 text-white font-bold text-sm transition-colors">Quero falar com o comercial</button>
       <p id="lead-msg" class="hidden text-sm text-center"></p>
     </form>
   </div>
 </section>
 
-<section class="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white">
+<!-- ===================== CTA FINAL ===================== -->
+<section class="border-b border-line">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16 text-center">
-    <h2 class="text-3xl font-black tracking-tight">Quanto custa cada quilômetro da sua safra?</h2>
-    <p class="mt-3 text-emerald-100">Descubra quanto sua usina pode economizar. Teste a demo e fale com nosso comercial para contratar.</p>
+    <h2 class="text-3xl font-extrabold tracking-tight text-white">Quanto custa cada quilômetro da sua safra?</h2>
+    <p class="mt-3 text-mut">Descubra quanto sua usina pode economizar. Teste a demo e fale com o comercial para contratar.</p>
     <div class="mt-7 flex flex-col sm:flex-row gap-3 justify-center">
-      <a href="/app?demo=1" class="px-8 py-3.5 rounded-xl bg-white text-emerald-700 font-bold hover:bg-emerald-50">Testar a demo agora</a>
-      <a href="#contato" class="px-8 py-3.5 rounded-xl border-2 border-white/60 font-bold hover:bg-white/10">Falar com o comercial</a>
+      <a href="/app?demo=1" class="px-8 py-3.5 rounded-xl bg-brand hover:bg-brand2 text-white font-bold transition-colors">Testar a demo agora</a>
+      <a href="#contato" class="px-8 py-3.5 rounded-xl border border-line hover:border-brand/50 font-bold text-slate-200 transition-colors">Falar com o comercial</a>
     </div>
   </div>
 </section>
 
-<footer class="border-t">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
+<footer>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 mono text-[11px] text-slate-500">
     <div class="flex items-center gap-2">
-      <div class="w-6 h-6 rounded bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
-        <i data-lucide="leaf" class="icon-xs text-white"></i>
-      </div>
-      <span><b class="text-gray-600">NOKAHI</b> · AgroRoute · Waze do Agro · © 2026</span>
+      <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-brand/10 border border-brand/25">
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round"><path d="M4 20c3-1 3.5-9 7-9s3.5 6 6 6 3-3 3-3" stroke-dasharray="0.1 3"/></svg>
+      </span>
+      <span><b class="text-slate-300">NOKAHI</b> · Peabiru Agro · desdobramento agro da otimização náutica Pharos · © 2026</span>
     </div>
-    <a href="mailto:contato@nokahi.com" class="hover:text-gray-600">contato@nokahi.com</a>
+    <a href="mailto:contato@nokahi.com" class="hover:text-slate-300">contato@nokahi.com</a>
   </div>
 </footer>
 
@@ -319,18 +426,16 @@ const fR = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:0});
 
 function renderPlans(plans) {
   document.getElementById('plans-grid').innerHTML = plans.map((p,i) => `
-    <div class="rounded-2xl border p-6 flex flex-col gap-3 ${i===1?'border-emerald-500 ring-2 ring-emerald-500 shadow-xl relative':''}">
-      ${i===1?'<span class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold">MAIS ESCOLHIDO</span>':''}
-      <div class="font-bold">${p.name}</div>
-      <div class="text-3xl font-black">${p.price_month_brl>0?fR(p.price_month_brl):'Sob consulta'}<span class="text-sm font-medium text-gray-400">${p.price_month_brl>0?'/mês':''}</span></div>
-      <p class="text-sm text-gray-500 flex-1">${p.description}</p>
-      <a href="#contato" class="text-center px-4 py-2.5 rounded-xl ${i===1?'bg-emerald-600 hover:bg-emerald-700 text-white':'border text-gray-700 hover:bg-gray-50'} font-bold text-sm">Falar com o comercial</a>
+    <div class="card p-6 flex flex-col gap-3 ${i===1?'border-brand ring-1 ring-brand relative':''}">
+      ${i===1?'<span class="absolute -top-3 left-1/2 -translate-x-1/2 mono text-[10px] px-3 py-1 rounded-full bg-brand text-white">MAIS ESCOLHIDO</span>':''}
+      <div class="font-bold text-white">${p.name}</div>
+      <div class="text-3xl font-extrabold text-white">${p.price_month_brl>0?fR(p.price_month_brl):'Sob consulta'}<span class="text-sm font-medium text-mut">${p.price_month_brl>0?'/mês':''}</span></div>
+      <p class="text-sm text-mut flex-1">${p.description}</p>
+      <a href="#contato" class="text-center px-4 py-2.5 rounded-xl ${i===1?'bg-brand hover:bg-brand2 text-white':'border border-line text-slate-200 hover:border-brand/50'} font-bold text-sm transition-colors">Falar com o comercial</a>
     </div>`).join('');
 }
 renderPlans(FALLBACK_PLANS);
-fetch('/v1/billing/plans').then(r=>r.json())
-  .then(p => renderPlans(Object.values(p)))
-  .catch(()=>{});
+fetch('/v1/billing/plans').then(r=>r.json()).then(p => renderPlans(Object.values(p))).catch(()=>{});
 
 const fRk = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
 let calcTimer;
@@ -338,10 +443,10 @@ function calcQuote(){
   clearTimeout(calcTimer);
   calcTimer = setTimeout(async () => {
     const body = {
-      vehicles: +document.getElementById('calc-veh').value||0,
-      routes_per_month: +document.getElementById('calc-rot').value||0,
-      origins: +document.getElementById('calc-ori').value||0,
-      destinations: +document.getElementById('calc-dest').value||0,
+      vehicles:+document.getElementById('calc-veh').value||0,
+      routes_per_month:+document.getElementById('calc-rot').value||0,
+      origins:+document.getElementById('calc-ori').value||0,
+      destinations:+document.getElementById('calc-dest').value||0,
     };
     try{
       const r = await fetch('/v1/billing/quote', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
@@ -349,7 +454,7 @@ function calcQuote(){
       document.getElementById('calc-total').textContent = fRk(q.monthly_total);
       document.getElementById('calc-annual').textContent = fRk(q.annual_total) + '/ano';
       document.getElementById('calc-items').innerHTML = q.items.filter(i=>i.subtotal>0)
-        .map(i => `<div class="flex justify-between"><span>${i.item}${i.qty>1?` · ${i.qty}×`:''}</span><b>${fRk(i.subtotal)}</b></div>`).join('');
+        .map(i => `<div class="flex justify-between"><span>${i.item}${i.qty>1?` · ${i.qty}×`:''}</span><b class="text-slate-300">${fRk(i.subtotal)}</b></div>`).join('');
     }catch{ document.getElementById('calc-total').textContent = '—'; }
   }, 250);
 }
@@ -357,29 +462,22 @@ calcQuote();
 
 async function submitLead(e) {
   e.preventDefault();
-  const form = e.target;
-  const btn = document.getElementById('lead-submit');
-  const msg = document.getElementById('lead-msg');
+  const form = e.target, btn = document.getElementById('lead-submit'), msg = document.getElementById('lead-msg');
   const payload = Object.fromEntries(new FormData(form).entries());
   payload.source = 'landing';
   btn.disabled = true; btn.textContent = 'Enviando…';
   try {
     const r = await fetch('/v1/leads', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
-    if (!r.ok) {
-      let detail = 'falha ao enviar';
-      try { detail = (await r.json()).detail || detail; } catch {}
-      throw new Error(detail);
-    }
-    form.reset();
+    if (!r.ok) throw new Error(await r.text());
+    msg.className = 'text-sm text-center text-eme';
     msg.textContent = '✓ Recebido! A NOKAHI entrará em contato em breve.';
-    msg.className = 'text-sm text-center text-emerald-700 font-semibold';
+    form.reset();
   } catch (err) {
-    msg.textContent = 'Não foi possível enviar: ' + err.message + '. Escreva para contato@nokahi.com.';
-    msg.className = 'text-sm text-center text-red-600';
-  } finally {
-    msg.classList.remove('hidden');
-    btn.disabled = false; btn.textContent = 'Quero falar com a NOKAHI';
+    msg.className = 'text-sm text-center text-pink';
+    msg.textContent = 'Não foi possível enviar. Escreva para contato@nokahi.com.';
   }
+  msg.classList.remove('hidden');
+  btn.disabled = false; btn.textContent = 'Quero falar com o comercial';
 }
 </script>
 </body>

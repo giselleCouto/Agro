@@ -1,4 +1,4 @@
-"""Tipos de domínio do NOKAHI AgroRoute."""
+"""Tipos de domínio do Peabiru Agro."""
 from __future__ import annotations
 
 from enum import Enum

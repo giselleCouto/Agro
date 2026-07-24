@@ -1,6 +1,6 @@
 # Deploy — agroroute.despaxai.com
 
-Publicar o NOKAHI AgroRoute no subdomínio **`agroroute.despaxai.com`** (domínio
+Publicar o Peabiru Agro no subdomínio **`agroroute.despaxai.com`** (domínio
 GoDaddy `despaxai.com`). A aplicação já está preparada: URL pública configurável,
 proxy reverso com HTTPS e host permitido.
 

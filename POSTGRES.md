@@ -13,7 +13,7 @@ semeia os tenants sozinho no primeiro boot; basta apontar `DATABASE_URL`.
    **Add PostgreSQL**. O Railway sobe um serviço `Postgres` com a variável
    `DATABASE_URL` já pronta.
 
-2. **Ligue a API ao banco.** Abra o serviço da **API** (o do NOKAHI AgroRoute) →
+2. **Ligue a API ao banco.** Abra o serviço da **API** (o do Peabiru Agro) →
    aba **Variables** → **+ New Variable** → **Add Reference** → escolha o serviço
    **Postgres** e a variável **`DATABASE_URL`**.
    - Se preferir digitar, crie a variável `DATABASE_URL` com o valor:

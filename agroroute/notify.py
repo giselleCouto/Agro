@@ -42,7 +42,7 @@ def build_lead_email(lead: dict) -> EmailMessage:
     if lead.get("email"):
         msg["Reply-To"] = lead["email"]
     linhas = [
-        "Novo contato recebido pelo site da NOKAHI AgroRoute:",
+        "Novo contato recebido pelo site do Peabiru Agro:",
         "",
         f"Nome:      {lead.get('name','')}",
         f"Empresa:   {lead.get('company','') or '-'}",
@@ -55,7 +55,7 @@ def build_lead_email(lead: dict) -> EmailMessage:
         "Mensagem:",
         (lead.get("message") or "-"),
         "",
-        "— Notificação automática NOKAHI AgroRoute",
+        "— Notificação automática Peabiru Agro",
     ]
     msg.set_content("\n".join(linhas))
     return msg

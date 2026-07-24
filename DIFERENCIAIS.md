@@ -1,4 +1,4 @@
-# NOKAHI AgroRoute — Diferenciais competitivos
+# Peabiru Agro — Diferenciais competitivos
 
 *Documento de posicionamento. Pesquisa de mercado brasileiro (agronegócio / CCT — Colheita, Carregamento e Transporte de cana) realizada em julho de 2026.*
 
@@ -6,7 +6,7 @@
 
 ## 1. Posicionamento em uma frase
 
-> **A NOKAHI AgroRoute não compete com telemetria — ela consome telemetria.**
+> **O Peabiru Agro não compete com telemetria — ele consome telemetria.**
 
 O mercado brasileiro de agro/frota inteiro está estruturado para responder *"onde está e como está o veículo"* (localização, CAN, jornada, segurança, rastreabilidade documental da cana). A NOKAHI responde uma pergunta que **nenhum outro player responde de forma nativa**:
 
