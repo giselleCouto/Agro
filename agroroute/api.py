@@ -91,6 +91,8 @@ TENANTS_PATH = os.environ.get(
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 CONTACT_EMAIL = "contato@nokahi.com"
 DEMO_TENANT_ID = "demo-mg"
+# TTL de reciclagem das sessões de demo efêmeras (uma por visitante); padrão 7 dias
+DEMO_SESSION_TTL_S = int(os.environ.get("DEMO_SESSION_TTL_S", 7 * 24 * 3600))
 # sem default inseguro: se não configurado, os endpoints de admin ficam desativados
 ADMIN_TOKEN = os.environ.get("AGROROUTE_ADMIN_TOKEN")
 # só confia em X-Forwarded-For atrás de um proxy reverso confiável
@@ -607,15 +609,59 @@ def demo_config():
     tenant = store.by_id(DEMO_TENANT_ID)
     if not tenant:
         raise HTTPException(status_code=404, detail="demo indisponível")
+    return _demo_meta(tenant.api_key)
+
+
+def _demo_meta(api_key: str) -> dict:
     return {
-        "api_key": tenant.api_key,
+        "api_key": api_key,
         "region": "Triângulo Mineiro (MG)",
         "sample": {
-            "origin": {"lat": -19.90, "lon": -48.10, "name": "Talhão canavieiro — Triângulo Mineiro/MG"},
-            "dest": {"lat": -19.9707, "lon": -47.7799, "name": "Usina — Delta/MG"},
+            "origin": {"lat": -19.90, "lon": -48.10, "name": "Talhão — Triângulo Mineiro/MG"},
+            "dest": {"lat": -19.9707, "lon": -47.7799, "name": "Destino — Delta/MG"},
             "vehicle_id": "rodotrem",
         },
     }
+
+
+def _cleanup_demo_sessions() -> None:
+    """Recicla sessões de demo efêmeras vencidas (tenant + dados). Best-effort."""
+    expired = store.expired_demo_sessions(DEMO_SESSION_TTL_S)
+    if not expired:
+        return
+    from .db import (AlarmRow, ConnectorRow, RouteLogRow, SubscriptionRow,
+                     TelemetryRow, VehicleRow, session_factory)
+    Session = session_factory(_engine)
+    with Session() as s:
+        for Model in (VehicleRow, TelemetryRow, AlarmRow, RouteLogRow,
+                      SubscriptionRow, ConnectorRow):
+            s.query(Model).filter(Model.tenant_id.in_(expired)).delete(
+                synchronize_session=False)
+        s.commit()
+    store.delete_tenants(expired)
+
+
+@app.post("/v1/demo/start")
+def demo_start():
+    """Inicia uma demonstração ISOLADA para um novo usuário (sem login).
+
+    Cada visitante ganha seu próprio sandbox, com cota própria de 5 rotas e dados
+    de exemplo — assim a demo nunca 'acaba' para quem chega depois. Sessões antigas
+    são recicladas automaticamente (TTL).
+    """
+    if not store.by_id(DEMO_TENANT_ID):
+        raise HTTPException(status_code=404, detail="demo indisponível")
+    try:
+        _cleanup_demo_sessions()
+    except Exception:
+        pass  # a limpeza nunca deve impedir a criação de uma nova demo
+    cfg = store.create_demo_session(DEMO_TENANT_ID)
+    if cfg is None:
+        raise HTTPException(status_code=503, detail="não foi possível iniciar a demo")
+    ensure_demo_subscription(billing_store, cfg.tenant_id)
+    vehicle_store.seed(cfg.tenant_id, DEMO_VEHICLES.get(DEMO_TENANT_ID, []))
+    demo_seed.seed_demo(cfg.tenant_id, ingest_store, route_log)
+    return _demo_meta(cfg.api_key)
 
 
 # ---------------------------------------------------------------------------

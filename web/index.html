@@ -935,20 +935,35 @@ async function sendChat(){
 }
 
 /* ---------- modo demo ---------- */
+async function demoSessionKey(){
+  // reaproveita a sessão de demo deste navegador se ainda for válida
+  let key=localStorage.getItem('despaxa_demo_key');
+  if(key){
+    const chk=await fetch('/v1/tenant/config',{headers:{'X-API-Key':key}}).catch(()=>null);
+    if(chk&&chk.ok&&((await chk.json()).is_demo)) return key;
+  }
+  // senão, cria uma nova demonstração isolada (cota própria de 5 rotas)
+  const r=await fetch('/v1/demo/start',{method:'POST'});
+  if(!r.ok) throw new Error('status '+r.status);
+  key=(await r.json()).api_key;
+  localStorage.setItem('despaxa_demo_key',key);
+  return key;
+}
 async function initDemo(){
   const params=new URLSearchParams(location.search); if(!params.get('demo'))return;
   try{
-    const cfg=await (await fetch('/v1/demo/config')).json();
-    document.getElementById('apikey').value=cfg.api_key;
+    const key=await demoSessionKey();
+    const meta=await fetch('/v1/demo/config').then(r=>r.json()).catch(()=>({region:'Triângulo Mineiro (MG)'}));
+    document.getElementById('apikey').value=key;
     await connect();
-    document.getElementById('demo-region').textContent=cfg.region;
+    document.getElementById('demo-region').textContent=meta.region||'Triângulo Mineiro (MG)';
     document.getElementById('demo-banner').classList.remove('hidden'); lucide.createIcons();
-    if(cfg.sample){
-      state.vehicle=cfg.sample.vehicle_id||state.vehicle; renderVehiclePills(); renderTruckInfo();
+    if(meta.sample){
+      state.vehicle=meta.sample.vehicle_id||state.vehicle; renderVehiclePills(); renderTruckInfo();
       showView('rotas');
-      setPoint('origin',cfg.sample.origin.lat,cfg.sample.origin.lon,cfg.sample.origin.name);
-      setPoint('dest',cfg.sample.dest.lat,cfg.sample.dest.lon,cfg.sample.dest.name);
-      map.setView([(cfg.sample.origin.lat+cfg.sample.dest.lat)/2,(cfg.sample.origin.lon+cfg.sample.dest.lon)/2],9);
+      setPoint('origin',meta.sample.origin.lat,meta.sample.origin.lon,meta.sample.origin.name);
+      setPoint('dest',meta.sample.dest.lat,meta.sample.dest.lon,meta.sample.dest.name);
+      map.setView([(meta.sample.origin.lat+meta.sample.dest.lat)/2,(meta.sample.origin.lon+meta.sample.dest.lon)/2],9);
     }
   }catch(e){
     document.getElementById('disconnected').innerHTML=`<div class="text-sm text-red-600">Não foi possível carregar a demo (${esc(e.message)}). Recarregue a página ou <a href="/#contato" class="underline">fale com a NOKAHI</a>.</div>`;
