@@ -72,12 +72,18 @@ body { font-family:'Inter',ui-sans-serif,system-ui,sans-serif; }
     <main class="flex-1 min-w-0 p-4 sm:p-6 pb-16">
 
       <!-- banner demo -->
-      <div id="demo-banner" class="hidden mb-4 rounded-xl border-2 border-emerald-300 bg-emerald-50 p-4 flex items-center justify-between gap-3">
+      <div id="demo-banner" class="hidden mb-4 rounded-xl border-2 border-emerald-300 bg-emerald-50 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div class="flex items-center gap-2 text-sm text-emerald-800">
           <i data-lucide="play-circle" class="icon-sm"></i>
-          <span><b>Modo demonstração</b> — <span id="demo-region"></span>. Teste de até <b>5 rotas</b>; os recursos completos (integrações, otimização, planos) são liberados após contato. Para usar sua operação, <a href="/#contato" class="underline">fale com a NOKAHI</a>.</span>
+          <span><b>Modo demonstração</b> — <span id="demo-region"></span>. Teste de até <b>5 rotas</b>; os recursos completos são liberados após contato.</span>
         </div>
-        <a href="/#contato" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold whitespace-nowrap">Assinar</a>
+        <div class="flex items-center gap-3 whitespace-nowrap">
+          <div class="text-right">
+            <div class="text-xs font-bold text-emerald-800"><span id="demo-used">0</span> de <span id="demo-total">5</span> rotas de teste usadas</div>
+            <div class="w-36 h-1.5 bg-emerald-200 rounded-full mt-1 overflow-hidden"><div id="demo-bar" class="h-full bg-emerald-600 rounded-full transition-all" style="width:0%"></div></div>
+          </div>
+          <a href="/#contato" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Fale com a NOKAHI</a>
+        </div>
       </div>
       <!-- aviso billing -->
       <div id="billing-alert" class="hidden mb-4 rounded-xl border-2 border-amber-400 bg-amber-50 p-4 flex items-center justify-between gap-3">
@@ -863,7 +869,16 @@ async function refreshBilling(){
     const chip=document.getElementById('plan-chip'); chip.classList.remove('hidden'); chip.classList.add('flex');
     const b=state.billing, stTxt={trialing:'Trial',active:'Ativo',past_due:'Expirado',canceled:'Cancelado'}[b.status]||b.status;
     document.getElementById('plan-chip-text').textContent=`${b.plan_name} · ${stTxt} · ${b.routes_used_month}/${b.routes_per_month>1e8?'∞':b.routes_per_month}`;
+    if(state.isDemo){
+      const used=b.routes_used_month||0, total=(b.routes_per_month>1e8?5:(b.routes_per_month||5));
+      document.getElementById('demo-used').textContent=used;
+      document.getElementById('demo-total').textContent=total;
+      const bar=document.getElementById('demo-bar');
+      bar.style.width=(total>0?Math.min(100,Math.round(used/total*100)):0)+'%';
+      bar.className='h-full rounded-full transition-all '+(used>=total?'bg-red-500':used>=total-1?'bg-amber-500':'bg-emerald-600');
+    }
     if(b.status==='past_due'||b.status==='canceled')showBillingAlert('Sua assinatura precisa de atenção para continuar calculando rotas.');
+    else if(state.isDemo && (b.routes_used_month||0)>=(b.routes_per_month||5))showBillingAlert('Você usou suas 5 rotas de teste. Fale com a NOKAHI (contato@nokahi.com) para liberar sua operação completa.');
     else document.getElementById('billing-alert').classList.add('hidden');
     lucide.createIcons();
   }catch{}
