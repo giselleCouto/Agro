@@ -47,7 +47,7 @@ def lookup_key(plan_id: str) -> str:
 
 def product_params(plan) -> dict:
     return {
-        "name": f"Peabiru Agro — {plan.name}",
+        "name": f"Despaxa Agro — {plan.name}",
         "description": plan.description,
         "metadata[nokahi_plan]": plan.id,
     }

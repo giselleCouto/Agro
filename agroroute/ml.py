@@ -1,4 +1,4 @@
-"""Modelos de Machine Learning do Peabiru Agro.
+"""Modelos de Machine Learning do Despaxa Agro.
 
 Três modelos práticos, treináveis com os dados que a operação já gera:
 

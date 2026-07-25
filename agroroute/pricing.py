@@ -1,4 +1,4 @@
-"""Precificação por uso do Peabiru Agro.
+"""Precificação por uso do Despaxa Agro.
 
 O custo para o cliente é dimensionado pelos DRIVERS que realmente geram custo de
 infraestrutura e operação:

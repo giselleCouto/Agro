@@ -1,4 +1,4 @@
-"""API HTTP do Peabiru Agro (FastAPI).
+"""API HTTP do Despaxa Agro (FastAPI).
 
 Multi-tenant via header `X-API-Key`, com banco de dados (SQLAlchemy), assinatura
 mensal recorrente (Stripe), modo demo público (Triângulo Mineiro / MG) e captura
@@ -103,7 +103,7 @@ ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",
 CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
 
 app = FastAPI(
-    title="Peabiru Agro",
+    title="Despaxa Agro",
     version=__version__,
     description="Roteirização econômica multi-tenant para frotas agrícolas pesadas",
 )
@@ -119,6 +119,12 @@ if CORS_ORIGINS:
     from fastapi.middleware.cors import CORSMiddleware
     app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS,
                        allow_methods=["*"], allow_headers=["*"])
+
+# fotos do campo servidas para a landing (/img/*.jpg)
+_IMG_DIR = WEB_DIR / "img"
+if _IMG_DIR.is_dir():
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/img", StaticFiles(directory=str(_IMG_DIR)), name="img")
 
 
 def public_base_url(request: Request) -> str:

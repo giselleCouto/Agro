@@ -1,4 +1,4 @@
-# Peabiru Agro — Business Case
+# Despaxa Agro — Business Case
 
 _Roteirização econômica multi-tenant para o transporte canavieiro — cobertura Brasil inteiro._
 _Valores em BRL. Premissas base 2025/2026; câmbio ~R$ 5,40/USD. Fontes ao final._
@@ -13,7 +13,7 @@ _Revisão jul/2026: preços recalibrados (mais competitivos), economia de diesel
 
 ## 1. O produto e o mercado
 
-O **Peabiru Agro** (solução da **NOKAHI**) encontra, para cada viagem talhão→usina, a rota de **menor custo real**
+O **Despaxa Agro** (solução da **NOKAHI**) encontra, para cada viagem talhão→usina, a rota de **menor custo real**
 (combustível por rampa/peso/superfície/clima, pedágio por eixo e manutenção), respeitando as restrições dos CVCs
 (treminhão/rodotrem/pentatrem) e as condições de cada dia. Com economia de diesel de **~16%**, o ROI típico por
 usina fica em **R$ 1,5 a 6 milhões/ano** em diesel economizado (frotas de dezenas a centenas de CVCs).
@@ -48,7 +48,7 @@ Premissas conservadoras por CVC em operação de safra:
 | Consumo médio (carregado ida + vazio volta) | 0,42 L/km → ~3.822 L/mês |
 | Preço do diesel S10 (2026) | R$ 6,20/L |
 | **Gasto de diesel por CVC/mês** | **~R$ 23,7 mil** |
-| Economia com o Peabiru Agro (**16%**) | **~R$ 3,8 mil/mês por CVC** |
+| Economia com o Despaxa Agro (**16%**) | **~R$ 3,8 mil/mês por CVC** |
 
 Para blindar o ROI, as tabelas abaixo usam um ponto ainda mais **conservador: R$ 3.000 de economia/CVC/mês**
 (≈ 12,7% do gasto). Mesmo assim, a economia supera a mensalidade com folga enorme.
